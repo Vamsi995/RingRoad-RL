@@ -9,7 +9,7 @@ road_width = 50
 car_width = 40
 car_length = 80
 radius = 425
-velocity = 5
+velocity = 0
 acceleration = 0
 
 

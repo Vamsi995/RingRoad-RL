@@ -43,6 +43,40 @@ class Agent(Car):
         self.length = self.rect.height
         self.width = self.rect.width
 
+    def follower_stopper(self, desired_velocity, curvatures, initial_x):
+        v_lead = self.front_vehicle.v
+        v = min(max(v_lead, 0), desired_velocity)
+        delta_v = v_lead - self.v
+        delta_v = min(delta_v, 0)
+
+        delta_x1 = initial_x[0] + (1 / (2 * curvatures[0])) * (delta_v ** 2)
+        delta_x2 = initial_x[1] + (1 / (2 * curvatures[1])) * (delta_v ** 2)
+        delta_x3 = initial_x[2] + (1 / (2 * curvatures[2])) * (delta_v ** 2)
+
+        if self.front_vehicle.rad - self.rad < 0:
+            s = (2 * math.pi - self.rad + self.front_vehicle.rad) * radius - car_length - 10
+        else:
+            s = (self.front_vehicle.rad - self.rad) * radius - car_length - 10
+
+        if s <= delta_x1:
+            self.v = 0
+        elif delta_x2 >= s > delta_x1:
+            self.v = v * ((s - delta_x1) / (delta_x2 - delta_x1))
+        elif delta_x3 >= s > delta_x2:
+            self.v = v + (desired_velocity - v) * ((s - delta_x2) / (delta_x3 - delta_x2))
+        elif s > delta_x3:
+            self.v = desired_velocity
+
+        self.rad += (self.v / radius)
+        self.rad = self.rad % (2 * math.pi)
+
+        self.xpos = self.initial_xpos + math.cos(self.rad) * radius
+        self.ypos = self.initial_ypos + math.sin(self.rad) * radius
+        self.rotation = 90 - math.degrees(self.rad)
+        pass
+
+    def dqn(self):
+        pass
 
     def update(self):
         self.v += self.acc
@@ -66,6 +100,7 @@ class Agent(Car):
             self.ypos = self.initial_ypos + math.sin(self.rad) * radius
             self.rotation = 90 - math.degrees(self.rad)
 
+
 class EnvVehicle(Car):
     def __init__(self, rad, velocity, acceleration, id):
         super().__init__(rad, velocity, acceleration, id)
@@ -77,7 +112,7 @@ class EnvVehicle(Car):
     def idm_control(self):
         delta_v = self.v - self.front_vehicle.v
         if self.front_vehicle.rad - self.rad < 0:
-            s = (2*math.pi - self.rad + self.front_vehicle.rad) * radius - car_length - 10
+            s = (2 * math.pi - self.rad + self.front_vehicle.rad) * radius - car_length - 10
         else:
             s = (self.front_vehicle.rad - self.rad) * radius - car_length - 10
 

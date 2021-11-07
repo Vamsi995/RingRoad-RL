@@ -73,11 +73,11 @@ class Metrics:
             plt.plot(x, y, color='gray')
         for ag in self.env.agents:
             x, y = zip(*self.velocity[ag.id])
-            # plt.plot(x, y, color='r')
-        plt.plot(np.arange(len(self.running_mean)), self.running_mean, color='r')
-        plt.plot(np.arange(len(self.running_deviation)),
-                 [x + y for x, y in zip(self.running_mean, self.running_deviation)], color='b')
-        plt.plot(np.arange(len(self.running_deviation)),
-                 [x - y for x, y in zip(self.running_mean, self.running_deviation)], color='b')
+            plt.plot(x, y, color='r')
+        plt.plot(np.arange(len(self.running_mean)), self.running_mean, color='green')
+        # plt.plot(np.arange(len(self.running_deviation)),
+        #          [x + y for x, y in zip(self.running_mean, self.running_deviation)], color='b')
+        # plt.plot(np.arange(len(self.running_deviation)),
+        #          [x - y for x, y in zip(self.running_mean, self.running_deviation)], color='b')
 
         plt.show()

@@ -5,6 +5,7 @@ from constants import DISPLAY_WIDTH, DISPLAY_HEIGHT, white, black, ring_radius, 
 from vehicle import Car, EnvVehicle, Agent
 from matplotlib import pyplot as plt
 
+
 class Env:
     def __init__(self):
         """Constructor Method
@@ -28,7 +29,7 @@ class Env:
 
     def reset(self, envs, agents):
         total_no = envs + agents
-        degree_spacing = 360/total_no
+        degree_spacing = 360 / total_no
         positions = np.arange(total_no) * degree_spacing
         vehicle_list = []
         for i in range(len(positions)):
@@ -39,11 +40,11 @@ class Env:
 
         for i in range(len(vehicle_list)):
             cur_veh = vehicle_list[i]
-            front_vehicle = vehicle_list[(i+1) % len(vehicle_list)]
-            if(i - 1 < 0):
+            front_vehicle = vehicle_list[(i + 1) % len(vehicle_list)]
+            if (i - 1 < 0):
                 back_vehicle = vehicle_list[len(vehicle_list) - 1]
             else:
-                back_vehicle = vehicle_list[i-1]
+                back_vehicle = vehicle_list[i - 1]
             cur_veh.front_vehicle = front_vehicle
             cur_veh.back_vehicle = back_vehicle
             if isinstance(cur_veh, EnvVehicle):
@@ -54,10 +55,9 @@ class Env:
     def step(self):
         self.create_background()
         for sprite in self.agents:
-            sprite.update()
+            sprite.follower_stopper(7, [1.5, 1.0, 0.5], [4.5, 5.25, 6])
         for sprite in self.env_vehicles:
             sprite.idm_control()
-
 
         self.render()
 
@@ -74,5 +74,3 @@ class Env:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-
-

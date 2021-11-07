@@ -3,8 +3,9 @@ from matplotlib import pyplot as plt
 from metrics import Metrics
 from simulator import Env
 
+
 def main():
-    TIME_STEPS = 500
+    TIME_STEPS = 1000
     env = Env()
     env.reset(21, 1)
     met = Metrics(env)
@@ -19,6 +20,7 @@ def main():
 
     met.plot_velocities()
     # met.plot_positions()
+
 
 if __name__ == "__main__":
     main()
