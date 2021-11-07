@@ -14,7 +14,7 @@ def main():
         env.step()
         met.store_xy(t)
         met.store_v(t)
-        met.running_mean_vel()
+        met.running_mean_vel(t)
         t += 1
 
     met.plot_velocities()

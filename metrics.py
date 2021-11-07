@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 
 from constants import radius
@@ -9,8 +11,10 @@ class Metrics:
         self.env = env
         self.position = {}
         self.velocity = {}
-        self.mean_vel = 0
-        self.running_mean = []
+        self.throughput = 0
+        self.running_mean = [0]
+        self.running_deviation = [0]
+        self.total_veh = 0
 
     def register_cars(self):
         for veh in self.env.env_vehicles:
@@ -19,6 +23,7 @@ class Metrics:
         for veh in self.env.agents:
             self.position[veh.id] = []
             self.velocity[veh.id] = []
+        self.total_veh = len(self.position)
 
     def store_xy(self, t):
         for veh in self.env.env_vehicles:
@@ -34,20 +39,27 @@ class Metrics:
         for veh in self.env.agents:
             self.velocity[veh.id].append((t, veh.v))
 
-    def running_mean_vel(self):
-        temp = []
-        for veh in self.env.env_vehicles:
-            temp.append(veh.v)
-        for ag in self.env.agents:
-            temp.append(ag.v)
-        self.running_mean.append(sum(temp)/len(temp))
-
-    def mean_velocity(self, timesteps):
+    def running_mean_vel(self, t):
+        if t == 0:
+            return
         veh_v = []
         for id, vel in self.velocity.items():
             x, y = zip(*vel)
-            veh_v.append(sum(y) / len(y))
-        self.mean_vel = sum(veh_v) / len(veh_v)
+            veh_v.append(sum(y))
+        mean = sum(veh_v) / (len(veh_v) * t)
+        self.running_mean.append(mean)
+
+        dev = 0
+        for id, vel in self.velocity.items():
+            x, y = zip(*vel)
+            for v in y:
+                dev += (mean - v) ** 2
+
+        dev /= ((len(veh_v) * t) - 1)
+        self.running_deviation.append(dev ** 0.5)
+
+    def throughput(self):
+        self.throughput = self.mean_vel * self.total_veh / (2 * math.pi * radius)
 
     def plot_positions(self):
         for veh in self.env.env_vehicles:
@@ -61,6 +73,11 @@ class Metrics:
             plt.plot(x, y, color='gray')
         for ag in self.env.agents:
             x, y = zip(*self.velocity[ag.id])
-            plt.plot(x, y, color='r')
-        # plt.plot(np.arange(len(self.running_mean)), self.running_mean, color='r')
+            # plt.plot(x, y, color='r')
+        plt.plot(np.arange(len(self.running_mean)), self.running_mean, color='r')
+        plt.plot(np.arange(len(self.running_deviation)),
+                 [x + y for x, y in zip(self.running_mean, self.running_deviation)], color='b')
+        plt.plot(np.arange(len(self.running_deviation)),
+                 [x - y for x, y in zip(self.running_mean, self.running_deviation)], color='b')
+
         plt.show()
