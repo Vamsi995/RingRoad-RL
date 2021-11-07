@@ -59,7 +59,7 @@ class Metrics:
         self.running_deviation.append(dev ** 0.5)
 
     def throughput(self):
-        self.throughput = self.mean_vel * self.total_veh / (2 * math.pi * radius)
+        self.throughput = self.running_mean[-1] * self.total_veh / (2 * math.pi * radius)
 
     def plot_positions(self):
         for veh in self.env.env_vehicles:
