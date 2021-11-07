@@ -3,7 +3,7 @@ import numpy as np
 from constants import DISPLAY_WIDTH, DISPLAY_HEIGHT, white, black, ring_radius, road_width, velocity, radius, \
     acceleration
 from vehicle import Car, EnvVehicle, Agent
-
+from matplotlib import pyplot as plt
 
 class Env:
     def __init__(self):
@@ -33,9 +33,9 @@ class Env:
         vehicle_list = []
         for i in range(len(positions)):
             if i < envs:
-                vehicle_list.append(EnvVehicle(positions[i], velocity, acceleration))
+                vehicle_list.append(EnvVehicle(positions[i], velocity, acceleration, i))
             else:
-                vehicle_list.append(Agent(positions[i], velocity, acceleration))
+                vehicle_list.append(Agent(positions[i], velocity, acceleration, i))
 
         for i in range(len(vehicle_list)):
             cur_veh = vehicle_list[i]
@@ -75,7 +75,4 @@ class Env:
             if event.type == pygame.QUIT:
                 pygame.quit()
 
-env = Env()
-env.reset(15, 1)
-while True:
-    env.step()
+

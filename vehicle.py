@@ -8,8 +8,9 @@ import numpy as np
 
 class Car(pygame.sprite.Sprite):
 
-    def __init__(self, rad, velocity, acceleration):
+    def __init__(self, rad, velocity, acceleration, id):
         pygame.sprite.Sprite.__init__(self)
+        self.id = id
         self.initial_xpos = DISPLAY_WIDTH / 2
         self.initial_ypos = DISPLAY_HEIGHT / 2
         self.v, self.acc = velocity, acceleration
@@ -35,16 +36,39 @@ class Car(pygame.sprite.Sprite):
 
 
 class Agent(Car):
-    def __init__(self, rad, velocity, acceleration):
-        super().__init__(rad, velocity, acceleration)
+    def __init__(self, rad, velocity, acceleration, id):
+        super().__init__(rad, velocity, acceleration, id)
         self.image = agent_car_image
         self.rect = self.image.get_rect()
         self.length = self.rect.height
         self.width = self.rect.width
 
+
+    def update(self):
+        self.v += self.acc
+        self.rad += (self.v / radius)
+        self.rad = self.rad % (2 * math.pi)
+        self.distance_covered = radius * self.rad
+        if self.front_vehicle.rad - self.rad < 0:
+            s = (2 * math.pi - self.rad + self.front_vehicle.rad) * radius - car_length
+        else:
+            s = (self.front_vehicle.rad - self.rad) * radius - car_length
+
+        # print(s)
+        if s < 20:
+            self.v = 0
+        else:
+            self.v = 5
+            if self.v < 0:
+                self.v = 0
+                return
+            self.xpos = self.initial_xpos + math.cos(self.rad) * radius
+            self.ypos = self.initial_ypos + math.sin(self.rad) * radius
+            self.rotation = 90 - math.degrees(self.rad)
+
 class EnvVehicle(Car):
-    def __init__(self, rad, velocity, acceleration):
-        super().__init__(rad, velocity, acceleration)
+    def __init__(self, rad, velocity, acceleration, id):
+        super().__init__(rad, velocity, acceleration, id)
         self.image = env_car_image
         self.rect = self.image.get_rect()
         self.length = self.rect.height
@@ -52,10 +76,10 @@ class EnvVehicle(Car):
 
     def idm_control(self):
         delta_v = self.v - self.front_vehicle.v
-        if(self.front_vehicle.rad - self.rad < 0):
-            s = (2*math.pi - self.rad + self.front_vehicle.rad) * radius - 100
+        if self.front_vehicle.rad - self.rad < 0:
+            s = (2*math.pi - self.rad + self.front_vehicle.rad) * radius - car_length - 10
         else:
-            s = (self.front_vehicle.rad - self.rad) * radius - 100
+            s = (self.front_vehicle.rad - self.rad) * radius - car_length - 10
 
         if s <= 0:
             s = 0.00001
