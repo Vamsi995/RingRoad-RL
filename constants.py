@@ -33,15 +33,15 @@ agent_car_image = pygame.transform.scale(agent_car_image, (car_length, car_width
 clean_image(agent_car_image)
 clean_image(env_car_image)
 
-FPS = 5  # Frames per second
+FPS = 30  # Frames per second
 DELTA_T = 1 / FPS
 
 """
 IDM Parameters
 """
-a = 0.3
+a = 2
 b = 3
 T = 1.5
 s0 = 2
-v0 = 200
+v0 = 60
 IDM_DELTA = 4

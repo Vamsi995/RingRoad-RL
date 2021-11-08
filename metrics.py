@@ -62,9 +62,13 @@ class Metrics:
         self.throughput = self.running_mean[-1] * self.total_veh / (2 * math.pi * radius)
 
     def plot_positions(self):
+        global s
         for veh in self.env.env_vehicles:
             x, y = zip(*self.position[veh.id])
-            plt.scatter(x, y)
+            t, v = zip(*self.velocity[veh.id])
+            s = plt.scatter(x, y, c=v, cmap=plt.get_cmap("viridis"))
+
+        plt.colorbar(s,label="Velocity")
         plt.show()
 
     def plot_velocities(self):

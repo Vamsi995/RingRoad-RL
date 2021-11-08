@@ -7,7 +7,7 @@ from simulator import Env
 def main():
     TIME_STEPS = 1000
     env = Env()
-    env.reset(21, 1)
+    env.reset(21, 0)
     met = Metrics(env)
     t = 0
     met.register_cars()
@@ -18,8 +18,8 @@ def main():
         met.running_mean_vel(t)
         t += 1
 
-    met.plot_velocities()
-    # met.plot_positions()
+    # met.plot_velocities()
+    met.plot_positions()
 
 
 if __name__ == "__main__":

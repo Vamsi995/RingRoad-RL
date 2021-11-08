@@ -1,7 +1,7 @@
 import pygame
 import numpy as np
 from constants import DISPLAY_WIDTH, DISPLAY_HEIGHT, white, black, ring_radius, road_width, velocity, radius, \
-    acceleration
+    acceleration, FPS
 from vehicle import Car, EnvVehicle, Agent
 from matplotlib import pyplot as plt
 
@@ -55,7 +55,7 @@ class Env:
     def step(self):
         self.create_background()
         for sprite in self.agents:
-            sprite.follower_stopper(7, [1.5, 1.0, 0.5], [4.5, 5.25, 6])
+            sprite.follower_stopper(4, [2.5, 2.0, 1.5], [14.5, 15.25, 16])
         for sprite in self.env_vehicles:
             sprite.idm_control()
 
@@ -68,7 +68,7 @@ class Env:
         for sprite in self.agents:
             self.rotate_image_display(sprite.image, sprite.rotation, sprite.xpos, sprite.ypos)
         pygame.display.update()
-        self.clock.tick(20)
+        self.clock.tick(FPS)
 
     def check_quit(self):
         for event in pygame.event.get():
