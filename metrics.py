@@ -61,14 +61,48 @@ class Metrics:
     def throughput(self):
         self.throughput = self.running_mean[-1] * self.total_veh / (2 * math.pi * radius)
 
+    def findIndexes(self, pos):
+        indices = []
+        prev = pos[0]
+        for i in range(len(pos)):
+            if prev > pos[i]:
+                indices.append(i)
+            prev = pos[i]
+        return indices
+
+    def get_sliced_arrays(self, indices, times, pos, vel):
+
+        return_list = []
+
+        for i in range(len(indices)):
+            if i == 0:
+                ind = indices[i]
+                data_tup = (times[0:ind], pos[0:ind], vel[0:ind])
+            elif i == len(indices) - 1:
+                ind = indices[i]
+                data_tup = (times[ind:], pos[ind:], vel[ind:])
+            else:
+                prev_ind = indices[i-1]
+                curr_ind = indices[i]
+                data_tup = (times[prev_ind: curr_ind], pos[prev_ind: curr_ind], vel[prev_ind:curr_ind])
+
+            return_list.append(data_tup)
+        return return_list
+
     def plot_positions(self):
         global s
+        plot_data = []
         for veh in self.env.env_vehicles:
             x, y = zip(*self.position[veh.id])
             t, v = zip(*self.velocity[veh.id])
-            s = plt.scatter(x, y, c=v, cmap=plt.get_cmap("viridis"))
-
-        plt.colorbar(s,label="Velocity")
+            s = plt.scatter(x, y, c=v, cmap=plt.get_cmap("viridis"), marker='.')
+            # indices = self.findIndexes(y)
+            # sliced_data = self.get_sliced_arrays(indices, x, y, v)
+            #
+            # for data in sliced_data:
+            #     # print(len(data[0]), len(data[1]), len(data[2]))
+            #     s = plt.scatter(data[0], data[1], c=data[2], cmap=plt.get_cmap("viridis"), marker='.')
+        plt.colorbar(s, label="Velocity (m/s)")
         plt.show()
 
     def plot_velocities(self):
