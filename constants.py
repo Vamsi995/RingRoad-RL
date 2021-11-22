@@ -30,6 +30,9 @@ env_car_image = pygame.transform.scale(env_car_image, (car_length, car_width))
 agent_car_image = pygame.image.load("Sprites/mycar.png")
 agent_car_image = pygame.transform.scale(agent_car_image, (car_length, car_width))
 
+up_arrow = pygame.image.load("Sprites/all_arrows_up.png")
+down_arrow = pygame.image.load("Sprites/all_arrows_down.png")
+
 clean_image(agent_car_image)
 clean_image(env_car_image)
 
@@ -43,5 +46,13 @@ a = 2
 b = 3
 T = 1.5
 s0 = 2
-v0 = 60
+v0 = 20
 IDM_DELTA = 4
+
+DISCOUNT_FACTOR = 0.9
+MAX_EPISODE_LENGTH = 1000
+AGENT_MAX_VELOCITY = 20
+ENV_VEHICLES = 10
+AGENTS = 1
+CONTROL_XPOS = 0
+CONTROL_YPOS = 700

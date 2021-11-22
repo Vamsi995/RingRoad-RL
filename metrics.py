@@ -55,8 +55,9 @@ class Metrics:
             for v in y:
                 dev += (mean - v) ** 2
 
-        dev /= ((len(veh_v) * t) - 1)
-        self.running_deviation.append(dev ** 0.5)
+        if (len(veh_v) * t) - 1 != 0:
+            dev /= ((len(veh_v) * t) - 1)
+            self.running_deviation.append(dev ** 0.5)
 
     def throughput(self):
         self.throughput = self.running_mean[-1] * self.total_veh / (2 * math.pi * radius)
