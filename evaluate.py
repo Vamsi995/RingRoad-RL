@@ -14,8 +14,8 @@ def main():
     env = RenderEnv()
     iterations = 200
     # env = NoRenderEnv()
-    act = learn(env, network=models.mlp(num_hidden=32, num_layers=3), total_timesteps=0,
-                load_path="Models/Model.pkl", inbuild_network=True)
+    act = learn(env, network=models.mlp(num_hidden=64, num_layers=3), total_timesteps=0,
+                load_path="Models/Model1.pkl", inbuild_network=True)
 
 
     # for i in range(iterations):

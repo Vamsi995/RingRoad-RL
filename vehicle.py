@@ -99,7 +99,7 @@ class Agent(Car):
         self.rotation = 90 - math.degrees(self.rad)
 
     def a2c(self, action):
-        self.acc += action
+        self.acc = action[0]
         prev_vel = self.v
         self.v = max(0, min(self.v + (self.acc * DELTA_T), AGENT_MAX_VELOCITY))
         self.acc = (self.v - prev_vel) / DELTA_T

@@ -22,8 +22,8 @@ class BaseEnv(Env):
         features_high = np.array([20, 20, 20, 2500, 2500], dtype=np.float64)
 
         self.observation_space = spaces.Box(low=features_low, high=features_high, dtype=np.float64)
-        self.action_space = spaces.Discrete(2)
-        # self.action_space = spaces.Box(low=np.array([]))
+        # self.action_space = spaces.Discrete(2)
+        self.action_space = spaces.Box(low=np.array([-1]), high=np.array([1]), dtype=np.float64)
 
         self.state = None
         self.reward = None
@@ -39,9 +39,9 @@ class BaseEnv(Env):
         vehicle_list = []
         for i in range(len(positions)):
             if i < envs:
-                vehicle_list.append(EnvVehicle(positions[i], np.random.randint(low=0, high=2), acceleration, i))
+                vehicle_list.append(EnvVehicle(positions[i], np.random.randint(low=0, high=3), acceleration, i))
             else:
-                vehicle_list.append(Agent(positions[i], np.random.randint(low=0, high=2), acceleration, i))
+                vehicle_list.append(Agent(positions[i], np.random.randint(low=0, high=3), acceleration, i))
 
         for i in range(len(vehicle_list)):
             cur_veh = vehicle_list[i]
@@ -89,7 +89,7 @@ class BaseEnv(Env):
         #     return 0, 0
 
     def extract_state_features(self):
-        feature_list  = []
+        feature_list = []
         for ag in self.agents:
             feature_list.append(ag.front_vehicle.v)
             feature_list.append(ag.back_vehicle.v)
@@ -106,16 +106,14 @@ class BaseEnv(Env):
         sf = self.state[3]
         sb = self.state[4]
 
-        # print(vav)
-        # print(vlead/sf)
-        # if sf != 0:
-        #     return vlead/sf
+        # reward = 0
+        # if vlead > 0 and vlag > 0 and vav > 0:
+        #     reward += 10
         # else:
-        #     return 0
-        # print(vav)
+        #     reward -= 5
+        #
+        # return reward
         return vav
-        # print(vlag - vlead)
-        # return vlag - vlead
 
 
 class RenderEnv(BaseEnv):
@@ -147,13 +145,21 @@ class RenderEnv(BaseEnv):
         self.render()
         return np.array(self.state)
 
+    def display_controls(self, action):
+        if action == 0:
+            self.screen.blit(up_arrow, [CONTROL_XPOS, CONTROL_YPOS])
+
+        if action == 1:
+            self.screen.blit(down_arrow, [CONTROL_XPOS, CONTROL_YPOS])
+
     def step(self, action):
         self.create_background()
         self.step_number += 1
 
         for sprite in self.agents:
+            sprite.a2c(action)
             # sprite.follower_stopper(4, [2.5, 2.0, 1.5], [14.5, 15.25, 16])
-            sprite.dqn(action)
+            # sprite.dqn(action)
 
         for sprite in self.env_vehicles:
             sprite.idm_control()
@@ -165,7 +171,7 @@ class RenderEnv(BaseEnv):
                 info = {}
                 self.render()
                 self.reward = -10
-                print("hitting this")
+                # print("hitting this")
                 return np.array(self.state), self.reward, self.done, info
 
         self.state = self.extract_state_features()
@@ -185,11 +191,7 @@ class RenderEnv(BaseEnv):
         for sprite in self.agents:
             self.rotate_image_display(sprite.image, sprite.rotation, sprite.xpos, sprite.ypos)
 
-        if action == 0:
-            self.screen.blit(up_arrow, [CONTROL_XPOS, CONTROL_YPOS])
-
-        if action == 1:
-            self.screen.blit(down_arrow, [CONTROL_XPOS, CONTROL_YPOS])
+        # self.display_controls(action)
 
         pygame.display.update()
         self.clock.tick(FPS)
@@ -217,8 +219,9 @@ class NoRenderEnv(BaseEnv):
     def step(self, action):
         self.step_number += 1
         for sprite in self.agents:
+            sprite.a2c(action)
             # sprite.follower_stopper(4, [2.5, 2.0, 1.5], [14.5, 15.25, 16])
-            sprite.dqn(action)
+            # sprite.dqn(action)
         for sprite in self.env_vehicles:
             sprite.idm_control()
 
@@ -238,4 +241,3 @@ class NoRenderEnv(BaseEnv):
         info = {}
 
         return np.array(self.state), self.reward, self.done, info
-
