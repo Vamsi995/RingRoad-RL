@@ -23,7 +23,7 @@ class BaseEnv(Env):
 
         self.observation_space = spaces.Box(low=features_low, high=features_high, dtype=np.float64)
         # self.action_space = spaces.Discrete(2)
-        self.action_space = spaces.Box(low=np.array([-1]), high=np.array([1]), dtype=np.float64)
+        self.action_space = spaces.Box(low=np.array([-7]), high=np.array([2]), dtype=np.float64)
 
         self.state = None
         self.reward = None
@@ -39,9 +39,12 @@ class BaseEnv(Env):
         vehicle_list = []
         for i in range(len(positions)):
             if i < envs:
-                vehicle_list.append(EnvVehicle(positions[i], np.random.randint(low=0, high=3), acceleration, i))
+                # vehicle_list.append(EnvVehicle(positions[i], np.random.randint(low=0, high=3), acceleration, i))
+                vehicle_list.append(EnvVehicle(positions[i], 0, acceleration, i))
+
             else:
-                vehicle_list.append(Agent(positions[i], np.random.randint(low=0, high=3), acceleration, i))
+                # vehicle_list.append(Agent(positions[i], np.random.randint(low=0, high=3), acceleration, i))
+                vehicle_list.append(Agent(positions[i], 0, acceleration, i))
 
         for i in range(len(vehicle_list)):
             cur_veh = vehicle_list[i]
@@ -106,14 +109,17 @@ class BaseEnv(Env):
         sf = self.state[3]
         sb = self.state[4]
 
-        # reward = 0
-        # if vlead > 0 and vlag > 0 and vav > 0:
-        #     reward += 10
-        # else:
-        #     reward -= 5
-        #
-        # return reward
-        return vav
+        reward = 0
+        if vlead > 0 and vlag > 0:
+            reward += 10
+        else:
+            reward -= 450
+
+        if sf < 40:
+            reward -= 450
+
+        return reward
+        # return vav
 
 
 class RenderEnv(BaseEnv):
@@ -146,10 +152,13 @@ class RenderEnv(BaseEnv):
         return np.array(self.state)
 
     def display_controls(self, action):
-        if action == 0:
+        if action is None:
+            return
+
+        if action[0] > 0:
             self.screen.blit(up_arrow, [CONTROL_XPOS, CONTROL_YPOS])
 
-        if action == 1:
+        if action[0] < 0:
             self.screen.blit(down_arrow, [CONTROL_XPOS, CONTROL_YPOS])
 
     def step(self, action):
@@ -157,6 +166,7 @@ class RenderEnv(BaseEnv):
         self.step_number += 1
 
         for sprite in self.agents:
+            # sprite.idm_control()
             sprite.a2c(action)
             # sprite.follower_stopper(4, [2.5, 2.0, 1.5], [14.5, 15.25, 16])
             # sprite.dqn(action)
@@ -191,7 +201,7 @@ class RenderEnv(BaseEnv):
         for sprite in self.agents:
             self.rotate_image_display(sprite.image, sprite.rotation, sprite.xpos, sprite.ypos)
 
-        # self.display_controls(action)
+        self.display_controls(action)
 
         pygame.display.update()
         self.clock.tick(FPS)
@@ -219,9 +229,10 @@ class NoRenderEnv(BaseEnv):
     def step(self, action):
         self.step_number += 1
         for sprite in self.agents:
+            # sprite.dqn(action)
             sprite.a2c(action)
             # sprite.follower_stopper(4, [2.5, 2.0, 1.5], [14.5, 15.25, 16])
-            # sprite.dqn(action)
+
         for sprite in self.env_vehicles:
             sprite.idm_control()
 
@@ -230,7 +241,7 @@ class NoRenderEnv(BaseEnv):
             if sf <= 0:
                 self.done = True
                 info = {}
-                self.reward = -3000
+                self.reward = -1000
                 return np.array(self.state), self.reward, self.done, info
 
         self.state = self.extract_state_features()

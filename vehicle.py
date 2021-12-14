@@ -100,20 +100,40 @@ class Agent(Car):
 
     def a2c(self, action):
         self.acc = action[0]
+        # print(action)
         prev_vel = self.v
         self.v = max(0, min(self.v + (self.acc * DELTA_T), AGENT_MAX_VELOCITY))
         self.acc = (self.v - prev_vel) / DELTA_T
+        # print(self.acc)
         self.update_position()
 
     def dqn(self, action):
         if action == 0:
-            self.acc += 1
+            self.acc += 0.5
         elif action == 1:
             self.acc -= 2
 
         prev_vel = self.v
         self.v = max(0, min(self.v + (self.acc * DELTA_T), AGENT_MAX_VELOCITY))
         self.acc = (self.v - prev_vel) / DELTA_T
+
+        self.update_position()
+
+    def idm_control(self):
+        delta_v = self.v - self.front_vehicle.v
+        if self.front_vehicle.rad - self.rad < 0:
+            s = (2 * math.pi - self.rad + self.front_vehicle.rad) * radius - car_length - 10
+        else:
+            s = (self.front_vehicle.rad - self.rad) * radius - car_length - 10
+
+        if s <= 0:
+            s = 0.00001
+
+        s_star = s0 + max(0, (self.v * T) + ((self.v * delta_v) / (2 * np.power(a * b, 0.5))))
+        self.acc = a * (1 - np.power(self.v / v0, IDM_DELTA) - np.power(s_star / s, 2))
+        old_velocity = self.v
+        self.v = max(0, min((old_velocity) + (self.acc * DELTA_T), v0))
+        self.acc = (self.v - old_velocity) / DELTA_T  # adjustment to acc due to clamping of velocity
 
         self.update_position()
 

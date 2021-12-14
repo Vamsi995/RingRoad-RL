@@ -8,7 +8,7 @@ from metrics import Metrics
 from simulator import RenderEnv
 
 env = RenderEnv()
-model = A2C.load("Models/ActorCritic.zip")
+model = A2C.load("Models/ActorCritic2.zip")
 
 obs = env.reset()
 done = False

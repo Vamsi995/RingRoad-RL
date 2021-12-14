@@ -9,13 +9,13 @@ from simulator import RenderEnv, NoRenderEnv
 
 
 def main():
-    TIME_STEPS = 1000
+    TIME_STEPS = 2000
 
     env = RenderEnv()
     iterations = 200
     # env = NoRenderEnv()
     act = learn(env, network=models.mlp(num_hidden=64, num_layers=3), total_timesteps=0,
-                load_path="Models/Model1.pkl", inbuild_network=True)
+                load_path="Models/Model2.pkl", inbuild_network=True)
 
 
     # for i in range(iterations):
@@ -37,15 +37,15 @@ def main():
     # t = 0
     # met.register_cars()
     #
-    # # while t < TIME_STEPS:
-    # while True:
-    #     keys = pygame.key.get_pressed()
-    #     if keys[K_UP]:
-    #         for ag in env.agents:
-    #             ag.acc += 0.1
-    #     if keys[K_DOWN]:
-    #         for ag in env.agents:
-    #             ag.acc -= 1
+    # while t < TIME_STEPS:
+    # # while True:
+    #     # keys = pygame.key.get_pressed()
+    #     # if keys[K_UP]:
+    #     #     for ag in env.agents:
+    #     #         ag.acc += 0.1
+    #     # if keys[K_DOWN]:
+    #     #     for ag in env.agents:
+    #     #         ag.acc -= 1
     #
     #     env.step(3)
     #     met.store_xy(t)

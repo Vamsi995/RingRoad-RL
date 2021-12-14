@@ -18,7 +18,6 @@ def train():
         seed=None,  # TODO: what?
         lr=1e-4,
         network=models.mlp(num_hidden=64, num_layers=3),
-        # dueling=True,
         total_timesteps=100000,
         buffer_size=100000,
         exploration_fraction=0.9,  # Percentage of time in which exploration has to be done
@@ -30,17 +29,18 @@ def train():
         checkpoint_path='/home/vamsi/Desktop/RingRoad',  # TODO: put in
         learning_starts=100,
         gamma=DISCOUNT_FACTOR,
-        double_q=False,
-        # target_network_update_freq=1000,
+        double_q=True,
+        target_network_update_freq=1000,
         # callback=callback,  # TODO: put in
         load_path=None,  # initial checkpoint directory to be used
         inbuild_network=True,
         param_noise=True,
         plot_name='reward.png',
-        # prioritized_replay=True
+        prioritized_replay=True,
+        policy_kwargs=dict(dueling=True)
     )
     print("Saving model to Model.pkl")
-    act.save("Models/Model1.pkl")
+    act.save("Models/Model2.pkl")
 
 
 if __name__ == '__main__':

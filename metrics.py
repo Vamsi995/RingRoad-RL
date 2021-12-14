@@ -104,6 +104,8 @@ class Metrics:
             #     # print(len(data[0]), len(data[1]), len(data[2]))
             #     s = plt.scatter(data[0], data[1], c=data[2], cmap=plt.get_cmap("viridis"), marker='.')
         plt.colorbar(s, label="Velocity (m/s)")
+        plt.xlabel("Time (s)")
+        plt.ylabel("Position (m)")
         plt.show()
 
     def plot_velocities(self):
@@ -113,10 +115,11 @@ class Metrics:
         for ag in self.env.agents:
             x, y = zip(*self.velocity[ag.id])
             plt.plot(x, y, color='r')
-        plt.plot(np.arange(len(self.running_mean)), self.running_mean, color='green')
+        # plt.plot(np.arange(len(self.running_mean)), self.running_mean, color='green')
         # plt.plot(np.arange(len(self.running_deviation)),
         #          [x + y for x, y in zip(self.running_mean, self.running_deviation)], color='b')
         # plt.plot(np.arange(len(self.running_deviation)),
         #          [x - y for x, y in zip(self.running_mean, self.running_deviation)], color='b')
-
+        plt.xlabel("Time (s)")
+        plt.ylabel("Velocity (m/s)")
         plt.show()
