@@ -22,8 +22,8 @@ class BaseEnv(Env):
         features_high = np.array([20, 20, 20, 2500, 2500], dtype=np.float64)
 
         self.observation_space = spaces.Box(low=features_low, high=features_high, dtype=np.float64)
-        # self.action_space = spaces.Discrete(2)
-        self.action_space = spaces.Box(low=np.array([-7]), high=np.array([2]), dtype=np.float64)
+        self.action_space = spaces.Discrete(2)
+        # self.action_space = spaces.Box(low=np.array([-7]), high=np.array([2]), dtype=np.float64)
 
         self.state = None
         self.reward = None
@@ -155,11 +155,11 @@ class RenderEnv(BaseEnv):
         if action is None:
             return
 
-        if action[0] > 0:
-            self.screen.blit(up_arrow, [CONTROL_XPOS, CONTROL_YPOS])
-
-        if action[0] < 0:
-            self.screen.blit(down_arrow, [CONTROL_XPOS, CONTROL_YPOS])
+        # if action[0] > 0:
+        #     self.screen.blit(up_arrow, [CONTROL_XPOS, CONTROL_YPOS])
+        #
+        # if action[0] < 0:
+        #     self.screen.blit(down_arrow, [CONTROL_XPOS, CONTROL_YPOS])
 
     def step(self, action):
         self.create_background()
@@ -167,9 +167,9 @@ class RenderEnv(BaseEnv):
 
         for sprite in self.agents:
             # sprite.idm_control()
-            sprite.a2c(action)
+            # sprite.a2c(action)
             # sprite.follower_stopper(4, [2.5, 2.0, 1.5], [14.5, 15.25, 16])
-            # sprite.dqn(action)
+            sprite.dqn(action)
 
         for sprite in self.env_vehicles:
             sprite.idm_control()

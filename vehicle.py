@@ -57,6 +57,7 @@ class Car(pygame.sprite.Sprite):
         self.rect.height = self.image.get_height()
         self.rotation = 90 - math.degrees(self.rad)
 
+
 class Agent(Car):
     def __init__(self, rad, velocity, acceleration, id):
         super(Agent, self).__init__(rad, velocity, acceleration, id)
@@ -100,11 +101,9 @@ class Agent(Car):
 
     def a2c(self, action):
         self.acc = action[0]
-        # print(action)
         prev_vel = self.v
         self.v = max(0, min(self.v + (self.acc * DELTA_T), AGENT_MAX_VELOCITY))
         self.acc = (self.v - prev_vel) / DELTA_T
-        # print(self.acc)
         self.update_position()
 
     def dqn(self, action):
@@ -138,7 +137,6 @@ class Agent(Car):
         self.update_position()
 
     def update(self):
-
 
         if self.v < 0:
             self.v = 0
