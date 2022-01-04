@@ -4,6 +4,7 @@ from matplotlib import pyplot as plt
 from pygame import K_UP, K_DOWN
 
 from DQN import learn
+from constants import FPS
 from metrics import Metrics
 from simulator import RenderEnv, NoRenderEnv
 
@@ -25,7 +26,10 @@ def main():
     met.register_cars()
     t = 0
     while not done:
-        action = act(obs[None])[0]
+        if t % FPS == 0:
+            action = act(obs[None])[0]
+            print(t)
+            print("Hits")
         obs, rew, done, _ = env.step(action)
         met.store_v(t)
         met.store_xy(t)

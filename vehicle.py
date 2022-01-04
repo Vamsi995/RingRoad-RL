@@ -6,26 +6,20 @@ from constants import agent_car_image, radius, DISPLAY_WIDTH, DISPLAY_HEIGHT, en
 import numpy as np
 
 
-class Car(pygame.sprite.Sprite):
+class Car(pygame.Surface):
 
-    def __init__(self, rad, velocity, acceleration, id):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = agent_car_image
-        self.rect = self.image.get_rect()
-        self.length = self.rect.height
-        self.width = self.rect.width
+    def __init__(self, rad, velocity, acceleration, id, width, height):
+        pygame.Surface.__init__(self, (width,height), pygame.SRCALPHA)
         self.id = id
         self.initial_xpos = DISPLAY_WIDTH / 2
         self.initial_ypos = DISPLAY_HEIGHT / 2
         self.v, self.acc = velocity, acceleration
         self.rad = math.radians(rad)
-        self.rotation = 90 - math.degrees(self.rad)
+        self.rotation = 180 - math.degrees(self.rad)
         self.xpos = self.initial_xpos + math.cos(self.rad) * radius
         self.ypos = self.initial_ypos + math.sin(self.rad) * radius
-        # self.rect.x = self.xpos
-        # self.rect.y = self.ypos
-        # self.rect.width = self.image.get_width()
-        # self.rect.height = self.image.get_height()
+
+
         self.distance_covered = 0
         self.front_vehicle = {}
         self.back_vehicle = {}
@@ -47,26 +41,16 @@ class Car(pygame.sprite.Sprite):
         self.rad = self.rad % (2 * math.pi)
         self.xpos = self.initial_xpos + math.cos(self.rad) * radius
         self.ypos = self.initial_ypos + math.sin(self.rad) * radius
-        ext = (car_length / 2) / radius
-        ext += self.rad
-        sprite_x = self.initial_xpos + math.cos(ext) * radius
-        sprite_y = self.initial_xpos + math.sin(ext) * radius
-        self.rect.x = sprite_x
-        self.rect.y = sprite_y
-        self.rect.width = self.image.get_width()
-        self.rect.height = self.image.get_height()
-        self.rotation = 90 - math.degrees(self.rad)
+        self.rotation = 180 - math.degrees(self.rad)
 
 
 class Agent(Car):
-    def __init__(self, rad, velocity, acceleration, id):
-        super(Agent, self).__init__(rad, velocity, acceleration, id)
-        self.image = agent_car_image
-        self.rect = self.image.get_rect()
-        self.length = self.rect.height
-        self.width = self.rect.width
-        self.rect.x = self.xpos
-        self.rect.y = self.ypos
+    def __init__(self, rad, velocity, acceleration, id, width, height):
+        super(Agent, self).__init__(rad, velocity, acceleration, id, width, height)
+        # self.image = agent_car_image
+        self.fill((255,0,0))
+
+
 
     def follower_stopper(self, desired_velocity, curvatures, initial_x):
         v_lead = self.front_vehicle.v
@@ -151,14 +135,10 @@ class Agent(Car):
 
 
 class EnvVehicle(Car):
-    def __init__(self, rad, velocity, acceleration, id):
-        super(EnvVehicle, self).__init__(rad, velocity, acceleration, id)
-        self.image = env_car_image
-        self.rect = self.image.get_rect()
-        self.length = self.rect.height
-        self.width = self.rect.width
-        self.rect.x = self.xpos
-        self.rect.y = self.ypos
+    def __init__(self, rad, velocity, acceleration, id, width, height):
+        super(EnvVehicle, self).__init__(rad, velocity, acceleration, id, width, height)
+        self.fill((0, 0, 255))
+
 
     def idm_control(self):
         delta_v = self.v - self.front_vehicle.v

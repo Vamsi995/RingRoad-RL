@@ -111,7 +111,7 @@ class Metrics:
     def plot_velocities(self):
         for veh in self.env.env_vehicles:
             x, y = zip(*self.velocity[veh.id])
-            plt.plot(x, y, color='gray')
+            plt.plot(x, y)
         for ag in self.env.agents:
             x, y = zip(*self.velocity[ag.id])
             plt.plot(x, y, color='r')

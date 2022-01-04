@@ -4,7 +4,7 @@ import pygame
 import numpy as np
 from constants import DISPLAY_WIDTH, DISPLAY_HEIGHT, white, black, ring_radius, road_width, velocity, radius, \
     acceleration, FPS, DISCOUNT_FACTOR, MAX_EPISODE_LENGTH, car_length, ENV_VEHICLES, AGENTS, up_arrow, down_arrow, \
-    CONTROL_XPOS, CONTROL_YPOS
+    CONTROL_XPOS, CONTROL_YPOS, car_width
 from vehicle import Car, EnvVehicle, Agent
 from matplotlib import pyplot as plt
 from gym import Env, spaces
@@ -14,9 +14,10 @@ class BaseEnv(Env):
     def __init__(self):
         """Constructor Method
         """
-        self.agents = pygame.sprite.Group()
-        self.env_vehicles = pygame.sprite.Group()
-
+        # self.agents = pygame.sprite.Group()
+        # self.env_vehicles = pygame.sprite.Group()
+        self.agents = []
+        self.env_vehicles = []
         # vlead, vlag, vav, hlead, hlag
         features_low = np.array([0, 0, 0, 0, 0], dtype=np.float64)
         features_high = np.array([20, 20, 20, 2500, 2500], dtype=np.float64)
@@ -31,20 +32,20 @@ class BaseEnv(Env):
         self.discount_factor = DISCOUNT_FACTOR
 
     def initialize_state(self, envs, agents):
-        self.agents.empty()
-        self.env_vehicles.empty()
+        self.agents.clear()
+        self.env_vehicles.clear()
         total_no = envs + agents
         degree_spacing = 360 / total_no
         positions = np.arange(total_no) * degree_spacing
         vehicle_list = []
         for i in range(len(positions)):
             if i < envs:
-                # vehicle_list.append(EnvVehicle(positions[i], np.random.randint(low=0, high=3), acceleration, i))
-                vehicle_list.append(EnvVehicle(positions[i], 0, acceleration, i))
+                vehicle_list.append(EnvVehicle(positions[i], np.random.randint(low=0, high=3), acceleration, i, car_width, car_length))
+                # vehicle_list.append(EnvVehicle(positions[i], 0, acceleration, i, car_width, car_length))
 
             else:
-                # vehicle_list.append(Agent(positions[i], np.random.randint(low=0, high=3), acceleration, i))
-                vehicle_list.append(Agent(positions[i], 0, acceleration, i))
+                vehicle_list.append(Agent(positions[i], np.random.randint(low=0, high=3), acceleration, i, car_width, car_length))
+                # vehicle_list.append(Agent(positions[i], 0, acceleration, i, car_width, car_length))
 
         for i in range(len(vehicle_list)):
             cur_veh = vehicle_list[i]
@@ -56,9 +57,9 @@ class BaseEnv(Env):
             cur_veh.front_vehicle = front_vehicle
             cur_veh.back_vehicle = back_vehicle
             if isinstance(cur_veh, EnvVehicle):
-                self.env_vehicles.add(cur_veh)
+                self.env_vehicles.append(cur_veh)
             else:
-                self.agents.add(cur_veh)
+                self.agents.append(cur_veh)
 
     def gap_front(self, veh):
         if veh.front_vehicle.rad - veh.rad < 0:
@@ -111,7 +112,7 @@ class BaseEnv(Env):
 
         reward = 0
         if vlead > 0 and vlag > 0:
-            reward += 10
+            reward += 5
         else:
             reward -= 450
 
@@ -166,10 +167,10 @@ class RenderEnv(BaseEnv):
         self.step_number += 1
 
         for sprite in self.agents:
-            # sprite.idm_control()
+            sprite.idm_control()
             # sprite.a2c(action)
             # sprite.follower_stopper(4, [2.5, 2.0, 1.5], [14.5, 15.25, 16])
-            sprite.dqn(action)
+            # sprite.dqn(action)
 
         for sprite in self.env_vehicles:
             sprite.idm_control()
@@ -197,9 +198,9 @@ class RenderEnv(BaseEnv):
     def render(self, action=None):
         self.check_quit()
         for sprite in self.env_vehicles:
-            self.rotate_image_display(sprite.image, sprite.rotation, sprite.xpos, sprite.ypos)
+            self.rotate_image_display(sprite, sprite.rotation, sprite.xpos, sprite.ypos)
         for sprite in self.agents:
-            self.rotate_image_display(sprite.image, sprite.rotation, sprite.xpos, sprite.ypos)
+            self.rotate_image_display(sprite, sprite.rotation, sprite.xpos, sprite.ypos)
 
         self.display_controls(action)
 
@@ -229,8 +230,8 @@ class NoRenderEnv(BaseEnv):
     def step(self, action):
         self.step_number += 1
         for sprite in self.agents:
-            # sprite.dqn(action)
-            sprite.a2c(action)
+            sprite.dqn(action)
+            # sprite.a2c(action)
             # sprite.follower_stopper(4, [2.5, 2.0, 1.5], [14.5, 15.25, 16])
 
         for sprite in self.env_vehicles:
@@ -241,7 +242,7 @@ class NoRenderEnv(BaseEnv):
             if sf <= 0:
                 self.done = True
                 info = {}
-                self.reward = -1000
+                self.reward = -10000
                 return np.array(self.state), self.reward, self.done, info
 
         self.state = self.extract_state_features()

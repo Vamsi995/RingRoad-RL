@@ -6,8 +6,8 @@ white = (255, 255, 255)
 black = (0, 0, 0)
 ring_radius = 450
 road_width = 50
-car_width = 40
-car_length = 80
+car_width = 20
+car_length = 40
 radius = 425
 velocity = 0
 acceleration = 0
@@ -36,7 +36,7 @@ down_arrow = pygame.image.load("Sprites/all_arrows_down.png")
 clean_image(agent_car_image)
 clean_image(env_car_image)
 
-FPS = 30  # Frames per second
+FPS = 5  # Frames per second
 DELTA_T = 1 / FPS
 
 """
@@ -50,9 +50,9 @@ v0 = 20
 IDM_DELTA = 4
 
 DISCOUNT_FACTOR = 0.9
-MAX_EPISODE_LENGTH = 2000
+MAX_EPISODE_LENGTH = 1000
 AGENT_MAX_VELOCITY = 20
-ENV_VEHICLES = 19
+ENV_VEHICLES = 30
 AGENTS = 1
 CONTROL_XPOS = 0
 CONTROL_YPOS = 700

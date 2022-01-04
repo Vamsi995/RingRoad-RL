@@ -23,6 +23,8 @@ from baselines.deepq.models import build_q_func
 import tensorflow.contrib.layers as layers
 import matplotlib.pyplot as plt
 
+from constants import FPS
+
 
 class ActWrapper(object):
     def __init__(self, act, act_params):
@@ -312,9 +314,10 @@ def learn(env,
                 kwargs['update_param_noise_threshold'] = update_param_noise_threshold
                 kwargs['update_param_noise_scale'] = True
 
-            action = act(np.array(obs)[None], update_eps=update_eps, **kwargs)[0]
-            env_action = action
-            reset = False
+            if t % FPS == 0:
+                action = act(np.array(obs)[None], update_eps=update_eps, **kwargs)[0]
+                env_action = action
+                reset = False
             new_obs, rew, done, _ = env.step(env_action)
             # Store transition in the replay buffer.
             replay_buffer.add(obs, action, rew, new_obs, float(done))
