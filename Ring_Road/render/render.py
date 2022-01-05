@@ -14,8 +14,7 @@ class Render():
 
     def _create_background(self):
         self.screen.fill(WHITE)
-        gfxdraw.aacircle(self.screen, int(DISPLAY_WIDTH / 2), int(DISPLAY_HEIGHT / 2), RING_RADIUS, BLACK)
-        gfxdraw.aacircle(self.screen, int(DISPLAY_WIDTH/2), int(DISPLAY_HEIGHT/2), RING_RADIUS-ROAD_WIDTH, BLACK)
+        pygame.draw.circle(self.screen, BLACK, (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT // 2), RING_RADIUS, ROAD_WIDTH)
 
     def _rotate_image_display(self, image, angle, x, y):
         rotated_image = pygame.transform.rotate(image, angle)
@@ -28,11 +27,11 @@ class Render():
 
         for agent in self.env.agents:
             # self._rotate_image_display(agent, agent.rotation, agent.xpos, agent.ypos)
-            rotated_image, new_rect = agent.render(color=(255,0,0))
+            rotated_image, new_rect = agent.render(color=(255, 0, 0))
             self.screen.blit(rotated_image, new_rect)
         for env_veh in self.env.env_veh:
             # self._rotate_image_display(env_veh, env_veh.rotation, env_veh.xpos, env_veh.ypos)
-            rotated_image, new_rect = env_veh.render(color=(0, 0, 255))
+            rotated_image, new_rect = env_veh.render(color=(255, 255, 0))
             self.screen.blit(rotated_image, new_rect)
 
         pygame.display.update()
