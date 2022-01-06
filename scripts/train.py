@@ -1,8 +1,9 @@
 import gym
-from DQN import learn
+
+from Ring_Road.control.DQN import learn
 from baselines.common import models
-from constants import DISCOUNT_FACTOR
-from simulator import NoRenderEnv
+from Ring_Road.constants import DISCOUNT_FACTOR
+
 
 
 def callback(lcl, _glb):
@@ -12,13 +13,13 @@ def callback(lcl, _glb):
 
 
 def train():
-    env = NoRenderEnv()
+    env = gym.make("ringroad-v1", enable_render=False)
     act = learn(
         env,
         seed=None,  # TODO: what?
         lr=1e-4,
         network=models.mlp(num_hidden=64, num_layers=3),
-        total_timesteps=300000,
+        total_timesteps=100000,
         buffer_size=100000,
         exploration_fraction=0.9,  # Percentage of time in which exploration has to be done
         exploration_final_eps=0.1,

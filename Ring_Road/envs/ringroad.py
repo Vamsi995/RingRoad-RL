@@ -1,13 +1,23 @@
+import numpy as np
 import pygame
 import gym
+from gym import spaces
+
+from Ring_Road.constants import DISCOUNT_FACTOR, ENV_VEHICLES, AGENTS, FPS, MAX_EPISODE_LENGTH, ACTION_FREQ, \
+    INITIAL_ACCELERATION
+from Ring_Road.render.render import Render
+from Ring_Road.vehicle.state import StateExtractor
+from Ring_Road.vehicle.vehicle import EnvVehicle, Agent
 
 
 class RingRoad(gym.Env):
 
-    def __init__(self):
+    def __init__(self, enable_render=False):
 
-        self.agents = pygame.sprite.Group()
-        self.env_veh = pygame.sprite.Group()
+        self.enable_render = enable_render
+
+        self.agents = []
+        self.env_veh = []
 
         features_low = np.array([0, 0, 0, 0, 0], dtype=np.float64)
         features_high = np.array([20, 20, 20, 2500, 2500], dtype=np.float64)
@@ -24,12 +34,14 @@ class RingRoad(gym.Env):
         self.discount_factor = DISCOUNT_FACTOR
 
         self.state_extractor = StateExtractor(self)
-        self.viewer = Render(self)
+
+        if self.enable_render:
+            self.viewer = Render(self)
         self.collision = False
 
     def _initialize_state(self):
-        self.agents.empty()
-        self.env_veh.empty()
+        self.agents.clear()
+        self.env_veh.clear()
         total_no = ENV_VEHICLES + AGENTS
         degree_spacing = 360 / total_no
         positions = np.arange(total_no) * degree_spacing
@@ -43,10 +55,10 @@ class RingRoad(gym.Env):
         for i in range(len(positions)):
             if i not in agent_pos:
                 vehicle_list.append(
-                    EnvVehicle(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i, WIDTH, LENGTH))
+                    EnvVehicle(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i))
             else:
                 vehicle_list.append(
-                    Agent(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i, WIDTH, LENGTH))
+                    Agent(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i))
 
         for i in range(len(vehicle_list)):
             cur_veh = vehicle_list[i]
@@ -58,9 +70,9 @@ class RingRoad(gym.Env):
             cur_veh.front_vehicle = front_vehicle
             cur_veh.back_vehicle = back_vehicle
             if isinstance(cur_veh, EnvVehicle):
-                self.env_veh.add(cur_veh)
+                self.env_veh.append(cur_veh)
             else:
-                self.agents.add(cur_veh)
+                self.agents.append(cur_veh)
 
     def _handle_collisions(self):
         for agent in self.agents:
@@ -118,6 +130,8 @@ class RingRoad(gym.Env):
     def _is_done(self):
         if self.action_steps >= MAX_EPISODE_LENGTH or self.collision:
             return True
+        else:
+            return False
 
     def step(self, action):
 
@@ -132,6 +146,9 @@ class RingRoad(gym.Env):
         return obs, reward, terminal, info
 
     def render(self, mode='human'):
+
+        if not self.enable_render:
+            return
 
         if self.viewer is None:
             self.viewer = Render(self)

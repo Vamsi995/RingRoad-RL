@@ -1,11 +1,7 @@
-from stable_baselines.common.policies import FeedForwardPolicy, MlpPolicy
-from stable_baselines import logger, A2C
-from stable_baselines.common.cmd_util import make_atari_env, atari_arg_parser
-from stable_baselines.common.vec_env import VecFrameStack
-from stable_baselines.common.policies import CnnPolicy, CnnLstmPolicy, CnnLnLstmPolicy
-from baselines.common.tf_util import load_variables, save_variables
+from stable_baselines.common.policies import FeedForwardPolicy
+from stable_baselines import A2C
 
-from constants import DISCOUNT_FACTOR
+from Ring_Road.constants import DISCOUNT_FACTOR
 from simulator import NoRenderEnv
 import tensorflow as tf
 

@@ -1,14 +1,10 @@
-import gym
-
-from stable_baselines.common.policies import MlpPolicy
-from stable_baselines.common import make_vec_env
 from stable_baselines import A2C
 
-from metrics import Metrics
+from Ring_Road.metrics import Metrics
 from simulator import RenderEnv
 
 env = RenderEnv()
-model = A2C.load("Models/ActorCritic2.zip")
+model = A2C.load("../Models/ActorCritic2.zip")
 
 obs = env.reset()
 done = False

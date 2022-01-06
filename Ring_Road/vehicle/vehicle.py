@@ -3,6 +3,9 @@ import pygame
 
 import numpy as np
 
+from Ring_Road.constants import agent_car_image, DISPLAY_HEIGHT, RADIUS, CAR_LENGTH, DELTA_T, AGENT_MAX_VELOCITY, IDM_DELTA, v0, \
+    T, s0, a, b, env_car_image, DISPLAY_WIDTH
+
 
 class Car(pygame.sprite.Sprite):
 
@@ -17,7 +20,7 @@ class Car(pygame.sprite.Sprite):
         self.initial_ypos = DISPLAY_HEIGHT / 2
         self.v, self.acc = velocity, acceleration
         self.central_angle = math.radians(rad)
-        self.rotation = 90 - math.degrees(self.rad)
+        self.rotation = 90 - math.degrees(self.central_angle)
         self.xpos = self.initial_xpos + math.cos(self.central_angle) * RADIUS
         self.ypos = self.initial_ypos + math.sin(self.central_angle) * RADIUS
         # self.rect.x = self.xpos
@@ -28,12 +31,12 @@ class Car(pygame.sprite.Sprite):
         self.front_vehicle = {}
         self.back_vehicle = {}
 
-    def update_position(self):
+    def update_positions(self):
         self.central_angle += (self.v / RADIUS)
-        self.central_angle = self.rad % (2 * math.pi)
+        self.central_angle = self.central_angle % (2 * math.pi)
         self.xpos = self.initial_xpos + math.cos(self.central_angle) * RADIUS
         self.ypos = self.initial_ypos + math.sin(self.central_angle) * RADIUS
-        ext = (car_length / 2) / RADIUS
+        ext = (CAR_LENGTH / 2) / RADIUS
         ext += self.central_angle
         sprite_x = self.initial_xpos + math.cos(ext) * RADIUS
         sprite_y = self.initial_xpos + math.sin(ext) * RADIUS
@@ -67,9 +70,9 @@ class Agent(Car):
         delta_x3 = initial_x[2] + (1 / (2 * curvatures[2])) * (delta_v ** 2)
 
         if self.front_vehicle.central_angle - self.central_angle < 0:
-            s = (2 * math.pi - self.central_angle + self.front_vehicle.central_angle) * RADIUS - car_length
+            s = (2 * math.pi - self.central_angle + self.front_vehicle.central_angle) * RADIUS - CAR_LENGTH
         else:
-            s = (self.front_vehicle.central_angle - self.central_angle) * RADIUS - car_length
+            s = (self.front_vehicle.central_angle - self.central_angle) * RADIUS - CAR_LENGTH
 
         if s <= delta_x1:
             self.v = 0
@@ -106,9 +109,9 @@ class Agent(Car):
     def _idm_control(self):
         delta_v = self.v - self.front_vehicle.v
         if self.front_vehicle.central_angle - self.central_angle < 0:
-            s = (2 * math.pi - self.central_angle + self.front_vehicle.central_angle) * RADIUS - car_length - 10
+            s = (2 * math.pi - self.central_angle + self.front_vehicle.central_angle) * RADIUS - CAR_LENGTH
         else:
-            s = (self.front_vehicle.central_angle - self.central_angle) * RADIUS - car_length - 10
+            s = (self.front_vehicle.central_angle - self.central_angle) * RADIUS - CAR_LENGTH
 
         if s <= 0:
             s = 0.00001

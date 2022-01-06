@@ -1,22 +1,23 @@
-import pygame
+import sys
+import os
+from pathlib import Path
+
+myDir = os.getcwd()
+sys.path.append(myDir)
+path = Path(myDir)
+a = str(path.parent.absolute())
+sys.path.append(a)
+
+import gym
 from baselines.common import models
-from matplotlib import pyplot as plt
-from pygame import K_UP, K_DOWN
-import Ring_Road
-from DQN import learn
-from metrics import Metrics
-from simulator import RenderEnv, NoRenderEnv
+from Ring_Road.control.DQN import learn
+from Ring_Road.metrics import Metrics
 
 
 def main():
-    TIME_STEPS = 2000
-
-    env = gym.make("ringroad-v1")
-    iterations = 200
-    # env = NoRenderEnv()
+    env = gym.make("ringroad-v1", enable_render=True)
     act = learn(env, network=models.mlp(num_hidden=64, num_layers=3), total_timesteps=0,
-                load_path="Models/Model2.pkl", inbuild_network=True)
-
+                load_path="../Models/Model2.pkl", inbuild_network=True)
 
     # for i in range(iterations):
     obs = env.reset()
@@ -27,6 +28,7 @@ def main():
     while not done:
         action = act(obs[None])[0]
         obs, rew, done, _ = env.step(action)
+        env.render()
         met.store_v(t)
         met.store_xy(t)
         met.running_mean_vel(t)

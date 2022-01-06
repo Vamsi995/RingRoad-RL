@@ -1,8 +1,6 @@
 import math
 
-import numpy as np
-
-from constants import radius
+from Ring_Road.constants import RADIUS
 from matplotlib import pyplot as plt
 
 
@@ -17,7 +15,7 @@ class Metrics:
         self.total_veh = 0
 
     def register_cars(self):
-        for veh in self.env.env_vehicles:
+        for veh in self.env.env_veh:
             self.position[veh.id] = []
             self.velocity[veh.id] = []
         for veh in self.env.agents:
@@ -26,15 +24,15 @@ class Metrics:
         self.total_veh = len(self.position)
 
     def store_xy(self, t):
-        for veh in self.env.env_vehicles:
-            distance = veh.rad * radius
+        for veh in self.env.env_veh:
+            distance = veh.central_angle * RADIUS
             self.position[veh.id].append((t, distance))
         for veh in self.env.agents:
-            distance = veh.rad * radius
+            distance = veh.central_angle * RADIUS
             self.position[veh.id].append((t, distance))
 
     def store_v(self, t):
-        for veh in self.env.env_vehicles:
+        for veh in self.env.env_veh:
             self.velocity[veh.id].append((t, veh.v))
         for veh in self.env.agents:
             self.velocity[veh.id].append((t, veh.v))
@@ -60,7 +58,7 @@ class Metrics:
             self.running_deviation.append(dev ** 0.5)
 
     def throughput(self):
-        self.throughput = self.running_mean[-1] * self.total_veh / (2 * math.pi * radius)
+        self.throughput = self.running_mean[-1] * self.total_veh / (2 * math.pi * RADIUS)
 
     def findIndexes(self, pos):
         indices = []
@@ -93,7 +91,7 @@ class Metrics:
     def plot_positions(self):
         global s
         plot_data = []
-        for veh in self.env.env_vehicles:
+        for veh in self.env.env_veh:
             x, y = zip(*self.position[veh.id])
             t, v = zip(*self.velocity[veh.id])
             s = plt.scatter(x, y, c=v, cmap=plt.get_cmap("viridis"), marker='.')
@@ -109,7 +107,7 @@ class Metrics:
         plt.show()
 
     def plot_velocities(self):
-        for veh in self.env.env_vehicles:
+        for veh in self.env.env_veh:
             x, y = zip(*self.velocity[veh.id])
             plt.plot(x, y, color='gray')
         for ag in self.env.agents:

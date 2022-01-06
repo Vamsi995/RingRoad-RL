@@ -3,7 +3,7 @@ from pygame import gfxdraw
 from Ring_Road.constants import DISPLAY_WIDTH, DISPLAY_HEIGHT, WHITE, BLACK, RING_RADIUS, ROAD_WIDTH, FPS
 
 
-class Render():
+class Render:
 
     def __init__(self, env):
         self.env = env

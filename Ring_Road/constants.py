@@ -10,8 +10,7 @@ CAR_WIDTH = 40
 CAR_LENGTH = 80
 RADIUS = 425
 velocity = 0
-acceleration = 0
-
+INITIAL_ACCELERATION = 0
 
 def clean_image(mycar_image):
     road_color = (0, 0, 0)
@@ -24,19 +23,20 @@ def clean_image(mycar_image):
                 mycar_image.set_at((x, y), (0, 0, 0, 0))
 
 
-env_car_image = pygame.image.load("Sprites/env_vehicle.png")
+env_car_image = pygame.image.load("/home/vamsi/Documents/GitHub/RingRoad-RL/Ring_Road/sprites/env_vehicle.png")
 env_car_image = pygame.transform.scale(env_car_image, (CAR_LENGTH, CAR_WIDTH))
 
-agent_car_image = pygame.image.load("Sprites/mycar.png")
+agent_car_image = pygame.image.load("/home/vamsi/Documents/GitHub/RingRoad-RL/Ring_Road/sprites/mycar.png")
 agent_car_image = pygame.transform.scale(agent_car_image, (CAR_LENGTH, CAR_WIDTH))
 
-up_arrow = pygame.image.load("Sprites/all_arrows_up.png")
-down_arrow = pygame.image.load("Sprites/all_arrows_down.png")
+up_arrow = pygame.image.load("/home/vamsi/Documents/GitHub/RingRoad-RL/Ring_Road/sprites/all_arrows_up.png")
+down_arrow = pygame.image.load("/home/vamsi/Documents/GitHub/RingRoad-RL/Ring_Road/sprites/all_arrows_down.png")
 
 clean_image(agent_car_image)
 clean_image(env_car_image)
 
 FPS = 30  # Frames per second
+ACTION_FREQ = 6
 DELTA_T = 1 / FPS
 
 """
@@ -45,12 +45,12 @@ IDM Parameters
 a = 3
 b = 3
 T = 1.5
-s0 = 2
+s0 = 20
 v0 = 20
 IDM_DELTA = 4
 
 DISCOUNT_FACTOR = 0.9
-MAX_EPISODE_LENGTH = 2000
+MAX_EPISODE_LENGTH = 600
 AGENT_MAX_VELOCITY = 20
 ENV_VEHICLES = 19
 AGENTS = 1
