@@ -27,7 +27,8 @@ class BaseEnv(Env):
 
         self.state = None
         self.reward = None
-        self.step_number = 0
+        self.simulation_time = 0
+        self.action_steps = 0
         self.discount_factor = DISCOUNT_FACTOR
 
     def initialize_state(self, envs, agents):
@@ -161,18 +162,36 @@ class RenderEnv(BaseEnv):
         # if action[0] < 0:
         #     self.screen.blit(down_arrow, [CONTROL_XPOS, CONTROL_YPOS])
 
+    def _simulate(self, action):
+
+        frames = int(FPS//6)
+
+        for frame in range(frames):
+
+            if self.simulation_time % frames == 0:
+                for agents in self.agents:
+                    agents.stored_action = action
+
+            for sprite in self.agents:
+                # sprite.idm_control()
+                # sprite.a2c(action)
+                # sprite.follower_stopper(4, [2.5, 2.0, 1.5], [14.5, 15.25, 16])
+                sprite.dqn(action)
+
+            for sprite in self.env_vehicles:
+                sprite.idm_control()
+
+            self.simulation_time += 1
+
+            if frame < frames - 1:
+                self.render(action)
+
     def step(self, action):
-        self.create_background()
-        self.step_number += 1
 
-        for sprite in self.agents:
-            # sprite.idm_control()
-            # sprite.a2c(action)
-            # sprite.follower_stopper(4, [2.5, 2.0, 1.5], [14.5, 15.25, 16])
-            sprite.dqn(action)
+        self.action_steps += 1
 
-        for sprite in self.env_vehicles:
-            sprite.idm_control()
+        self._simulate(action)
+
 
         for ag in self.agents:
             sf = self.gap_front(ag)
@@ -195,6 +214,7 @@ class RenderEnv(BaseEnv):
         return np.array(self.state), self.reward, self.done, info
 
     def render(self, action=None):
+        self.create_background()
         self.check_quit()
         for sprite in self.env_vehicles:
             self.rotate_image_display(sprite.image, sprite.rotation, sprite.xpos, sprite.ypos)
@@ -226,21 +246,42 @@ class NoRenderEnv(BaseEnv):
 
         return np.array(self.state)
 
-    def step(self, action):
-        self.step_number += 1
-        for sprite in self.agents:
-            # sprite.dqn(action)
-            sprite.a2c(action)
-            # sprite.follower_stopper(4, [2.5, 2.0, 1.5], [14.5, 15.25, 16])
+    def _simulate(self, action):
 
-        for sprite in self.env_vehicles:
-            sprite.idm_control()
+        frames = int(FPS // 6)
+
+        for frame in range(frames):
+
+            if self.simulation_time % frames == 0:
+                for agents in self.agents:
+                    agents.stored_action = action
+
+            for sprite in self.agents:
+                # sprite.idm_control()
+                # sprite.a2c(action)
+                # sprite.follower_stopper(4, [2.5, 2.0, 1.5], [14.5, 15.25, 16])
+                sprite.dqn(action)
+
+            for sprite in self.env_vehicles:
+                sprite.idm_control()
+
+            self.simulation_time += 1
+
+            # if frame < frames - 1:
+            #     self.render(action)
+
+    def step(self, action):
+
+        self.action_steps += 1
+
+        self._simulate(action)
 
         for ag in self.agents:
             sf = self.gap_front(ag)
             if sf <= 0:
                 self.done = True
                 info = {}
+                # self.render()
                 self.reward = -1000
                 return np.array(self.state), self.reward, self.done, info
 

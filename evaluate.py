@@ -2,7 +2,7 @@ import pygame
 from baselines.common import models
 from matplotlib import pyplot as plt
 from pygame import K_UP, K_DOWN
-
+import Ring_Road
 from DQN import learn
 from metrics import Metrics
 from simulator import RenderEnv, NoRenderEnv
@@ -11,7 +11,7 @@ from simulator import RenderEnv, NoRenderEnv
 def main():
     TIME_STEPS = 2000
 
-    env = RenderEnv()
+    env = gym.make("ringroad-v1")
     iterations = 200
     # env = NoRenderEnv()
     act = learn(env, network=models.mlp(num_hidden=64, num_layers=3), total_timesteps=0,

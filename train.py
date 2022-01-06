@@ -18,7 +18,7 @@ def train():
         seed=None,  # TODO: what?
         lr=1e-4,
         network=models.mlp(num_hidden=64, num_layers=3),
-        total_timesteps=100000,
+        total_timesteps=300000,
         buffer_size=100000,
         exploration_fraction=0.9,  # Percentage of time in which exploration has to be done
         exploration_final_eps=0.1,

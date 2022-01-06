@@ -2,13 +2,13 @@ import pygame
 
 DISPLAY_WIDTH = 1200
 DISPLAY_HEIGHT = 1000
-white = (255, 255, 255)
-black = (0, 0, 0)
-ring_radius = 450
-road_width = 50
-car_width = 40
-car_length = 80
-radius = 425
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RING_RADIUS = 450
+ROAD_WIDTH = 50
+CAR_WIDTH = 40
+CAR_LENGTH = 80
+RADIUS = 425
 velocity = 0
 acceleration = 0
 
@@ -25,10 +25,10 @@ def clean_image(mycar_image):
 
 
 env_car_image = pygame.image.load("Sprites/env_vehicle.png")
-env_car_image = pygame.transform.scale(env_car_image, (car_length, car_width))
+env_car_image = pygame.transform.scale(env_car_image, (CAR_LENGTH, CAR_WIDTH))
 
 agent_car_image = pygame.image.load("Sprites/mycar.png")
-agent_car_image = pygame.transform.scale(agent_car_image, (car_length, car_width))
+agent_car_image = pygame.transform.scale(agent_car_image, (CAR_LENGTH, CAR_WIDTH))
 
 up_arrow = pygame.image.load("Sprites/all_arrows_up.png")
 down_arrow = pygame.image.load("Sprites/all_arrows_down.png")
