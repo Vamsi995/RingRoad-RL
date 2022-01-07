@@ -98,6 +98,9 @@ class Agent(Car):
         self.ypos = self.initial_ypos + math.sin(self.central_angle) * RADIUS_PIX
         self.rotation = 90 - math.degrees(self.central_angle)
 
+    def _pi_controller(self):
+        pass
+
     def _a2c(self):
         self.acc = self.stored_action[0]
         prev_vel = self.v
@@ -115,7 +118,7 @@ class Agent(Car):
         self.acc = (self.v - prev_vel) / DELTA_T
 
     def step(self):
-        self._a2c()
+        self.idm_control()
         self.update_positions()
 
 

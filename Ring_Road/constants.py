@@ -19,6 +19,7 @@ RING_PIX_RADIUS = int(RING_RADIUS * PIXEL_CONVERSION)
 ROAD_PIX_WIDTH = int(ROAD_WIDTH * PIXEL_CONVERSION)
 RADIUS_PIX = RADIUS * PIXEL_CONVERSION
 
+
 def clean_image(mycar_image):
     road_color = (0, 0, 0)
     threshold_white = 220  # checking for border colours close to WHITE=(255,255,255)

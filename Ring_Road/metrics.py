@@ -2,7 +2,7 @@ import math
 
 import numpy as np
 
-from Ring_Road.constants import RADIUS
+from Ring_Road.constants import RADIUS_PIX, FPS, ACTION_FREQ
 from matplotlib import pyplot as plt
 
 
@@ -15,6 +15,12 @@ class Metrics:
         self.running_mean = [0]
         self.running_deviation = [0]
         self.total_veh = 0
+        self.register_cars()
+
+    def step(self):
+        self.store_v(self.env.action_steps)
+        self.store_xy(self.env.action_steps)
+        self.running_mean_vel(self.env.action_steps)
 
     def register_cars(self):
         for veh in self.env.env_veh:
@@ -27,10 +33,10 @@ class Metrics:
 
     def store_xy(self, t):
         for veh in self.env.env_veh:
-            distance = veh.central_angle * RADIUS
+            distance = veh.central_angle * RADIUS_PIX
             self.position[veh.id].append((t, distance))
         for veh in self.env.agents:
-            distance = veh.central_angle * RADIUS
+            distance = veh.central_angle * RADIUS_PIX
             self.position[veh.id].append((t, distance))
 
     def store_v(self, t):
@@ -60,7 +66,7 @@ class Metrics:
             self.running_deviation.append(dev ** 0.5)
 
     def throughput(self):
-        self.throughput = self.running_mean[-1] * self.total_veh / (2 * math.pi * RADIUS)
+        self.throughput = self.running_mean[-1] * self.total_veh / (2 * math.pi * RADIUS_PIX)
 
     def findIndexes(self, pos):
         indices = []
@@ -70,6 +76,11 @@ class Metrics:
                 indices.append(i)
             prev = pos[i]
         return indices
+
+    def convert_action_steps_to_time(self, x):
+        time_sec = len(x) / (FPS // ACTION_FREQ)
+        new_x = np.linspace(0, time_sec, len(x))
+        return new_x
 
     def get_sliced_arrays(self, indices, times, pos, vel):
 
@@ -83,43 +94,48 @@ class Metrics:
                 ind = indices[i]
                 data_tup = (times[ind:], pos[ind:], vel[ind:])
             else:
-                prev_ind = indices[i-1]
+                prev_ind = indices[i - 1]
                 curr_ind = indices[i]
                 data_tup = (times[prev_ind: curr_ind], pos[prev_ind: curr_ind], vel[prev_ind:curr_ind])
 
             return_list.append(data_tup)
         return return_list
 
+    def plot(self):
+        self.plot_positions()
+        self.plot_velocities()
+        self.plot_avg_vel()
+
     def plot_positions(self):
         global s
-        plot_data = []
-        for veh in self.env.env_veh:
+        plot_data = self.env.env_veh + self.env.agents
+        for veh in plot_data:
             x, y = zip(*self.position[veh.id])
             t, v = zip(*self.velocity[veh.id])
-            s = plt.scatter(x, y, c=v, cmap=plt.get_cmap("viridis"), marker='.')
-            # indices = self.findIndexes(y)
-            # sliced_data = self.get_sliced_arrays(indices, x, y, v)
-            #
-            # for data in sliced_data:
-            #     # print(len(data[0]), len(data[1]), len(data[2]))
-            #     s = plt.scatter(data[0], data[1], c=data[2], cmap=plt.get_cmap("viridis"), marker='.')
+            s = plt.scatter(self.convert_action_steps_to_time(x), y, c=v, cmap=plt.get_cmap("viridis"), marker='.')
         plt.colorbar(s, label="Velocity (m/s)")
         plt.xlabel("Time (s)")
         plt.ylabel("Position (m)")
+        plt.figure(0)
         plt.show()
 
     def plot_velocities(self):
         for veh in self.env.env_veh:
             x, y = zip(*self.velocity[veh.id])
-            plt.plot(x, y, color='gray')
+            plt.plot(self.convert_action_steps_to_time(x), y, color='gray')
         for ag in self.env.agents:
             x, y = zip(*self.velocity[ag.id])
-            plt.plot(x, y, color='r')
-        plt.plot(np.arange(len(self.running_mean)), self.running_mean, color='green')
-        # plt.plot(np.arange(len(self.running_deviation)),
-        #          [x + y for x, y in zip(self.running_mean, self.running_deviation)], color='b')
-        # plt.plot(np.arange(len(self.running_deviation)),
-        #          [x - y for x, y in zip(self.running_mean, self.running_deviation)], color='b')
+            plt.plot(self.convert_action_steps_to_time(x), y, color='r')
         plt.xlabel("Time (s)")
         plt.ylabel("Velocity (m/s)")
+        plt.figure(1)
+        plt.show()
+
+    def plot_avg_vel(self):
+        plt.plot(self.convert_action_steps_to_time(len(self.running_mean)), self.running_mean, color='green')
+        plt.plot(self.convert_action_steps_to_time(len(self.running_deviation)),
+                 [x + y for x, y in zip(self.running_mean, self.running_deviation)], color='b')
+        plt.plot(self.convert_action_steps_to_time(len(self.running_deviation)),
+                 [x - y for x, y in zip(self.running_mean, self.running_deviation)], color='b')
+        plt.figure(2)
         plt.show()

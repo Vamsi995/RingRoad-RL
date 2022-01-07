@@ -3,7 +3,7 @@ import gym
 from gym import spaces
 
 from Ring_Road.constants import DISCOUNT_FACTOR, ENV_VEHICLES, AGENTS, FPS, MAX_EPISODE_LENGTH, ACTION_FREQ, \
-    INITIAL_ACCELERATION
+    INITIAL_ACCELERATION, AGENT_MAX_VELOCITY
 from Ring_Road.render.render import Render
 from Ring_Road.vehicle.state import StateExtractor
 from Ring_Road.vehicle.vehicle import EnvVehicle, Agent
@@ -19,7 +19,7 @@ class RingRoad(gym.Env):
         self.env_veh = []
 
         features_low = np.array([0, 0, 0, 0, 0], dtype=np.float64)
-        features_high = np.array([20, 20, 20, 2500, 2500], dtype=np.float64)
+        features_high = np.array([AGENT_MAX_VELOCITY, AGENT_MAX_VELOCITY, AGENT_MAX_VELOCITY, 2500, 2500], dtype=np.float64)
 
         # self.action_space = spaces.Discrete(2)
         self.action_space = spaces.Box(low=np.array([-10]), high=np.array([10]))
@@ -54,11 +54,11 @@ class RingRoad(gym.Env):
 
         for i in range(len(positions)):
             if i not in agent_pos:
-                vehicle_list.append(EnvVehicle(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i))
-                # vehicle_list.append(EnvVehicle(positions[i], 1, INITIAL_ACCELERATION, i))
+                # vehicle_list.append(EnvVehicle(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i))
+                vehicle_list.append(EnvVehicle(positions[i], 0, INITIAL_ACCELERATION, i))
             else:
-                vehicle_list.append(Agent(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i))
-                # vehicle_list.append(Agent(positions[i], 1, INITIAL_ACCELERATION, i))
+                # vehicle_list.append(Agent(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i))
+                vehicle_list.append(Agent(positions[i], 0, INITIAL_ACCELERATION, i))
 
         for i in range(len(vehicle_list)):
             cur_veh = vehicle_list[i]
@@ -129,7 +129,7 @@ class RingRoad(gym.Env):
         else:
             return False
 
-    def step(self, action):
+    def step(self, action=None):
 
         self.action_steps += 1
         self._simulate(action)

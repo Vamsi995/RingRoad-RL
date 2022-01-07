@@ -1,4 +1,4 @@
-import scripts.evaluate, scripts.evaluate_a2c, scripts.train, scripts.a2c
+import scripts.evaluate, scripts.evaluate_a2c, scripts.train, scripts.a2c, scripts.evaluate_idm
 import argparse
 
 
@@ -15,7 +15,8 @@ def main():
         scripts.a2c.train()
     elif args.type == "eval_a2c":
         scripts.evaluate_a2c.main()
-
+    elif args.type == "eval_idm":
+        scripts.evaluate_idm.main()
 
 if __name__ == "__main__":
     main()
