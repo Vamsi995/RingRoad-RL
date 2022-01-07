@@ -3,8 +3,10 @@ import pygame
 
 import numpy as np
 
-from Ring_Road.constants import agent_car_image, DISPLAY_HEIGHT, RADIUS, CAR_LENGTH, DELTA_T, AGENT_MAX_VELOCITY, IDM_DELTA, v0, \
-    T, s0, a, b, env_car_image, DISPLAY_WIDTH
+from Ring_Road.constants import agent_car_image, DISPLAY_HEIGHT, RADIUS_PIX, CAR_PIX_LENGTH, DELTA_T, \
+    AGENT_MAX_VELOCITY, \
+    IDM_DELTA, v0, \
+    T, s0, a, b, env_car_image, DISPLAY_WIDTH, PIXEL_CONVERSION
 
 
 class Car(pygame.sprite.Sprite):
@@ -21,30 +23,36 @@ class Car(pygame.sprite.Sprite):
         self.v, self.acc = velocity, acceleration
         self.central_angle = math.radians(rad)
         self.rotation = 90 - math.degrees(self.central_angle)
-        self.xpos = self.initial_xpos + math.cos(self.central_angle) * RADIUS
-        self.ypos = self.initial_ypos + math.sin(self.central_angle) * RADIUS
-        # self.rect.x = self.xpos
-        # self.rect.y = self.ypos
-        # self.rect.width = self.image.get_width()
-        # self.rect.height = self.image.get_height()
+        self.xpos = self.initial_xpos + math.cos(self.central_angle) * RADIUS_PIX
+        self.ypos = self.initial_ypos + math.sin(self.central_angle) * RADIUS_PIX
         self.distance_covered = 0
         self.front_vehicle = {}
         self.back_vehicle = {}
 
     def update_positions(self):
-        self.central_angle += (self.v / RADIUS)
+        self.central_angle += (self.v * DELTA_T / RADIUS_PIX) * (PIXEL_CONVERSION)
         self.central_angle = self.central_angle % (2 * math.pi)
-        self.xpos = self.initial_xpos + math.cos(self.central_angle) * RADIUS
-        self.ypos = self.initial_ypos + math.sin(self.central_angle) * RADIUS
-        ext = (CAR_LENGTH / 2) / RADIUS
-        ext += self.central_angle
-        sprite_x = self.initial_xpos + math.cos(ext) * RADIUS
-        sprite_y = self.initial_xpos + math.sin(ext) * RADIUS
-        self.rect.x = sprite_x
-        self.rect.y = sprite_y
+        self.xpos = self.initial_xpos + math.cos(self.central_angle) * RADIUS_PIX
+        self.ypos = self.initial_ypos + math.sin(self.central_angle) * RADIUS_PIX
         self.rect.width = self.image.get_width()
         self.rect.height = self.image.get_height()
         self.rotation = 90 - math.degrees(self.central_angle)
+
+    def idm_control(self):
+        delta_v = self.v - self.front_vehicle.v
+        if self.front_vehicle.central_angle - self.central_angle < 0:
+            s = (2 * math.pi - self.central_angle + self.front_vehicle.central_angle) * RADIUS_PIX - CAR_PIX_LENGTH
+        else:
+            s = (self.front_vehicle.central_angle - self.central_angle) * RADIUS_PIX - CAR_PIX_LENGTH
+
+        if s <= 0:
+            s = 0.00001
+
+        s_star = s0 + max(0, (self.v * T) + ((self.v * delta_v) / (2 * np.power(a * b, 0.5))))
+        self.acc = a * (1 - np.power(self.v / v0, IDM_DELTA) - np.power(s_star / s, 2))
+        old_velocity = self.v
+        self.v = max(0, min((old_velocity) + (self.acc * DELTA_T), v0))
+        self.acc = (self.v - old_velocity) / DELTA_T  # adjustment to acc due to clamping of velocity
 
 
 class Agent(Car):
@@ -70,9 +78,9 @@ class Agent(Car):
         delta_x3 = initial_x[2] + (1 / (2 * curvatures[2])) * (delta_v ** 2)
 
         if self.front_vehicle.central_angle - self.central_angle < 0:
-            s = (2 * math.pi - self.central_angle + self.front_vehicle.central_angle) * RADIUS - CAR_LENGTH
+            s = (2 * math.pi - self.central_angle + self.front_vehicle.central_angle) * RADIUS_PIX - CAR_PIX_LENGTH
         else:
-            s = (self.front_vehicle.central_angle - self.central_angle) * RADIUS - CAR_LENGTH
+            s = (self.front_vehicle.central_angle - self.central_angle) * RADIUS_PIX - CAR_PIX_LENGTH
 
         if s <= delta_x1:
             self.v = 0
@@ -83,20 +91,20 @@ class Agent(Car):
         elif s > delta_x3:
             self.v = desired_velocity
 
-        self.central_angle += (self.v / RADIUS)
+        self.central_angle += (self.v / RADIUS_PIX)
         self.central_angle = self.central_angle % (2 * math.pi)
 
-        self.xpos = self.initial_xpos + math.cos(self.central_angle) * RADIUS
-        self.ypos = self.initial_ypos + math.sin(self.central_angle) * RADIUS
+        self.xpos = self.initial_xpos + math.cos(self.central_angle) * RADIUS_PIX
+        self.ypos = self.initial_ypos + math.sin(self.central_angle) * RADIUS_PIX
         self.rotation = 90 - math.degrees(self.central_angle)
 
-    def _a2c(self, action):
-        self.acc = action[0]
+    def _a2c(self):
+        self.acc = self.stored_action[0]
         prev_vel = self.v
         self.v = max(0, min(self.v + (self.acc * DELTA_T), AGENT_MAX_VELOCITY))
         self.acc = (self.v - prev_vel) / DELTA_T
 
-    def _dqn(self, action):
+    def _dqn(self):
         if self.stored_action == 0:
             self.acc += 0.5
         elif self.stored_action == 1:
@@ -106,24 +114,8 @@ class Agent(Car):
         self.v = max(0, min(self.v + (self.acc * DELTA_T), AGENT_MAX_VELOCITY))
         self.acc = (self.v - prev_vel) / DELTA_T
 
-    def _idm_control(self):
-        delta_v = self.v - self.front_vehicle.v
-        if self.front_vehicle.central_angle - self.central_angle < 0:
-            s = (2 * math.pi - self.central_angle + self.front_vehicle.central_angle) * RADIUS - CAR_LENGTH
-        else:
-            s = (self.front_vehicle.central_angle - self.central_angle) * RADIUS - CAR_LENGTH
-
-        if s <= 0:
-            s = 0.00001
-
-        s_star = s0 + max(0, (self.v * T) + ((self.v * delta_v) / (2 * np.power(a * b, 0.5))))
-        self.acc = a * (1 - np.power(self.v / v0, IDM_DELTA) - np.power(s_star / s, 2))
-        old_velocity = self.v
-        self.v = max(0, min((old_velocity) + (self.acc * DELTA_T), v0))
-        self.acc = (self.v - old_velocity) / DELTA_T  # adjustment to acc due to clamping of velocity
-
     def step(self):
-        self._idm_control()
+        self._a2c()
         self.update_positions()
 
 
@@ -136,22 +128,6 @@ class EnvVehicle(Car):
         self.width = self.rect.width
         self.rect.x = self.xpos
         self.rect.y = self.ypos
-
-    def idm_control(self):
-        delta_v = self.v - self.front_vehicle.v
-        if self.front_vehicle.central_angle - self.central_angle < 0:
-            s = (2 * math.pi - self.central_angle + self.front_vehicle.central_angle) * RADIUS - CAR_LENGTH
-        else:
-            s = (self.front_vehicle.central_angle - self.central_angle) * RADIUS - CAR_LENGTH
-
-        if s <= 0:
-            s = 0.00001
-
-        s_star = s0 + max(0, (self.v * T) + ((self.v * delta_v) / (2 * np.power(a * b, 0.5))))
-        self.acc = a * (1 - np.power(self.v / v0, IDM_DELTA) - np.power(s_star / s, 2))
-        old_velocity = self.v
-        self.v = max(0, min((old_velocity) + (self.acc * DELTA_T), v0))
-        self.acc = (self.v - old_velocity) / DELTA_T  # adjustment to acc due to clamping of velocity
 
     def step(self):
         self.idm_control()

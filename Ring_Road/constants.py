@@ -4,13 +4,20 @@ DISPLAY_WIDTH = 1200
 DISPLAY_HEIGHT = 1000
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-RING_RADIUS = 450
-ROAD_WIDTH = 50
-CAR_WIDTH = 40
-CAR_LENGTH = 80
-RADIUS = 425
+RING_RADIUS = 22.5
+ROAD_WIDTH = 2.5
+CAR_WIDTH = 2
+CAR_LENGTH = 4
+RADIUS = 21.25
 velocity = 0
 INITIAL_ACCELERATION = 0
+PIXEL_CONVERSION = 20
+
+CAR_PIX_LENGTH = CAR_LENGTH * PIXEL_CONVERSION
+CAR_PIX_WIDTH = CAR_WIDTH * PIXEL_CONVERSION
+RING_PIX_RADIUS = int(RING_RADIUS * PIXEL_CONVERSION)
+ROAD_PIX_WIDTH = int(ROAD_WIDTH * PIXEL_CONVERSION)
+RADIUS_PIX = RADIUS * PIXEL_CONVERSION
 
 def clean_image(mycar_image):
     road_color = (0, 0, 0)
@@ -24,10 +31,10 @@ def clean_image(mycar_image):
 
 
 env_car_image = pygame.image.load("/home/vamsi/Documents/GitHub/RingRoad-RL/Ring_Road/sprites/env_vehicle.png")
-env_car_image = pygame.transform.scale(env_car_image, (CAR_LENGTH, CAR_WIDTH))
+env_car_image = pygame.transform.scale(env_car_image, (CAR_PIX_LENGTH, CAR_PIX_WIDTH))
 
 agent_car_image = pygame.image.load("/home/vamsi/Documents/GitHub/RingRoad-RL/Ring_Road/sprites/mycar.png")
-agent_car_image = pygame.transform.scale(agent_car_image, (CAR_LENGTH, CAR_WIDTH))
+agent_car_image = pygame.transform.scale(agent_car_image, (CAR_PIX_LENGTH, CAR_PIX_WIDTH))
 
 up_arrow = pygame.image.load("/home/vamsi/Documents/GitHub/RingRoad-RL/Ring_Road/sprites/all_arrows_up.png")
 down_arrow = pygame.image.load("/home/vamsi/Documents/GitHub/RingRoad-RL/Ring_Road/sprites/all_arrows_down.png")
@@ -42,11 +49,11 @@ DELTA_T = 1 / FPS
 """
 IDM Parameters
 """
-a = 3
+a = 2
 b = 3
-T = 1.5
-s0 = 20
-v0 = 20
+T = 1
+s0 = 2
+v0 = 30
 IDM_DELTA = 4
 
 DISCOUNT_FACTOR = 0.9

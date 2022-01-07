@@ -1,47 +1,48 @@
 import gym
+from stable_baselines import DQN
+from stable_baselines.deepq.policies import FeedForwardPolicy
 
 from Ring_Road.control.DQN import learn
 from baselines.common import models
 from Ring_Road.constants import DISCOUNT_FACTOR
 
 
-
-def callback(lcl, _glb):
-    # stop training if reward maintains a desired value
-    is_solved = lcl['t'] > 100 and sum(lcl['episode_rewards'][-101:-1]) / 100 >= 56700
-    return is_solved
+class CustomDQNPolicy(FeedForwardPolicy):
+    def __init__(self, *args, **kwargs):
+        super(CustomDQNPolicy, self).__init__(*args, **kwargs,
+                                              layers=[64, 64, 64],
+                                              layer_norm=False,
+                                              feature_extraction="mlp")
 
 
 def train():
     env = gym.make("ringroad-v1", enable_render=False)
-    act = learn(
-        env,
-        seed=None,  # TODO: what?
-        lr=1e-4,
-        network=models.mlp(num_hidden=64, num_layers=3),
-        total_timesteps=100000,
+
+    model = DQN(
+        env=env,
+        policy=CustomDQNPolicy,
+        learning_rate=1e-4,
         buffer_size=100000,
-        exploration_fraction=0.9,  # Percentage of time in which exploration has to be done
-        exploration_final_eps=0.1,
-        train_freq=4,
-        batch_size=32,
-        print_freq=10,
-        checkpoint_freq=1000,
-        checkpoint_path='/home/vamsi/Desktop/RingRoad',  # TODO: put in
-        learning_starts=100,
-        gamma=DISCOUNT_FACTOR,
+        exploration_fraction=0.9,
+        exploration_final_eps=0.01,
+        train_freq=6,
+        batch_size=64,
         double_q=True,
-        target_network_update_freq=1000,
-        # callback=callback,  # TODO: put in
-        load_path=None,  # initial checkpoint directory to be used
-        inbuild_network=True,
-        param_noise=True,
-        plot_name='reward.png',
+        learning_starts=10000,
         prioritized_replay=True,
-        policy_kwargs=dict(dueling=True)
+        target_network_update_freq=1000,
+        param_noise=True,
+        verbose=1,
+        policy_kwargs=dict(dueling=True),
+        tensorboard_log="/home/vamsi/Documents/GitHub/RingRoad-RL/logs/DQN/"
     )
-    print("Saving model to Model.pkl")
-    act.save("Models/Model2.pkl")
+
+    model.learn(total_timesteps=100000)
+    model.save("Models/DQN")
+
+    # print("Saving model to Model.pkl")
+    # act.save("Models/Model2.pkl")
+    env.close()
 
 
 if __name__ == '__main__':

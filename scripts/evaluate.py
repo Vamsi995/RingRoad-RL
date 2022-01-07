@@ -1,23 +1,14 @@
-import sys
-import os
-from pathlib import Path
-
-myDir = os.getcwd()
-sys.path.append(myDir)
-path = Path(myDir)
-a = str(path.parent.absolute())
-sys.path.append(a)
-
 import gym
 from baselines.common import models
+from stable_baselines import DQN
+
 from Ring_Road.control.DQN import learn
 from Ring_Road.metrics import Metrics
 
 
 def main():
     env = gym.make("ringroad-v1", enable_render=True)
-    act = learn(env, network=models.mlp(num_hidden=64, num_layers=3), total_timesteps=0,
-                load_path="../Models/Model2.pkl", inbuild_network=True)
+    model = DQN.load("Models/DQN")
 
     # for i in range(iterations):
     obs = env.reset()
@@ -26,7 +17,7 @@ def main():
     met.register_cars()
     t = 0
     while not done:
-        action = act(obs[None])[0]
+        action, _states = model.predict(obs)
         obs, rew, done, _ = env.step(action)
         env.render()
         met.store_v(t)
@@ -58,6 +49,3 @@ def main():
     met.plot_positions()
     met.plot_velocities()
 
-
-if __name__ == "__main__":
-    main()

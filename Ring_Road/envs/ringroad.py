@@ -1,5 +1,4 @@
 import numpy as np
-import pygame
 import gym
 from gym import spaces
 
@@ -22,7 +21,8 @@ class RingRoad(gym.Env):
         features_low = np.array([0, 0, 0, 0, 0], dtype=np.float64)
         features_high = np.array([20, 20, 20, 2500, 2500], dtype=np.float64)
 
-        self.action_space = spaces.Discrete(2)
+        # self.action_space = spaces.Discrete(2)
+        self.action_space = spaces.Box(low=np.array([-10]), high=np.array([10]))
         self.observation_space = spaces.Box(low=features_low, high=features_high, dtype=np.float64)
 
         self.simulation_time = 0  # Simulation time
@@ -54,11 +54,11 @@ class RingRoad(gym.Env):
 
         for i in range(len(positions)):
             if i not in agent_pos:
-                vehicle_list.append(
-                    EnvVehicle(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i))
+                vehicle_list.append(EnvVehicle(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i))
+                # vehicle_list.append(EnvVehicle(positions[i], 1, INITIAL_ACCELERATION, i))
             else:
-                vehicle_list.append(
-                    Agent(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i))
+                vehicle_list.append(Agent(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i))
+                # vehicle_list.append(Agent(positions[i], 1, INITIAL_ACCELERATION, i))
 
         for i in range(len(vehicle_list)):
             cur_veh = vehicle_list[i]
@@ -116,14 +116,10 @@ class RingRoad(gym.Env):
         if vlead > 0 and vlag > 0:
             reward += 10
         else:
-            reward -= 450
+            reward -= 350
 
-        if sf < 40:
-            reward -= 450
-
-        for agents in self.agents:
-            if agents.crashed:
-                reward -= 1000
+        if self.collision:
+            reward -= 1000
 
         return reward
 
