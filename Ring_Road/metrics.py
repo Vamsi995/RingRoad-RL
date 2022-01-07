@@ -116,7 +116,6 @@ class Metrics:
         plt.colorbar(s, label="Velocity (m/s)")
         plt.xlabel("Time (s)")
         plt.ylabel("Position (m)")
-        plt.figure(0)
         plt.show()
 
     def plot_velocities(self):
@@ -128,14 +127,17 @@ class Metrics:
             plt.plot(self.convert_action_steps_to_time(x), y, color='r')
         plt.xlabel("Time (s)")
         plt.ylabel("Velocity (m/s)")
-        plt.figure(1)
         plt.show()
 
     def plot_avg_vel(self):
-        plt.plot(self.convert_action_steps_to_time(len(self.running_mean)), self.running_mean, color='green')
-        plt.plot(self.convert_action_steps_to_time(len(self.running_deviation)),
-                 [x + y for x, y in zip(self.running_mean, self.running_deviation)], color='b')
-        plt.plot(self.convert_action_steps_to_time(len(self.running_deviation)),
-                 [x - y for x, y in zip(self.running_mean, self.running_deviation)], color='b')
-        plt.figure(2)
+
+        plt.plot(self.convert_action_steps_to_time(self.running_mean), self.running_mean, color='#1B2ACC')
+
+        plt.fill_between(self.convert_action_steps_to_time(self.running_mean),
+                         np.array(self.running_mean) - np.array(self.running_deviation),
+                         np.array(self.running_mean) + np.array(self.running_deviation), antialiased=True, alpha=0.2,
+                         edgecolor='#1B2ACC', facecolor='#089FFF')
+
+        plt.xlabel("Time (s)")
+        plt.ylabel("Spatially-Averaged Velocity (m/s)")
         plt.show()
