@@ -11,7 +11,6 @@ class Render:
         pygame.display.set_caption("RingRoad Env")
         self.screen = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
         self.clock = pygame.time.Clock()
-        self._create_background()
 
     def _create_background(self):
         self.screen.fill(WHITE)
@@ -33,6 +32,7 @@ class Render:
 
     def render(self):
         self._check_quit()
+        self._create_background()
 
         for agent in self.env.agents:
             self._rotate_image_display(agent.image, agent.rotation, agent.xpos, agent.ypos)
