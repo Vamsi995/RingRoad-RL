@@ -80,14 +80,6 @@ class RingRoad(gym.Env):
                 agent.crashed = True
                 self.collision = True
 
-    def reset(self):
-        self.done = False
-        self.simulation_time = 0
-        self.action_steps = 0
-        self._initialize_state()
-        self.state = self.state_extractor.neighbour_states()
-        return self.state
-
     def _simulate(self, action):
         frames = int(FPS // ACTION_FREQ)
         for frame in range(frames):
@@ -128,6 +120,14 @@ class RingRoad(gym.Env):
             return True
         else:
             return False
+
+    def reset(self):
+        self.done = False
+        self.simulation_time = 0
+        self.action_steps = 0
+        self._initialize_state()
+        self.state = self.state_extractor.neighbour_states()
+        return self.state
 
     def step(self, action=None):
 
