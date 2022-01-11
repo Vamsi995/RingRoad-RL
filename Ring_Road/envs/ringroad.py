@@ -62,11 +62,11 @@ class RingRoad(gym.Env):
 
         for i in range(len(positions)):
             if i not in agent_pos:
-                vehicle_list.append(EnvVehicle(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i))
-                # vehicle_list.append(EnvVehicle(positions[i], 0, INITIAL_ACCELERATION, i))
+                # vehicle_list.append(EnvVehicle(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i))
+                vehicle_list.append(EnvVehicle(positions[i], 0, INITIAL_ACCELERATION, i))
             else:
-                vehicle_list.append(Agent(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i, self.agent_type))
-                # vehicle_list.append(Agent(positions[i], 0, INITIAL_ACCELERATION, i))
+                # vehicle_list.append(Agent(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i, self.agent_type))
+                vehicle_list.append(Agent(positions[i], 0, INITIAL_ACCELERATION, i, self.agent_type))
 
         for i in range(len(vehicle_list)):
             cur_veh = vehicle_list[i]
@@ -120,11 +120,11 @@ class RingRoad(gym.Env):
         reward = 0
 
         if self.collision:
-            reward += -5 * self.rew_b
+            reward += -10 * self.rew_b
 
         reward += (vav / AGENT_MAX_VELOCITY) * self.rew_a
 
-        return self._linear_map(reward, [-5 * self.rew_b, (vav / AGENT_MAX_VELOCITY) * self.rew_a], [0, 1])
+        return self._linear_map(reward, [-10 * self.rew_b, (vav / AGENT_MAX_VELOCITY) * self.rew_a], [0, 1])
 
     def _is_done(self):
         if self.action_steps >= MAX_EPISODE_LENGTH or self.collision:
