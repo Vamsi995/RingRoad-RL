@@ -11,16 +11,10 @@ def main():
     obs = env.reset()
     done = False
     met = Metrics(env)
-    met.register_cars()
-    t = 0
+
     while not done:
         action, _states = model.predict(obs)
-        met.store_v(t)
-        met.store_xy(t)
-        met.running_mean_vel(t)
         obs, rewards, done, info = env.step(action)
-        t += 1
-
-
-    met.plot_positions()
-    met.plot_velocities()
+        env.render()
+    met.plot()
+    env.close()

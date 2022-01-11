@@ -11,15 +11,17 @@ from Ring_Road.vehicle.vehicle import EnvVehicle, Agent
 
 class RingRoad(gym.Env):
 
-    def __init__(self, enable_render=False):
+    def __init__(self, enable_render=False, agent_type="idm"):
 
         self.enable_render = enable_render
+        self.agent_type = agent_type
 
         self.agents = []
         self.env_veh = []
 
         features_low = np.array([0, 0, 0, 0, 0], dtype=np.float64)
-        features_high = np.array([AGENT_MAX_VELOCITY, AGENT_MAX_VELOCITY, AGENT_MAX_VELOCITY, 2500, 2500], dtype=np.float64)
+        features_high = np.array([AGENT_MAX_VELOCITY, AGENT_MAX_VELOCITY, AGENT_MAX_VELOCITY, 2500, 2500],
+                                 dtype=np.float64)
 
         # self.action_space = spaces.Discrete(2)
         self.action_space = spaces.Box(low=np.array([-10]), high=np.array([10]), dtype=np.float64)
@@ -39,6 +41,9 @@ class RingRoad(gym.Env):
             self.viewer = Render(self)
         self.collision = False
 
+        self.rew_a = 1
+        self.rew_b = 0.5
+
     def _initialize_state(self):
         self.agents.clear()
         self.env_veh.clear()
@@ -54,11 +59,11 @@ class RingRoad(gym.Env):
 
         for i in range(len(positions)):
             if i not in agent_pos:
-                # vehicle_list.append(EnvVehicle(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i))
-                vehicle_list.append(EnvVehicle(positions[i], 0, INITIAL_ACCELERATION, i))
+                vehicle_list.append(EnvVehicle(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i))
+                # vehicle_list.append(EnvVehicle(positions[i], 0, INITIAL_ACCELERATION, i))
             else:
-                # vehicle_list.append(Agent(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i))
-                vehicle_list.append(Agent(positions[i], 0, INITIAL_ACCELERATION, i))
+                vehicle_list.append(Agent(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i, self.agent_type))
+                # vehicle_list.append(Agent(positions[i], 0, INITIAL_ACCELERATION, i))
 
         for i in range(len(vehicle_list)):
             cur_veh = vehicle_list[i]
@@ -97,7 +102,12 @@ class RingRoad(gym.Env):
             if frame < frames - 1:
                 self.render()
 
+    def _linear_map(self, v, x, y):
+        """Linear map of value v with range x to desired range y."""
+        return y[0] + (v - x[0]) * (y[1] - y[0]) / (x[1] - x[0])
+
     def _reward(self):
+
         vav = self.state[2]
         vlead = self.state[0]
         vlag = self.state[1]
@@ -105,15 +115,13 @@ class RingRoad(gym.Env):
         sb = self.state[4]
 
         reward = 0
-        if vlead > 0 and vlag > 0:
-            reward += 10
-        else:
-            reward -= 350
 
         if self.collision:
-            reward -= 1000
+            reward += -5 * self.rew_b
 
-        return reward
+        reward += (vav / AGENT_MAX_VELOCITY) * self.rew_a
+
+        return self._linear_map(reward, [-5 * self.rew_b, (vav / AGENT_MAX_VELOCITY) * self.rew_a], [0, 1])
 
     def _is_done(self):
         if self.action_steps >= MAX_EPISODE_LENGTH or self.collision:

@@ -56,7 +56,7 @@ class Car(pygame.sprite.Sprite):
 
 
 class Agent(Car):
-    def __init__(self, rad, velocity, acceleration, id):
+    def __init__(self, rad, velocity, acceleration, id, agent_type):
         super(Agent, self).__init__(rad, velocity, acceleration, id)
         self.image = agent_car_image
         self.rect = self.image.get_rect()
@@ -66,6 +66,7 @@ class Agent(Car):
         self.rect.y = self.ypos
         self.stored_action = None
         self.crashed = False
+        self.agent_type = agent_type
 
     def _follower_stopper(self, desired_velocity, curvatures, initial_x):
         v_lead = self.front_vehicle.v
@@ -117,8 +118,20 @@ class Agent(Car):
         self.v = max(0, min(self.v + (self.acc * DELTA_T), AGENT_MAX_VELOCITY))
         self.acc = (self.v - prev_vel) / DELTA_T
 
+    def _run_control(self):
+        if self.agent_type == "idm":
+            self.idm_control()
+        elif self.agent_type == "dqn":
+            self._dqn()
+        elif self.agent_type == "a2c":
+            self._a2c()
+        elif self.agent_type == "fs":
+            self._follower_stopper()
+        elif self.agent_type == "pi":
+            self._pi_controller()
+
     def step(self):
-        self.idm_control()
+        self._run_control()
         self.update_positions()
 
 

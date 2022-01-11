@@ -1,4 +1,4 @@
-import scripts.evaluate, scripts.evaluate_a2c, scripts.train_dqn, scripts.train_a2c, scripts.evaluate_idm
+import scripts.evaluate_dqn, scripts.evaluate_a2c, scripts.train_dqn, scripts.train_a2c, scripts.evaluate_idm
 import argparse
 
 
