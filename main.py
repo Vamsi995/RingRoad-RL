@@ -12,7 +12,7 @@ def main():
     elif args.type == "train_a2c":
         scripts.train_a2c.train()
     elif args.type == "eval_dqn":
-        scripts.evaluate.main()
+        scripts.evaluate_dqn.main()
     elif args.type == "eval_a2c":
         scripts.evaluate_a2c.main()
     elif args.type == "eval_idm":

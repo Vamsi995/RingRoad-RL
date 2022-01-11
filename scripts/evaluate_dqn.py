@@ -7,7 +7,7 @@ from Ring_Road.metrics import Metrics
 
 
 def main():
-    env = gym.make("ringroad-v1", enable_render=True)
+    env = gym.make("ringroad-v1", enable_render=True, agent_type="dqn")
     model = DQN.load("Models/DQN")
 
     obs = env.reset()
@@ -17,6 +17,7 @@ def main():
     while not done:
         action, _states = model.predict(obs)
         obs, rew, done, _ = env.step(action)
+        met.step()
         env.render()
 
     met.plot()

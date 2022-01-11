@@ -23,8 +23,11 @@ class RingRoad(gym.Env):
         features_high = np.array([AGENT_MAX_VELOCITY, AGENT_MAX_VELOCITY, AGENT_MAX_VELOCITY, 2500, 2500],
                                  dtype=np.float64)
 
-        # self.action_space = spaces.Discrete(2)
-        self.action_space = spaces.Box(low=np.array([-10]), high=np.array([10]), dtype=np.float64)
+        if self.agent_type == "a2c":
+            self.action_space = spaces.Box(low=np.array([-10]), high=np.array([10]), dtype=np.float64)
+        else:
+            self.action_space = spaces.Discrete(2)
+
         self.observation_space = spaces.Box(low=features_low, high=features_high, dtype=np.float64)
 
         self.simulation_time = 0  # Simulation time
