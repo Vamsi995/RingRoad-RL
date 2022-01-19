@@ -82,25 +82,6 @@ class Metrics:
         new_x = np.linspace(0, time_sec, len(x))
         return new_x
 
-    def get_sliced_arrays(self, indices, times, pos, vel):
-
-        return_list = []
-
-        for i in range(len(indices)):
-            if i == 0:
-                ind = indices[i]
-                data_tup = (times[0:ind], pos[0:ind], vel[0:ind])
-            elif i == len(indices) - 1:
-                ind = indices[i]
-                data_tup = (times[ind:], pos[ind:], vel[ind:])
-            else:
-                prev_ind = indices[i - 1]
-                curr_ind = indices[i]
-                data_tup = (times[prev_ind: curr_ind], pos[prev_ind: curr_ind], vel[prev_ind:curr_ind])
-
-            return_list.append(data_tup)
-        return return_list
-
     def plot(self):
         self.plot_positions()
         self.plot_velocities()

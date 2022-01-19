@@ -6,7 +6,7 @@ import gym
 
 def main():
     env = gym.make("ringroad-v1", enable_render=True, agent_type="a2c")
-    model = A2C.load("Models/ActorCritic2.zip")
+    model = A2C.load("Models/A2C/ActorCritic2.zip")
 
     obs = env.reset()
     done = False

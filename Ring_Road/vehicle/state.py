@@ -2,7 +2,7 @@ import math
 
 import numpy as np
 
-from Ring_Road.constants import RADIUS, CAR_LENGTH
+from Ring_Road.constants import RADIUS, CAR_LENGTH, RADIUS
 
 
 class StateExtractor:
@@ -14,6 +14,7 @@ class StateExtractor:
             sf = (2 * math.pi - veh.central_angle + veh.front_vehicle.central_angle) * RADIUS - CAR_LENGTH
         else:
             sf = (veh.front_vehicle.central_angle - veh.central_angle) * RADIUS - CAR_LENGTH
+
         return sf
 
     def _calculate_distances(self, agent):

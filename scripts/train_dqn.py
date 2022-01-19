@@ -23,25 +23,20 @@ def train():
         policy=CustomDQNPolicy,
         learning_rate=1e-4,
         buffer_size=100000,
-        exploration_fraction=0.9,
-        exploration_final_eps=0.01,
-        train_freq=6,
+        train_freq=1,
         batch_size=64,
         double_q=True,
-        learning_starts=10000,
+        learning_starts=100,
         prioritized_replay=True,
-        target_network_update_freq=1000,
-        param_noise=True,
+        target_network_update_freq=100,
         verbose=1,
         policy_kwargs=dict(dueling=True),
         tensorboard_log="/home/vamsi/Documents/GitHub/RingRoad-RL/logs/DQN/"
     )
 
-    model.learn(total_timesteps=100000)
-    model.save("Models/DQN")
+    model.learn(total_timesteps=200000)
+    model.save("Models/DQN/DQN5")
 
-    # print("Saving model to Model.pkl")
-    # act.save("Models/Model2.pkl")
     env.close()
 
 

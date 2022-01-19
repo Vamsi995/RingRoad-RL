@@ -22,4 +22,4 @@ def train():
     model = A2C(CustomPolicy, env, gamma=DISCOUNT_FACTOR, lr_schedule="linear", verbose=1, n_steps=32,
                 tensorboard_log="logs/A2C", learning_rate=0.0001)
     model.learn(total_timesteps=200000)
-    model.save("Models/ActorCritic2")
+    model.save("Models/A2C/ActorCritic2")

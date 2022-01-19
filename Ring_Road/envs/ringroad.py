@@ -38,14 +38,12 @@ class RingRoad(gym.Env):
         self.reward = None
         self.discount_factor = DISCOUNT_FACTOR
 
+        self.crashed_state = None
         self.state_extractor = StateExtractor(self)
 
         if self.enable_render:
             self.viewer = Render(self)
         self.collision = False
-
-        self.rew_a = 1
-        self.rew_b = 0.5
 
     def _initialize_state(self):
         self.agents.clear()
@@ -62,11 +60,12 @@ class RingRoad(gym.Env):
 
         for i in range(len(positions)):
             if i not in agent_pos:
-                # vehicle_list.append(EnvVehicle(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i))
-                vehicle_list.append(EnvVehicle(positions[i], 0, INITIAL_ACCELERATION, i))
+                vehicle_list.append(EnvVehicle(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i))
+                # vehicle_list.append(EnvVehicle(positions[i], 0, INITIAL_ACCELERATION, i))
             else:
-                # vehicle_list.append(Agent(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i, self.agent_type))
-                vehicle_list.append(Agent(positions[i], 0, INITIAL_ACCELERATION, i, self.agent_type))
+                vehicle_list.append(
+                    Agent(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i, self.agent_type))
+                # vehicle_list.append(Agent(positions[i], 0, INITIAL_ACCELERATION, i, self.agent_type))
 
         for i in range(len(vehicle_list)):
             cur_veh = vehicle_list[i]
@@ -87,6 +86,10 @@ class RingRoad(gym.Env):
             if self.state_extractor.gap_front(agent) <= 0:
                 agent.crashed = True
                 self.collision = True
+                self.crashed_state = self.state_extractor.neighbour_states()
+            else:
+                self.collision = False
+                agent.crashed = False
 
     def _simulate(self, action):
         frames = int(FPS // ACTION_FREQ)
@@ -105,26 +108,38 @@ class RingRoad(gym.Env):
             if frame < frames - 1:
                 self.render()
 
+            if self.collision:
+                break
+
     def _linear_map(self, v, x, y):
         """Linear map of value v with range x to desired range y."""
         return y[0] + (v - x[0]) * (y[1] - y[0]) / (x[1] - x[0])
 
     def _reward(self):
 
-        vav = self.state[2]
-        vlead = self.state[0]
-        vlag = self.state[1]
-        sf = self.state[3]
-        sb = self.state[4]
-
         reward = 0
-
         if self.collision:
-            reward += -10 * self.rew_b
+            vav = self.crashed_state[2]
+            sf = self.crashed_state[3]
+            vlead = self.crashed_state[0]
+            vlag = self.crashed_state[1]
+        else:
+            vav = self.state[2]
+            vlead = self.state[0]
+            vlag = self.state[1]
+            sf = self.state[3]
+            sb = self.state[4]
 
-        reward += (vav / AGENT_MAX_VELOCITY) * self.rew_a
+        reward += (vav / AGENT_MAX_VELOCITY)
 
-        return self._linear_map(reward, [-10 * self.rew_b, (vav / AGENT_MAX_VELOCITY) * self.rew_a], [0, 1])
+        if vav == 0 or self.collision:
+            reward = 0
+
+        # print(self._linear_map(reward, [-1, 1], [0, 1]))
+        # return self._linear_map(reward, [-1, 1], [0, 1])
+
+        # print(reward)
+        return reward
 
     def _is_done(self):
         if self.action_steps >= MAX_EPISODE_LENGTH or self.collision:
@@ -136,6 +151,7 @@ class RingRoad(gym.Env):
         self.done = False
         self.simulation_time = 0
         self.action_steps = 0
+        self.collision = False
         self._initialize_state()
         self.state = self.state_extractor.neighbour_states()
         return self.state
@@ -145,12 +161,12 @@ class RingRoad(gym.Env):
         self.action_steps += 1
         self._simulate(action)
 
-        obs = self.state_extractor.neighbour_states()
+        self.state = self.state_extractor.neighbour_states()
         reward = self._reward()
         terminal = self._is_done()
         # info = self._info(obs, action)
         info = {}
-        return obs, reward, terminal, info
+        return self.state, reward, terminal, info
 
     def render(self, mode='human'):
 

@@ -8,7 +8,7 @@ from Ring_Road.metrics import Metrics
 
 def main():
     env = gym.make("ringroad-v1", enable_render=True, agent_type="dqn")
-    model = DQN.load("Models/DQN")
+    model = DQN.load("Models/DQN/DQN3")
 
     obs = env.reset()
     done = False
