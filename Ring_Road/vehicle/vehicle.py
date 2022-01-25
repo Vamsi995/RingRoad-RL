@@ -110,9 +110,19 @@ class Agent(Car):
 
     def _dqn(self):
         if self.stored_action == 0:
-            self.acc += 0.5
+            self.acc = 1
         elif self.stored_action == 1:
-            self.acc -= 2
+            self.acc = -1
+
+        prev_vel = self.v
+        self.v = max(0, min(self.v + (self.acc * DELTA_T), AGENT_MAX_VELOCITY))
+        self.acc = (self.v - prev_vel) / DELTA_T
+
+    def _manual_control(self):
+        if self.stored_action == 0:
+            self.acc = 1
+        else:
+            self.acc = -1
 
         prev_vel = self.v
         self.v = max(0, min(self.v + (self.acc * DELTA_T), AGENT_MAX_VELOCITY))
@@ -129,6 +139,8 @@ class Agent(Car):
             self._follower_stopper()
         elif self.agent_type == "pi":
             self._pi_controller()
+        elif self.agent_type == "man":
+            self._manual_control()
 
     def step(self):
         self._run_control()

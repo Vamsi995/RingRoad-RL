@@ -130,15 +130,11 @@ class RingRoad(gym.Env):
             sf = self.state[3]
             sb = self.state[4]
 
-        reward += (vav / AGENT_MAX_VELOCITY)
+        reward += (vav / sf)
 
         if vav == 0 or self.collision:
             reward = 0
 
-        # print(self._linear_map(reward, [-1, 1], [0, 1]))
-        # return self._linear_map(reward, [-1, 1], [0, 1])
-
-        # print(reward)
         return reward
 
     def _is_done(self):
