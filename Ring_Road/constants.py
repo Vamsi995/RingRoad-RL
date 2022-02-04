@@ -4,14 +4,14 @@ DISPLAY_WIDTH = 1200
 DISPLAY_HEIGHT = 1000
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-RING_RADIUS = 22.5
+RING_RADIUS = 42.5
 ROAD_WIDTH = 2.5
 CAR_WIDTH = 2
 CAR_LENGTH = 4
-RADIUS = 21.25
+RADIUS = 41.25
 velocity = 0
 INITIAL_ACCELERATION = 0
-PIXEL_CONVERSION = 20
+PIXEL_CONVERSION = 10
 
 CAR_PIX_LENGTH = CAR_LENGTH * PIXEL_CONVERSION
 CAR_PIX_WIDTH = CAR_WIDTH * PIXEL_CONVERSION
@@ -43,24 +43,24 @@ down_arrow = pygame.image.load("/home/vamsi/Documents/GitHub/RingRoad-RL/Ring_Ro
 clean_image(agent_car_image)
 clean_image(env_car_image)
 
-FPS = 30  # Frames per second
-ACTION_FREQ = 6
+FPS = 10  # Frames per second
+ACTION_FREQ = 10
 DELTA_T = 1 / FPS
 
 """
 IDM Parameters
 """
-a = 2
-b = 3
+a = 1
+b = 1.5
 T = 1
 s0 = 2
 v0 = 30
 IDM_DELTA = 4
 
-DISCOUNT_FACTOR = 0.9
-MAX_EPISODE_LENGTH = 600
+DISCOUNT_FACTOR = 0.99
+MAX_EPISODE_LENGTH = 2000
 AGENT_MAX_VELOCITY = 20
-ENV_VEHICLES = 19
+ENV_VEHICLES = 21
 AGENTS = 1
 CONTROL_XPOS = 0
 CONTROL_YPOS = 700

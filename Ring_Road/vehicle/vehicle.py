@@ -6,7 +6,7 @@ import numpy as np
 from Ring_Road.constants import agent_car_image, DISPLAY_HEIGHT, RADIUS_PIX, CAR_PIX_LENGTH, DELTA_T, \
     AGENT_MAX_VELOCITY, \
     IDM_DELTA, v0, \
-    T, s0, a, b, env_car_image, DISPLAY_WIDTH, PIXEL_CONVERSION
+    T, s0, a, b, env_car_image, DISPLAY_WIDTH, PIXEL_CONVERSION, RADIUS, CAR_LENGTH
 
 
 class Car(pygame.sprite.Sprite):
@@ -30,7 +30,7 @@ class Car(pygame.sprite.Sprite):
         self.back_vehicle = {}
 
     def update_positions(self):
-        self.central_angle += (self.v * DELTA_T / RADIUS_PIX) * (PIXEL_CONVERSION)
+        self.central_angle += (self.v * DELTA_T / RADIUS)
         self.central_angle = self.central_angle % (2 * math.pi)
         self.xpos = self.initial_xpos + math.cos(self.central_angle) * RADIUS_PIX
         self.ypos = self.initial_ypos + math.sin(self.central_angle) * RADIUS_PIX
@@ -41,15 +41,15 @@ class Car(pygame.sprite.Sprite):
     def idm_control(self):
         delta_v = self.v - self.front_vehicle.v
         if self.front_vehicle.central_angle - self.central_angle < 0:
-            s = (2 * math.pi - self.central_angle + self.front_vehicle.central_angle) * RADIUS_PIX - CAR_PIX_LENGTH
+            s = (2 * math.pi - self.central_angle + self.front_vehicle.central_angle) * RADIUS - CAR_LENGTH
         else:
-            s = (self.front_vehicle.central_angle - self.central_angle) * RADIUS_PIX - CAR_PIX_LENGTH
+            s = (self.front_vehicle.central_angle - self.central_angle) * RADIUS - CAR_LENGTH
 
         if s <= 0:
             s = 0.00001
 
         s_star = s0 + max(0, (self.v * T) + ((self.v * delta_v) / (2 * np.power(a * b, 0.5))))
-        self.acc = a * (1 - np.power(self.v / v0, IDM_DELTA) - np.power(s_star / s, 2))
+        self.acc = a * (1 - np.power(self.v / v0, IDM_DELTA) - np.power(s_star / s, 2)) + np.random.normal(0, 0.2)
         old_velocity = self.v
         self.v = max(0, min((old_velocity) + (self.acc * DELTA_T), v0))
         self.acc = (self.v - old_velocity) / DELTA_T  # adjustment to acc due to clamping of velocity
@@ -112,7 +112,7 @@ class Agent(Car):
         if self.stored_action == 0:
             self.acc = 1
         elif self.stored_action == 1:
-            self.acc = -1
+            self.acc = -2
 
         prev_vel = self.v
         self.v = max(0, min(self.v + (self.acc * DELTA_T), AGENT_MAX_VELOCITY))

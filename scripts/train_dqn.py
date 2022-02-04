@@ -28,7 +28,7 @@ def train():
         double_q=True,
         learning_starts=100,
         prioritized_replay=True,
-        target_network_update_freq=100,
+        target_network_update_freq=1000,
         verbose=1,
         policy_kwargs=dict(dueling=True),
         tensorboard_log="/home/vamsi/Documents/GitHub/RingRoad-RL/logs/DQN/"

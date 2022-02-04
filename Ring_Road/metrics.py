@@ -88,6 +88,7 @@ class Metrics:
         self.plot_avg_vel()
 
     def plot_positions(self):
+        plt.figure(figsize=(15, 5))
         global s
         plot_data = self.env.env_veh + self.env.agents
         for veh in plot_data:
@@ -100,6 +101,7 @@ class Metrics:
         plt.show()
 
     def plot_velocities(self):
+        plt.figure(figsize=(15, 5))
         for veh in self.env.env_veh:
             x, y = zip(*self.velocity[veh.id])
             plt.plot(self.convert_action_steps_to_time(x), y, color='gray')
@@ -111,7 +113,7 @@ class Metrics:
         plt.show()
 
     def plot_avg_vel(self):
-
+        plt.figure(figsize=(15, 5))
         plt.plot(self.convert_action_steps_to_time(self.running_mean), self.running_mean, color='#1B2ACC')
 
         plt.fill_between(self.convert_action_steps_to_time(self.running_mean),

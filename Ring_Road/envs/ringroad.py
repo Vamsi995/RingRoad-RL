@@ -60,12 +60,12 @@ class RingRoad(gym.Env):
 
         for i in range(len(positions)):
             if i not in agent_pos:
-                vehicle_list.append(EnvVehicle(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i))
-                # vehicle_list.append(EnvVehicle(positions[i], 0, INITIAL_ACCELERATION, i))
+                # vehicle_list.append(EnvVehicle(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i))
+                vehicle_list.append(EnvVehicle(positions[i], 0, INITIAL_ACCELERATION, i))
             else:
-                vehicle_list.append(
-                    Agent(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i, self.agent_type))
-                # vehicle_list.append(Agent(positions[i], 0, INITIAL_ACCELERATION, i, self.agent_type))
+                # vehicle_list.append(
+                    # Agent(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i, self.agent_type))
+                vehicle_list.append(Agent(positions[i], 0, INITIAL_ACCELERATION, i, self.agent_type))
 
         for i in range(len(vehicle_list)):
             cur_veh = vehicle_list[i]
@@ -121,6 +121,7 @@ class RingRoad(gym.Env):
         if self.collision:
             vav = self.crashed_state[2]
             sf = self.crashed_state[3]
+            sb = self.crashed_state[4]
             vlead = self.crashed_state[0]
             vlag = self.crashed_state[1]
         else:
@@ -130,10 +131,10 @@ class RingRoad(gym.Env):
             sf = self.state[3]
             sb = self.state[4]
 
-        reward += (vav / sf)
+        reward += (vav / AGENT_MAX_VELOCITY)
 
         if vav == 0 or self.collision:
-            reward = 0
+            reward = -1
 
         return reward
 
