@@ -99,7 +99,7 @@ class RingRoad(gym.Env):
                     agent.stored_action = action
 
             for agents in self.agents:
-                agents.step()
+                agents.step(self.action_steps)
             for env_veh in self.env_veh:
                 env_veh.step()
             self._handle_collisions()

@@ -38,13 +38,18 @@ class Car(pygame.sprite.Sprite):
         self.rect.height = self.image.get_height()
         self.rotation = 90 - math.degrees(self.central_angle)
 
-    def idm_control(self):
-        delta_v = self.v - self.front_vehicle.v
+    def gap_front(self):
         if self.front_vehicle.central_angle - self.central_angle < 0:
             s = (2 * math.pi - self.central_angle + self.front_vehicle.central_angle) * RADIUS - CAR_LENGTH
         else:
             s = (self.front_vehicle.central_angle - self.central_angle) * RADIUS - CAR_LENGTH
 
+        return s
+
+    def idm_control(self):
+        delta_v = self.v - self.front_vehicle.v
+
+        s = self.gap_front()
         if s <= 0:
             s = 0.00001
 
@@ -68,39 +73,54 @@ class Agent(Car):
         self.crashed = False
         self.agent_type = agent_type
 
+        self.agent_vel_history = []
+        self.history_len = 380
+        self.desired_vel = 0
+        self.v_cmd = 0
+
     def _follower_stopper(self, desired_velocity, curvatures, initial_x):
         v_lead = self.front_vehicle.v
         v = min(max(v_lead, 0), desired_velocity)
-        delta_v = v_lead - self.v
-        delta_v = min(delta_v, 0)
+        delta_v = min(v_lead - self.v, 0)
 
         delta_x1 = initial_x[0] + (1 / (2 * curvatures[0])) * (delta_v ** 2)
         delta_x2 = initial_x[1] + (1 / (2 * curvatures[1])) * (delta_v ** 2)
         delta_x3 = initial_x[2] + (1 / (2 * curvatures[2])) * (delta_v ** 2)
 
-        if self.front_vehicle.central_angle - self.central_angle < 0:
-            s = (2 * math.pi - self.central_angle + self.front_vehicle.central_angle) * RADIUS_PIX - CAR_PIX_LENGTH
-        else:
-            s = (self.front_vehicle.central_angle - self.central_angle) * RADIUS_PIX - CAR_PIX_LENGTH
+        s = self.gap_front()
 
+        v_cmd = 0
         if s <= delta_x1:
-            self.v = 0
-        elif delta_x2 >= s > delta_x1:
-            self.v = v * ((s - delta_x1) / (delta_x2 - delta_x1))
-        elif delta_x3 >= s > delta_x2:
-            self.v = v + (desired_velocity - v) * ((s - delta_x2) / (delta_x3 - delta_x2))
+            v_cmd = 0
+        elif s <= delta_x2:
+            v_cmd = v * ((s - delta_x1) / (delta_x2 - delta_x1))
+        elif s <= delta_x3:
+            v_cmd = v + ((desired_velocity - v) * ((s - delta_x2) / (delta_x3 - delta_x2)))
         elif s > delta_x3:
-            self.v = desired_velocity
+            v_cmd = desired_velocity
 
-        self.central_angle += (self.v / RADIUS_PIX)
-        self.central_angle = self.central_angle % (2 * math.pi)
+        self.acc = (v_cmd - self.v) / DELTA_T
+        self.v = max(0, self.v + (self.acc * DELTA_T))
 
-        self.xpos = self.initial_xpos + math.cos(self.central_angle) * RADIUS_PIX
-        self.ypos = self.initial_ypos + math.sin(self.central_angle) * RADIUS_PIX
-        self.rotation = 90 - math.degrees(self.central_angle)
+    def _pi_controller(self, v_catch=1, gl=7, gu=30):
 
-    def _pi_controller(self):
-        pass
+        self.agent_vel_history.append(self.v)
+        if len(self.agent_vel_history) == self.history_len:
+            self.agent_vel_history.pop(0)
+
+        self.desired_vel = sum(self.agent_vel_history) / len(self.agent_vel_history)
+        v_lead = self.front_vehicle.v
+        s = self.gap_front()
+        delta_v = v_lead - self.v
+        safety = max(2 * delta_v, 4)
+
+        v_target = self.desired_vel + v_catch * min(max((s - gl) / (gu - gl), 0), 1)
+        alpha = min(max((s - safety) / 2, 0), 1)
+        beta = 1 - (alpha / 2)
+
+        self.v_cmd = beta * (alpha * v_target + (1 - alpha) * v_lead) + (1 - beta) * self.v_cmd
+        self.acc = (self.v_cmd - self.v) / DELTA_T
+        self.v = max(0, min(self.v + (self.acc * DELTA_T), v0))
 
     def _a2c(self):
         self.acc = self.stored_action[0]
@@ -136,13 +156,17 @@ class Agent(Car):
         elif self.agent_type == "a2c":
             self._a2c()
         elif self.agent_type == "fs":
-            self._follower_stopper()
+            self._follower_stopper(4.15, [1.5, 1, 0.5], [4.5, 5.25, 6])
         elif self.agent_type == "pi":
             self._pi_controller()
         elif self.agent_type == "man":
             self._manual_control()
 
-    def step(self):
+    def step(self, action_steps=None):
+        if action_steps > 3000:
+            self.agent_type = "fs"
+        else:
+            self.agent_type = "idm"
         self._run_control()
         self.update_positions()
 

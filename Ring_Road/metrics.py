@@ -2,7 +2,7 @@ import math
 
 import numpy as np
 
-from Ring_Road.constants import RADIUS_PIX, FPS, ACTION_FREQ
+from Ring_Road.constants import RADIUS_PIX, FPS, ACTION_FREQ, RADIUS
 from matplotlib import pyplot as plt
 
 
@@ -33,10 +33,10 @@ class Metrics:
 
     def store_xy(self, t):
         for veh in self.env.env_veh:
-            distance = veh.central_angle * RADIUS_PIX
+            distance = veh.central_angle * RADIUS
             self.position[veh.id].append((t, distance))
         for veh in self.env.agents:
-            distance = veh.central_angle * RADIUS_PIX
+            distance = veh.central_angle * RADIUS
             self.position[veh.id].append((t, distance))
 
     def store_v(self, t):
@@ -78,7 +78,10 @@ class Metrics:
         return indices
 
     def convert_action_steps_to_time(self, x):
-        time_sec = len(x) / (FPS // ACTION_FREQ)
+        if FPS // ACTION_FREQ == 1:
+            time_sec = len(x) / FPS
+        else:
+            time_sec = len(x) / (FPS // ACTION_FREQ)
         new_x = np.linspace(0, time_sec, len(x))
         return new_x
 
