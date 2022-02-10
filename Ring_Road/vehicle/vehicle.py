@@ -6,7 +6,7 @@ import numpy as np
 from Ring_Road.constants import agent_car_image, DISPLAY_HEIGHT, RADIUS_PIX, CAR_PIX_LENGTH, DELTA_T, \
     AGENT_MAX_VELOCITY, \
     IDM_DELTA, v0, \
-    T, s0, a, b, env_car_image, DISPLAY_WIDTH, PIXEL_CONVERSION, RADIUS, CAR_LENGTH
+    T, s0, a, b, env_car_image, DISPLAY_WIDTH, PIXEL_CONVERSION, RADIUS, CAR_LENGTH, ENV_VEHICLES, AGENTS
 
 
 class Car(pygame.sprite.Sprite):
@@ -78,15 +78,25 @@ class Agent(Car):
         self.desired_vel = 0
         self.v_cmd = 0
 
-    def _follower_stopper(self, desired_velocity, curvatures, initial_x):
+    def calculate_system_mean_vel(self, env):
+        vel = []
+        for veh in env.env_veh:
+            vel.append(veh.v)
+        for ag in env.agents:
+            vel.append(ag.v)
+
+        return sum(vel) / len(vel)
+
+    def _follower_stopper(self, desired_velocity, curvatures, initial_x, env):
         v_lead = self.front_vehicle.v
-        v = min(max(v_lead, 0), desired_velocity)
         delta_v = min(v_lead - self.v, 0)
+
+        self.desired_vel = desired_velocity
 
         delta_x1 = initial_x[0] + (1 / (2 * curvatures[0])) * (delta_v ** 2)
         delta_x2 = initial_x[1] + (1 / (2 * curvatures[1])) * (delta_v ** 2)
         delta_x3 = initial_x[2] + (1 / (2 * curvatures[2])) * (delta_v ** 2)
-
+        v = min(max(v_lead, 0), self.desired_vel)
         s = self.gap_front()
 
         v_cmd = 0
@@ -95,9 +105,9 @@ class Agent(Car):
         elif s <= delta_x2:
             v_cmd = v * ((s - delta_x1) / (delta_x2 - delta_x1))
         elif s <= delta_x3:
-            v_cmd = v + ((desired_velocity - v) * ((s - delta_x2) / (delta_x3 - delta_x2)))
+            v_cmd = v + ((self.desired_vel - v) * ((s - delta_x2) / (delta_x3 - delta_x2)))
         elif s > delta_x3:
-            v_cmd = desired_velocity
+            v_cmd = self.desired_vel
 
         self.acc = (v_cmd - self.v) / DELTA_T
         self.v = max(0, self.v + (self.acc * DELTA_T))
@@ -109,6 +119,7 @@ class Agent(Car):
             self.agent_vel_history.pop(0)
 
         self.desired_vel = sum(self.agent_vel_history) / len(self.agent_vel_history)
+
         v_lead = self.front_vehicle.v
         s = self.gap_front()
         delta_v = v_lead - self.v
@@ -120,7 +131,9 @@ class Agent(Car):
 
         self.v_cmd = beta * (alpha * v_target + (1 - alpha) * v_lead) + (1 - beta) * self.v_cmd
         self.acc = (self.v_cmd - self.v) / DELTA_T
-        self.v = max(0, min(self.v + (self.acc * DELTA_T), v0))
+
+        self.acc = min(self.acc, 1)
+        self.v = max(0, self.v + (self.acc * DELTA_T))
 
     def _a2c(self):
         self.acc = self.stored_action[0]
@@ -148,7 +161,7 @@ class Agent(Car):
         self.v = max(0, min(self.v + (self.acc * DELTA_T), AGENT_MAX_VELOCITY))
         self.acc = (self.v - prev_vel) / DELTA_T
 
-    def _run_control(self):
+    def _run_control(self, env):
         if self.agent_type == "idm":
             self.idm_control()
         elif self.agent_type == "dqn":
@@ -156,18 +169,18 @@ class Agent(Car):
         elif self.agent_type == "a2c":
             self._a2c()
         elif self.agent_type == "fs":
-            self._follower_stopper(4.15, [1.5, 1, 0.5], [4.5, 5.25, 6])
+            self._follower_stopper(4.15, [1.5, 1, 0.5], [4.5, 5.25, 6], env)
         elif self.agent_type == "pi":
             self._pi_controller()
         elif self.agent_type == "man":
             self._manual_control()
 
-    def step(self, action_steps=None):
-        if action_steps > 3000:
-            self.agent_type = "fs"
+    def step(self, env):
+        if env.action_steps > 3000:
+            self.agent_type = "pi"
         else:
             self.agent_type = "idm"
-        self._run_control()
+        self._run_control(env)
         self.update_positions()
 
 
