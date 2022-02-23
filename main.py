@@ -17,6 +17,10 @@ def main():
         scripts.evaluate_a2c.main()
     elif args.type == "eval_idm":
         scripts.evaluate_idm.main()
+    # elif args.type == "train_trpo":
+    #     scripts.train_trpo.train()
+    # elif args.type == "eval_trpo":
+    #     scripts.evaluate_trpo.main()
 
 
 if __name__ == "__main__":

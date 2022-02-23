@@ -2,7 +2,7 @@ import math
 
 import numpy as np
 
-from Ring_Road.constants import RADIUS, CAR_LENGTH, RADIUS
+from Ring_Road.constants import RADIUS, CAR_LENGTH, RADIUS, AGENT_MAX_VELOCITY, TRACK_LENGTH
 
 
 class StateExtractor:
@@ -38,10 +38,9 @@ class StateExtractor:
     def neighbour_states(self):
         feature_list = []
         for ag in self.env.agents:
-            feature_list.append(ag.front_vehicle.v)
-            feature_list.append(ag.back_vehicle.v)
-            feature_list.append(ag.v)
+            feature_list.append(ag.v / AGENT_MAX_VELOCITY)
+            feature_list.append((ag.front_vehicle.v - ag.v) / AGENT_MAX_VELOCITY)
             slead, sback = self._calculate_distances(ag)
-            feature_list.append(slead)
-            feature_list.append(sback)
+            feature_list.append(slead / TRACK_LENGTH)
+
         return np.array(feature_list)

@@ -10,7 +10,7 @@ from Ring_Road.constants import DISCOUNT_FACTOR
 class CustomDQNPolicy(FeedForwardPolicy):
     def __init__(self, *args, **kwargs):
         super(CustomDQNPolicy, self).__init__(*args, **kwargs,
-                                              layers=[64, 64, 64],
+                                              layers=[256, 256],
                                               layer_norm=False,
                                               feature_extraction="mlp")
 
@@ -24,11 +24,11 @@ def train():
         learning_rate=1e-4,
         buffer_size=100000,
         train_freq=1,
-        batch_size=64,
+        batch_size=32,
         double_q=True,
         learning_starts=100,
         prioritized_replay=True,
-        target_network_update_freq=1000,
+        target_network_update_freq=100,
         verbose=1,
         policy_kwargs=dict(dueling=True),
         tensorboard_log="/home/vamsi/Documents/GitHub/RingRoad-RL/logs/DQN/"

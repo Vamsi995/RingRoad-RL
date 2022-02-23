@@ -51,7 +51,7 @@ class Car(pygame.sprite.Sprite):
 
         s = self.gap_front()
         if s <= 0:
-            s = 0.00001
+            s = 0.0001
 
         s_star = s0 + max(0, (self.v * T) + ((self.v * delta_v) / (2 * np.power(a * b, 0.5))))
         self.acc = a * (1 - np.power(self.v / v0, IDM_DELTA) - np.power(s_star / s, 2)) + np.random.normal(0, 0.2)
@@ -96,7 +96,9 @@ class Agent(Car):
         delta_x1 = initial_x[0] + (1 / (2 * curvatures[0])) * (delta_v ** 2)
         delta_x2 = initial_x[1] + (1 / (2 * curvatures[1])) * (delta_v ** 2)
         delta_x3 = initial_x[2] + (1 / (2 * curvatures[2])) * (delta_v ** 2)
-        v = min(max(v_lead, 0), self.desired_vel)
+        # v = min(max(v_lead, 0), self.desired_vel)
+        v = max(v_lead, 0)
+        print(v)
         s = self.gap_front()
 
         v_cmd = 0
@@ -109,8 +111,9 @@ class Agent(Car):
         elif s > delta_x3:
             v_cmd = self.desired_vel
 
-        self.acc = (v_cmd - self.v) / DELTA_T
-        self.v = max(0, self.v + (self.acc * DELTA_T))
+        self.v = max(0, v_cmd)
+        # self.acc = (v_cmd - self.v) / DELTA_T
+        # self.v = max(0, self.v + (self.acc * DELTA_T))
 
     def _pi_controller(self, v_catch=1, gl=7, gu=30):
 
@@ -137,9 +140,11 @@ class Agent(Car):
 
     def _a2c(self):
         self.acc = self.stored_action[0]
-        prev_vel = self.v
         self.v = max(0, min(self.v + (self.acc * DELTA_T), AGENT_MAX_VELOCITY))
-        self.acc = (self.v - prev_vel) / DELTA_T
+
+    def _trpo(self):
+        self.acc = self.stored_action[0]
+        self.v = max(0, min(self.v + (self.acc * DELTA_T), AGENT_MAX_VELOCITY))
 
     def _dqn(self):
         if self.stored_action == 0:
@@ -174,12 +179,15 @@ class Agent(Car):
             self._pi_controller()
         elif self.agent_type == "man":
             self._manual_control()
+        elif self.agent_type == "trpo":
+            self._trpo()
 
-    def step(self, env):
-        if env.action_steps > 3000:
-            self.agent_type = "pi"
-        else:
-            self.agent_type = "idm"
+    def step(self, env, eval_mode):
+        # if eval_mode:
+        #     if env.action_steps > 3000:
+        #         self.agent_type = "a2c"
+        #     else:
+        #         self.agent_type = "idm"
         self._run_control(env)
         self.update_positions()
 

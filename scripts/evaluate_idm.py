@@ -9,15 +9,15 @@ from Ring_Road.metrics import Metrics
 def main():
     env = gym.make("ringroad-v1", enable_render=False, agent_type="idm")
 
-    obs = env.reset()
+    obs = env.reset(eval_mode=True)
     done = False
     met = Metrics(env)
 
     while not done:
-        obs, rew, done, _ = env.step()
+        obs, rew, done, _ = env.step(eval_mode=True)
         met.step()
         env.render()
-        print(env.action_steps)
+        # print(env.action_steps)
 
     met.plot()
     env.close()

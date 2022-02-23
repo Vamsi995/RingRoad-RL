@@ -1,3 +1,4 @@
+import numpy
 import pygame
 from Ring_Road.constants import DISPLAY_WIDTH, DISPLAY_HEIGHT, WHITE, BLACK, FPS, \
     RING_PIX_RADIUS, ROAD_PIX_WIDTH, up_arrow, down_arrow
@@ -25,10 +26,18 @@ class Render:
     def _display_action(self):
 
         for agents in self.env.agents:
-            if agents.stored_action == 0:
-                self.screen.blit(up_arrow, [0, DISPLAY_HEIGHT - 80])
+
+            if isinstance(agents.stored_action, numpy.ndarray):
+                if agents.stored_action[0] > 0:
+                    self.screen.blit(up_arrow, [0, DISPLAY_HEIGHT - 80])
+                else:
+                    self.screen.blit(down_arrow, [0, DISPLAY_HEIGHT - 80])
+
             else:
-                self.screen.blit(down_arrow, [0, DISPLAY_HEIGHT - 80])
+                if agents.stored_action == 0:
+                    self.screen.blit(up_arrow, [0, DISPLAY_HEIGHT - 80])
+                else:
+                    self.screen.blit(down_arrow, [0, DISPLAY_HEIGHT - 80])
 
     def render(self):
         self._check_quit()
