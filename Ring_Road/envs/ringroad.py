@@ -11,7 +11,7 @@ from Ring_Road.vehicle.vehicle import EnvVehicle, Agent
 
 class RingRoad(gym.Env):
 
-    def __init__(self, enable_render=False, agent_type="idm"):
+    def __init__(self,  env_config, enable_render=False, agent_type="idm"):
 
         self.enable_render = enable_render
         self.agent_type = agent_type
@@ -19,7 +19,7 @@ class RingRoad(gym.Env):
         self.agents = []
         self.env_veh = []
 
-        features_low = np.array([0, 0, 0], dtype=np.float64)
+        features_low = np.array([0, -1, 0], dtype=np.float64)
         features_high = np.array([1, 1, 1], dtype=np.float64)
 
         if self.agent_type == "a2c" or self.agent_type == "trpo":
