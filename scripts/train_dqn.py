@@ -35,8 +35,6 @@ class Experiment:
                            checkpoint_freq=2
                            )
         checkpoint_path = results.get_last_checkpoint()
-        # retriev the checkpoint path; we only have a single checkpoint, so take the first one
-        # checkpoint_path = checkpoints[0][0]
         print("Checkpoint path:", checkpoint_path)
         return checkpoint_path, results
 

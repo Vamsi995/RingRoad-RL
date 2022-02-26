@@ -78,16 +78,7 @@ class Agent(Car):
         self.desired_vel = 0
         self.v_cmd = 0
 
-    def calculate_system_mean_vel(self, env):
-        vel = []
-        for veh in env.env_veh:
-            vel.append(veh.v)
-        for ag in env.agents:
-            vel.append(ag.v)
-
-        return sum(vel) / len(vel)
-
-    def _follower_stopper(self, desired_velocity, curvatures, initial_x, env):
+    def _follower_stopper(self, desired_velocity, curvatures, initial_x):
         v_lead = self.front_vehicle.v
         delta_v = min(v_lead - self.v, 0)
 
@@ -97,8 +88,8 @@ class Agent(Car):
         delta_x2 = initial_x[1] + (1 / (2 * curvatures[1])) * (delta_v ** 2)
         delta_x3 = initial_x[2] + (1 / (2 * curvatures[2])) * (delta_v ** 2)
         # v = min(max(v_lead, 0), self.desired_vel)
-        v = max(v_lead, 0)
-        print(v)
+        # v = max(v_lead, 0)
+        # print(v)
         s = self.gap_front()
 
         v_cmd = 0
@@ -112,8 +103,6 @@ class Agent(Car):
             v_cmd = self.desired_vel
 
         self.v = max(0, v_cmd)
-        # self.acc = (v_cmd - self.v) / DELTA_T
-        # self.v = max(0, self.v + (self.acc * DELTA_T))
 
     def _pi_controller(self, v_catch=1, gl=7, gu=30):
 
@@ -138,15 +127,11 @@ class Agent(Car):
         self.acc = min(self.acc, 1)
         self.v = max(0, self.v + (self.acc * DELTA_T))
 
-    def _a2c(self):
+    def _continuous(self):
         self.acc = self.stored_action[0]
         self.v = max(0, min(self.v + (self.acc * DELTA_T), AGENT_MAX_VELOCITY))
 
-    def _trpo(self):
-        self.acc = self.stored_action[0]
-        self.v = max(0, min(self.v + (self.acc * DELTA_T), AGENT_MAX_VELOCITY))
-
-    def _dqn(self):
+    def _discrete(self):
         if self.stored_action == 0:
             self.acc = 1
         elif self.stored_action == 1:
@@ -166,29 +151,27 @@ class Agent(Car):
         self.v = max(0, min(self.v + (self.acc * DELTA_T), AGENT_MAX_VELOCITY))
         self.acc = (self.v - prev_vel) / DELTA_T
 
-    def _run_control(self, env):
+    def _run_control(self):
         if self.agent_type == "idm":
             self.idm_control()
-        elif self.agent_type == "dqn":
-            self._dqn()
-        elif self.agent_type == "a2c":
-            self._a2c()
+        elif self.agent_type == "discrete":
+            self._discrete()
+        elif self.agent_type == "continuous":
+            self._continuous()
         elif self.agent_type == "fs":
-            self._follower_stopper(4.15, [1.5, 1, 0.5], [4.5, 5.25, 6], env)
+            self._follower_stopper(4.15, [1.5, 1, 0.5], [4.5, 5.25, 6])
         elif self.agent_type == "pi":
             self._pi_controller()
         elif self.agent_type == "man":
             self._manual_control()
-        elif self.agent_type == "trpo":
-            self._trpo()
 
-    def step(self, env, eval_mode):
-        # if eval_mode:
-        #     if env.action_steps > 3000:
-        #         self.agent_type = "a2c"
-        #     else:
-        #         self.agent_type = "idm"
-        self._run_control(env)
+    def step(self, eval_mode, action_steps, agent_type):
+        if eval_mode:
+            if action_steps > 3000:
+                self.agent_type = agent_type
+            else:
+                self.agent_type = "idm"
+        self._run_control()
         self.update_positions()
 
 

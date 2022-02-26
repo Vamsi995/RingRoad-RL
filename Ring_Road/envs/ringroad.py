@@ -1,6 +1,9 @@
+from typing import Optional
+
 import numpy as np
 import gym
 from gym import spaces
+from gym.utils import seeding
 
 from Ring_Road.constants import DISCOUNT_FACTOR, ENV_VEHICLES, AGENTS, FPS, MAX_EPISODE_LENGTH, ACTION_FREQ, \
     INITIAL_ACCELERATION, AGENT_MAX_VELOCITY, REWARD_ALPHA, WARMUP_STEPS, EVAL_EPISODE_LENGTH
@@ -11,10 +14,11 @@ from Ring_Road.vehicle.vehicle import EnvVehicle, Agent
 
 class RingRoad(gym.Env):
 
-    def __init__(self,  env_config):
+    def __init__(self, env_config):
 
         self.enable_render = env_config["enable_render"]
         self.agent_type = env_config["agent_type"]
+        self.eval_mode = env_config["eval_mode"]
 
         self.agents = []
         self.env_veh = []
@@ -45,8 +49,7 @@ class RingRoad(gym.Env):
         self.collision = False
 
     def _initialize_state(self, env_vehicles=ENV_VEHICLES):
-        self.agents.clear()
-        self.env_veh.clear()
+
         total_no = env_vehicles + AGENTS
         degree_spacing = 360 / total_no
         positions = np.arange(total_no) * degree_spacing
@@ -59,11 +62,8 @@ class RingRoad(gym.Env):
 
         for i in range(len(positions)):
             if i not in agent_pos:
-                # vehicle_list.append(EnvVehicle(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i))
                 vehicle_list.append(EnvVehicle(positions[i], 0, INITIAL_ACCELERATION, i))
             else:
-                # vehicle_list.append(
-                # Agent(positions[i], np.random.randint(low=0, high=3), INITIAL_ACCELERATION, i, self.agent_type))
                 vehicle_list.append(Agent(positions[i], 0, INITIAL_ACCELERATION, i, self.agent_type))
 
         for i in range(len(vehicle_list)):
@@ -97,7 +97,7 @@ class RingRoad(gym.Env):
         valueScaled = float(value - leftMin) / float(leftSpan)
         return rightMin + (valueScaled * rightSpan)
 
-    def _simulate(self, action, eval_mode):
+    def _simulate(self, action):
         frames = int(FPS // ACTION_FREQ)
         for frame in range(frames):
             if action is not None and self.simulation_time % frames == 0:
@@ -105,7 +105,7 @@ class RingRoad(gym.Env):
                     agent.stored_action = action
 
             for agents in self.agents:
-                agents.step(self, eval_mode)
+                agents.step(self.eval_mode, self.action_steps, self.agent_type)
             for env_veh in self.env_veh:
                 env_veh.step()
             self._handle_collisions()
@@ -135,14 +135,14 @@ class RingRoad(gym.Env):
         reward = self._get_average_vel() - REWARD_ALPHA * abs(acc)
 
         reward = self._linear_map(reward, -0.1, AGENT_MAX_VELOCITY, 0, 1)
-        # print(reward)
+
         if self.collision:
             reward = -1
 
         return reward
 
-    def _is_done(self, eval_mode):
-        if eval_mode:
+    def _is_done(self):
+        if self.eval_mode:
             if self.action_steps >= EVAL_EPISODE_LENGTH or self.collision:
                 return True
             else:
@@ -154,35 +154,46 @@ class RingRoad(gym.Env):
                 return False
 
     def _warmup_steps(self):
-
         for i in range(WARMUP_STEPS):
             self.step()
 
-    def reset(self, eval_mode=False):
+    def _destroy(self):
+        self.agents.clear()
+        self.env_veh.clear()
+
+    def _set_agent_type(self, agent_type):
+        for ag in self.agents:
+            ag.agent_type = agent_type
+
+    def reset(self, *, seed: Optional[int] = None, return_info: bool = False, options: Optional[dict] = None):
+
+        super().reset(seed=seed)
+        self._destroy()
         self.done = False
         self.simulation_time = 0
         self.action_steps = 0
         self.collision = False
-        if eval_mode:
+
+        if self.eval_mode:
             self._initialize_state()
         else:
             env_vehicles = np.random.randint(10, 22)
-            self.agent_type = "idm"
             self._initialize_state(env_vehicles)
+            self._set_agent_type("idm")
             self._warmup_steps()
+            self._set_agent_type(self.agent_type)
+
         self.state = self.state_extractor.neighbour_states()
-        self.agent_type = "a2c"
         return self.state
 
-    def step(self, action=None, eval_mode=False):
+    def step(self, action=None):
 
         self.action_steps += 1
-        self._simulate(action, eval_mode)
+        self._simulate(action)
 
         self.state = self.state_extractor.neighbour_states()
         reward = self._reward()
-        terminal = self._is_done(eval_mode)
-        # info = self._info(obs, action)
+        terminal = self._is_done()
         info = {}
         return self.state, reward, terminal, info
 
