@@ -2,6 +2,8 @@ import gym
 import ray
 from ray import tune
 from ray.rllib.agents import dqn
+from Ring_Road import RingRoad
+from Ring_Road.metrics import Metrics
 
 
 class Experiment:
@@ -10,13 +12,17 @@ class Experiment:
         ray.shutdown()
         ray.init()
         self.agent = None
-        self.env = gym.make("CartPole-v0")
         self.config = dqn.DEFAULT_CONFIG.copy()
-        self.config["env"] = "CartPole-v0"
+        self.config["env_config"]["enable_render"] = False
+        self.config["env_config"]["agent_type"] = "dqn"
+        self.config["env_config"]["eval_mode"] = False
+        self.env = RingRoad(self.config["env_config"])
+
+        self.config["env"] = "ringroad-v1"
         self.config["num_gpus"] = 1
         self.config["num_workers"] = 1
         self.config["lr"] = 0.0001
-        # self.config["horizon"] = 3000
+        self.config["horizon"] = 3000
         self.config['replay_buffer_config']['capacity'] = 50000
         self.config['learning_starts'] = 1000
         self.config['target_network_update_freq'] = 500
@@ -51,11 +57,15 @@ class Experiment:
         episode_reward = 0
         done = False
         obs = env.reset()
+
+        met = Metrics(env)
         while not done:
             action = self.agent.compute_single_action(obs)
             obs, reward, done, info = env.step(action)
+            met.step()
             episode_reward += reward
-            env.render()
+            # env.render()
+            print(env.action_steps)
 
         return episode_reward
 
