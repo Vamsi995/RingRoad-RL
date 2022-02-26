@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import pygame
 
@@ -33,14 +35,16 @@ def clean_image(mycar_image):
                 mycar_image.set_at((x, y), (0, 0, 0, 0))
 
 
-env_car_image = pygame.image.load("/home/vamsi/Documents/GitHub/RingRoad-RL/Ring_Road/sprites/env_vehicle.png")
+cwd = os.getcwd()
+
+env_car_image = pygame.image.load(cwd + "/Ring_Road/sprites/env_vehicle.png")
 env_car_image = pygame.transform.scale(env_car_image, (CAR_PIX_LENGTH, CAR_PIX_WIDTH))
 
-agent_car_image = pygame.image.load("/home/vamsi/Documents/GitHub/RingRoad-RL/Ring_Road/sprites/mycar.png")
+agent_car_image = pygame.image.load(cwd + "/RingRoad-RL/Ring_Road/sprites/mycar.png")
 agent_car_image = pygame.transform.scale(agent_car_image, (CAR_PIX_LENGTH, CAR_PIX_WIDTH))
 
-up_arrow = pygame.image.load("/home/vamsi/Documents/GitHub/RingRoad-RL/Ring_Road/sprites/all_arrows_up.png")
-down_arrow = pygame.image.load("/home/vamsi/Documents/GitHub/RingRoad-RL/Ring_Road/sprites/all_arrows_down.png")
+up_arrow = pygame.image.load(cwd + "/Ring_Road/sprites/all_arrows_up.png")
+down_arrow = pygame.image.load(cwd + "/Ring_Road/sprites/all_arrows_down.png")
 
 clean_image(agent_car_image)
 clean_image(env_car_image)
@@ -58,7 +62,6 @@ T = 1
 s0 = 2
 v0 = 30
 IDM_DELTA = 4
-
 
 REWARD_ALPHA = 0.1
 
