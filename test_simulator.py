@@ -1,9 +1,14 @@
 import gym
 import pygame
 from pygame import K_LEFT, K_RIGHT, K_DOWN, K_UP
-import Ring_Road
+from Ring_Road import RingRoad
 
-env = gym.make("ringroad-v1", enable_render=True, agent_type="man")
+env_config = {
+        "enable_render": True,
+        "agent_type": "man",
+        "eval_mode": False
+    }
+env = RingRoad(env_config)
 obs = env.reset()
 
 

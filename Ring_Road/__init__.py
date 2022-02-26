@@ -2,10 +2,10 @@ from gym.envs.registration import register
 from Ring_Road.envs.ringroad import RingRoad
 from ray.tune.registry import register_env
 
-
+#
 # register(
 #     id='ringroad-v1',
-#     entry_point='Ring_Road.envs.ringroad:RingRoad',
+#     entry_point='Ring_Road.envs.ringroad:RingRoad'
 # )
 
 

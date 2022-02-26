@@ -1,4 +1,4 @@
-import scripts.train_dqn
+import scripts.train_dqn, scripts.evaluate
 import argparse
 
 
@@ -9,7 +9,8 @@ def main():
 
     if args.type == "train_dqn":
         scripts.train_dqn.train()
-
+    if args.type == "eval":
+        scripts.evaluate.evaluate()
 
 
 
