@@ -11,10 +11,10 @@ from Ring_Road.vehicle.vehicle import EnvVehicle, Agent
 
 class RingRoad(gym.Env):
 
-    def __init__(self,  env_config, enable_render=False, agent_type="idm"):
+    def __init__(self,  env_config):
 
-        self.enable_render = enable_render
-        self.agent_type = agent_type
+        self.enable_render = env_config["enable_render"]
+        self.agent_type = env_config["agent_type"]
 
         self.agents = []
         self.env_veh = []
@@ -22,7 +22,7 @@ class RingRoad(gym.Env):
         features_low = np.array([0, -1, 0], dtype=np.float64)
         features_high = np.array([1, 1, 1], dtype=np.float64)
 
-        if self.agent_type == "a2c" or self.agent_type == "trpo":
+        if self.agent_type == "continuous":
             self.action_space = spaces.Box(low=np.array([-1]), high=np.array([1]), dtype=np.float64)
         else:
             self.action_space = spaces.Discrete(2)
