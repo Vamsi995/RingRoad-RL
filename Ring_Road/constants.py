@@ -35,7 +35,7 @@ def clean_image(mycar_image):
                 mycar_image.set_at((x, y), (0, 0, 0, 0))
 
 
-cwd = "/home/vamsi/GitHub"
+cwd = "/home/vamsi/GitHub/RingRoad-RL"
 
 env_car_image = pygame.image.load(cwd + "/Ring_Road/sprites/env_vehicle.png")
 env_car_image = pygame.transform.scale(env_car_image, (CAR_PIX_LENGTH, CAR_PIX_WIDTH))
