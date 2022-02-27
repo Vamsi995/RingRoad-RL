@@ -47,6 +47,7 @@ class RingRoad(gym.Env):
         if self.enable_render:
             self.viewer = Render(self)
         self.collision = False
+        np.random.seed(42)
 
     def _initialize_state(self, env_vehicles=ENV_VEHICLES):
 
@@ -168,7 +169,6 @@ class RingRoad(gym.Env):
     def reset(self, *, seed: Optional[int] = None, return_info: bool = False, options: Optional[dict] = None):
 
         # super().reset(seed=seed)
-        np.random.seed(42)
         self._destroy()
         self.done = False
         self.simulation_time = 0
