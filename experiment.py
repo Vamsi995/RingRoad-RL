@@ -48,16 +48,20 @@ class Experiment:
         """Test trained agent for a single episode. Return the episode reward"""
         # instantiate env class
         self.config["env_config"]["eval_mode"] = True
+        self.config["env_config"]["enable_render"] = True
+        self.config["num_workers"] = 0
+
         if self.algorithm == "dqn":
             self.agent = dqn.DQNTrainer(config=self.config)
         elif self.algorithm == "ppo":
             self.agent = ppo.PPOTrainer(config=self.config)
 
         policy = self.agent.get_policy()
-        policy.model.base_model.summary()
+
         self.agent.restore(path)
 
         env = self.env
+
 
         # run until episode ends
         episode_reward = 0
@@ -70,7 +74,7 @@ class Experiment:
             obs, reward, done, info = env.step(action)
             met.step()
             episode_reward += reward
-            # env.render()
-            print(env.action_steps)
+            env.render()
+            # print(env.action_steps)
         met.plot()
         return episode_reward
