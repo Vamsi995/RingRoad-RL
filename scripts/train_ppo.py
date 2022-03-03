@@ -19,13 +19,15 @@ config["env"] = "ringroad-v1"
 # num_gpus = 0.0001 # Driver GPU
 # num_gpus_per_worker = (gpu_count - num_gpus) / num_workers
 config["num_gpus"] = 1
-config["num_workers"] = 1
+config["num_workers"] = 8
 config["lr"] = 0.0001
 config["horizon"] = 3000
+config["model"]["fcnet_hiddens"] = [256, 256, 256]
 config["evaluation_interval"] = 2
 config["evaluation_duration"] = 20
 config["framework"] = "torch"
 
+print(config)
 
 def train():
     exp = Experiment(env_config, config)

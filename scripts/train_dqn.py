@@ -3,7 +3,7 @@ from ray.rllib.agents import dqn
 from experiment import Experiment
 
 env_config = {
-    "enable_render": True,
+    "enable_render": False,
     "agent_type": "discrete",
     "eval_mode": True,
     "algorithm": "dqn",
@@ -17,8 +17,8 @@ config["env_config"]["eval_mode"] = False
 config["env_config"]["algorithm"] = env_config["algorithm"]
 config["env"] = "ringroad-v1"
 config["num_gpus"] = 1
-config["num_workers"] = 2
-# config["num_cpus_per_worker"] = 2
+config["num_workers"] = 8
+config["num_cpus_per_worker"] = 2
 config["lr"] = 0.0001
 config["horizon"] = 3000
 config['replay_buffer_config']['capacity'] = 100000

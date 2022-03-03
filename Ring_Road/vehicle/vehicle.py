@@ -131,6 +131,10 @@ class Agent(Car):
         self.acc = self.stored_action[0]
         self.v = max(0, min(self.v + (self.acc * DELTA_T), AGENT_MAX_VELOCITY))
 
+        prev_vel = self.v
+        self.v = max(0, min(self.v + (self.acc * DELTA_T), AGENT_MAX_VELOCITY))
+        self.acc = (self.v - prev_vel) / DELTA_T
+
     def _discrete(self):
         if self.stored_action == 0:
             self.acc = 1
@@ -139,6 +143,7 @@ class Agent(Car):
 
         prev_vel = self.v
         self.v = max(0, min(self.v + (self.acc * DELTA_T), AGENT_MAX_VELOCITY))
+        self.acc = (self.v - prev_vel) / DELTA_T
 
     def _manual_control(self):
         if self.stored_action == 0:
