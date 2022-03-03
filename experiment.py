@@ -12,6 +12,7 @@ class Experiment:
         ray.shutdown()
         ray.init()
         self.algorithm = env_config["algorithm"]
+        self.time_steps = env_config["time_steps"]
         self.agent = None
         self.config = config
         self.env = RingRoad(env_config)
@@ -22,7 +23,7 @@ class Experiment:
             results = tune.run(dqn.DQNTrainer,
                                verbose=1,
                                config=self.config,
-                               stop={"timesteps_total": 200000},
+                               stop={"timesteps_total": self.time_steps},
                                # restore="/home/vamsi/Documents/GitHub/RingRoad-RL/Models/DQN/DQNTrainer_2022-02-26_18-33-46/DQNTrainer_ringroad-v1_88476_00000_0_2022-02-26_18-33-46/checkpoint_000096/checkpoint-96",
                                local_dir="Models/DQN/",
                                checkpoint_freq=2
@@ -35,7 +36,7 @@ class Experiment:
             results = tune.run(ppo.PPOTrainer,
                                verbose=1,
                                config=self.config,
-                               stop={"timesteps_total": 400000},
+                               stop={"timesteps_total": self.time_steps},
                                local_dir="Models/PPO/",
                                checkpoint_freq=2
                                )

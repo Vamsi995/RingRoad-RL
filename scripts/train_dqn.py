@@ -6,7 +6,8 @@ env_config = {
     "enable_render": False,
     "agent_type": "discrete",
     "eval_mode": True,
-    "algorithm": "dqn"
+    "algorithm": "dqn",
+    "time_steps": 200000
 }
 
 config = dqn.DEFAULT_CONFIG.copy()

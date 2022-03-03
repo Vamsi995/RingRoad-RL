@@ -6,7 +6,8 @@ env_config = {
     "enable_render": False,
     "agent_type": "discrete",
     "eval_mode": True,
-    "algorithm": "ppo"
+    "algorithm": "ppo",
+    "time_steps": 400000
 }
 
 config = ppo.DEFAULT_CONFIG.copy()
