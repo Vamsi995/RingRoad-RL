@@ -51,6 +51,9 @@ class Experiment:
             self.agent = dqn.DQNTrainer(config=self.config)
         elif self.algorithm == "ppo":
             self.agent = ppo.PPOTrainer(config=self.config)
+
+        policy = self.agent.get_policy()
+        policy.model.base_model.summary()
         self.agent.restore(path)
 
         env = self.env

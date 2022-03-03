@@ -101,7 +101,10 @@ class Metrics:
         plt.colorbar(s, label="Velocity (m/s)")
         plt.xlabel("Time (s)")
         plt.ylabel("Position (m)")
-        plt.show()
+        if self.env.algorithm == "dqn":
+            plt.savefig("Plots/DQN/SpaceTime_New1.png")
+        elif self.env.algorithm == "ppo":
+            plt.savefig("Plots/PPO/SpaceTime_New1.png")
 
     def plot_velocities(self):
         plt.figure(figsize=(15, 5))
@@ -113,7 +116,10 @@ class Metrics:
             plt.plot(self.convert_action_steps_to_time(x), y, color='r')
         plt.xlabel("Time (s)")
         plt.ylabel("Velocity (m/s)")
-        plt.show()
+        if self.env.algorithm == "dqn":
+            plt.savefig("Plots/DQN/VelocityProfile_New1.png")
+        elif self.env.algorithm == "ppo":
+            plt.savefig("Plots/PPO/VelocityProfile_New1.png")
 
     def plot_avg_vel(self):
         plt.figure(figsize=(15, 5))
@@ -126,4 +132,7 @@ class Metrics:
 
         plt.xlabel("Time (s)")
         plt.ylabel("Spatially-Averaged Velocity (m/s)")
-        plt.show()
+        if self.env.algorithm == "dqn":
+            plt.savefig("Plots/DQN/AverageVelocity_New1.png")
+        elif self.env.algorithm == "ppo":
+            plt.savefig("Plots/PPO/AverageVelocity_New1.png")

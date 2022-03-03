@@ -19,6 +19,7 @@ class RingRoad(gym.Env):
         self.enable_render = env_config["enable_render"]
         self.agent_type = env_config["agent_type"]
         self.eval_mode = env_config["eval_mode"]
+        self.algorithm = env_config["algorithm"]
 
         self.agents = []
         self.env_veh = []

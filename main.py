@@ -17,7 +17,7 @@ def main():
         scripts.train_dqn.evaluate("")
 
     elif args.type == "eval_ppo":
-        scripts.train_ppo.evaluate("")
+        scripts.train_ppo.evaluate("/home/vamsi/Documents/GitHub/RingRoad-RL/Models/PPO/PPOTrainer_2022-03-02_17-00-29/PPOTrainer_ringroad-v1_29c23_00000_0_2022-03-02_17-00-29/checkpoint_000100/checkpoint-100")
 
     elif args.type == "eval_idm":
         scripts.evaluate_idm.evaluate()

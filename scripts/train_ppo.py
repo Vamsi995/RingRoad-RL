@@ -11,9 +11,12 @@ env_config = {
 
 config = ppo.DEFAULT_CONFIG.copy()
 config["env_config"]["enable_render"] = False
-config["env_config"]["agent_type"] = "discrete"
+config["env_config"]["agent_type"] = "continuous"
 config["env_config"]["eval_mode"] = False
 config["env"] = "ringroad-v1"
+# gpu_count = 1
+# num_gpus = 0.0001 # Driver GPU
+# num_gpus_per_worker = (gpu_count - num_gpus) / num_workers
 config["num_gpus"] = 1
 config["num_workers"] = 1
 config["lr"] = 0.0001
