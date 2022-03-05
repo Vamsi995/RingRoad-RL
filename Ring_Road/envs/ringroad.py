@@ -156,8 +156,9 @@ class RingRoad(gym.Env):
                 return False
 
     def _warmup_steps(self):
+        self._set_agent_type("idm")
         for i in range(WARMUP_STEPS):
-            self.step()
+            self._simulate(None)
 
     def _destroy(self):
         self.agents.clear()
@@ -181,7 +182,6 @@ class RingRoad(gym.Env):
         else:
             env_vehicles = np.random.randint(10, 22)
             self._initialize_state(env_vehicles)
-            self._set_agent_type("idm")
             self._warmup_steps()
             self._set_agent_type(self.agent_type)
 
