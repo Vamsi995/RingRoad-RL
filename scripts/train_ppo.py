@@ -3,7 +3,7 @@ from ray.rllib.agents import ppo
 from experiment import Experiment
 
 env_config = {
-    "enable_render": False,
+    "enable_render": True,
     "agent_type": "continuous",
     "eval_mode": True,
     "algorithm": "ppo",
@@ -20,7 +20,7 @@ config["env"] = "ringroad-v1"
 # num_gpus = 0.0001 # Driver GPU
 # num_gpus_per_worker = (gpu_count - num_gpus) / num_workers
 config["num_gpus"] = 1
-config["num_workers"] = 8
+config["num_workers"] = 2
 config["lr"] = 0.0001
 config["horizon"] = 3000
 config["model"]["fcnet_hiddens"] = [256, 256, 256]

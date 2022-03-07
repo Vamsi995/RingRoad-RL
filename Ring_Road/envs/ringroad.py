@@ -180,8 +180,8 @@ class RingRoad(gym.Env):
         if self.eval_mode:
             self._initialize_state()
         else:
-            env_vehicles = np.random.randint(10, 22)
-            self._initialize_state(env_vehicles)
+            # env_vehicles = np.random.randint(10, 22)
+            self._initialize_state()
             self._warmup_steps()
             self._set_agent_type(self.agent_type)
 

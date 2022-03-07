@@ -74,7 +74,7 @@ class Experiment:
             obs, reward, done, info = env.step(action)
             met.step()
             episode_reward += reward
-            # env.render()
-            # print(env.action_steps)
+            env.render()
+            print(env.action_steps)
         met.plot()
         return episode_reward
