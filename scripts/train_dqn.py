@@ -3,7 +3,7 @@ from ray.rllib.agents import dqn
 from experiment import Experiment
 
 env_config = {
-    "enable_render": False,
+    "enable_render": True,
     "agent_type": "discrete",
     "eval_mode": True,
     "algorithm": "dqn",
