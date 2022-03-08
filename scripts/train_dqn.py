@@ -7,7 +7,7 @@ env_config = {
     "agent_type": "discrete",
     "eval_mode": True,
     "algorithm": "dqn",
-    "time_steps": 500000
+    "time_steps": 300000
 }
 
 config = dqn.DEFAULT_CONFIG.copy()

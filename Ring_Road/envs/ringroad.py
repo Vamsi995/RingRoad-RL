@@ -139,7 +139,7 @@ class RingRoad(gym.Env):
         reward = self._linear_map(reward, -0.1, AGENT_MAX_VELOCITY, 0, 1)
 
         if self.collision:
-            reward -= 5
+            reward -= 2
 
         return reward
 
@@ -180,7 +180,7 @@ class RingRoad(gym.Env):
         if self.eval_mode:
             self._initialize_state()
         else:
-            env_vehicles = np.random.randint(15, 22)
+            env_vehicles = np.random.randint(10, 22)
             self._initialize_state(env_vehicles)
             self._warmup_steps()
             self._set_agent_type(self.agent_type)
