@@ -129,15 +129,6 @@ class RingRoad(gym.Env):
         return sum(vel) / len(vel)
 
     def _reward(self, action):
-        #
-        # acc = 0
-        # for ag in self.agents:
-        #     acc = ag.acc
-        #
-        # reward = self._get_average_vel() - REWARD_ALPHA * abs(acc)
-        #
-        # if self.collision:
-        #     reward -= 30
 
         if action is None:
             return 0
@@ -150,7 +141,7 @@ class RingRoad(gym.Env):
         reward = eta_2 * self._get_average_vel() / 20
 
         # punish accelerations (should lead to reduced stop-and-go waves)
-        eta = 4  # 0.25
+        eta = 5  # 0.25
         mean_actions = np.mean(np.abs(np.array(action)))
         accel_threshold = 0
 
@@ -196,7 +187,7 @@ class RingRoad(gym.Env):
         if self.eval_mode:
             self._initialize_state()
         else:
-            env_vehicles = np.random.randint(10, 22)
+            env_vehicles = np.random.randint(8, 22)
             self._initialize_state(env_vehicles)
             self._warmup_steps()
             self._set_agent_type(self.agent_type)
