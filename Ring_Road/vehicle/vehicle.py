@@ -170,11 +170,11 @@ class Agent(Car):
             self._manual_control()
 
     def step(self, eval_mode, action_steps, agent_type):
-        if eval_mode:
-            if action_steps > 3000:
-                self.agent_type = agent_type
-            else:
-                self.agent_type = "idm"
+        # if eval_mode:
+        #     if action_steps > 3000:
+        #         self.agent_type = agent_type
+        #     else:
+        #         self.agent_type = "idm"
         self._run_control()
         self.update_positions()
 

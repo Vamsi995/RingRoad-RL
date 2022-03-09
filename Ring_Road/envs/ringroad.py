@@ -136,10 +136,8 @@ class RingRoad(gym.Env):
 
         reward = self._get_average_vel() - REWARD_ALPHA * abs(acc)
 
-        reward = self._linear_map(reward, -0.1, AGENT_MAX_VELOCITY, 0, 1)
-
         if self.collision:
-            reward -= 2
+            reward -= 30
 
         return reward
 
