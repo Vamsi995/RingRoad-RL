@@ -128,18 +128,36 @@ class RingRoad(gym.Env):
             vel.append(ag.v)
         return sum(vel) / len(vel)
 
-    def _reward(self):
+    def _reward(self, action):
+        #
+        # acc = 0
+        # for ag in self.agents:
+        #     acc = ag.acc
+        #
+        # reward = self._get_average_vel() - REWARD_ALPHA * abs(acc)
+        #
+        # if self.collision:
+        #     reward -= 30
 
-        acc = 0
-        for ag in self.agents:
-            acc = ag.acc
-
-        reward = self._get_average_vel() - REWARD_ALPHA * abs(acc)
+        if action is None:
+            return 0
 
         if self.collision:
-            reward -= 30
+            return 0.
 
-        return reward
+        # reward average velocity
+        eta_2 = 4.
+        reward = eta_2 * self._get_average_vel() / 20
+
+        # punish accelerations (should lead to reduced stop-and-go waves)
+        eta = 4  # 0.25
+        mean_actions = np.mean(np.abs(np.array(action)))
+        accel_threshold = 0
+
+        if mean_actions > accel_threshold:
+            reward += eta * (accel_threshold - mean_actions)
+
+        return float(reward)
 
     def _is_done(self):
         if self.eval_mode:
@@ -156,7 +174,7 @@ class RingRoad(gym.Env):
     def _warmup_steps(self):
         self._set_agent_type("idm")
         for i in range(WARMUP_STEPS):
-            self._simulate(None)
+            self.step(None)
 
     def _destroy(self):
         self.agents.clear()
@@ -192,7 +210,7 @@ class RingRoad(gym.Env):
         self._simulate(action)
 
         self.state = self.state_extractor.neighbour_states()
-        reward = self._reward()
+        reward = self._reward(action)
         terminal = self._is_done()
         info = {}
         return self.state, reward, terminal, info

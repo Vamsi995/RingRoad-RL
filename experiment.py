@@ -38,7 +38,8 @@ class Experiment:
                                config=self.config,
                                stop={"timesteps_total": self.time_steps},
                                local_dir="Models/PPO/",
-                               checkpoint_freq=2
+                               checkpoint_freq=2,
+                               resources_per_trial={"gpu": 1}
                                )
         checkpoint_path = results.get_last_checkpoint()
         print("Checkpoint path:", checkpoint_path)
@@ -75,6 +76,6 @@ class Experiment:
             met.step()
             episode_reward += reward
             # env.render()
-            print(env.action_steps, reward)
+            # print(env.action_steps, reward)
         met.plot()
         return episode_reward

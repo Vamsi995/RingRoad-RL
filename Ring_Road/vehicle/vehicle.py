@@ -131,10 +131,6 @@ class Agent(Car):
         self.acc = self.stored_action[0]
         self.v = max(0, min(self.v + (self.acc * DELTA_T), AGENT_MAX_VELOCITY))
 
-        prev_vel = self.v
-        self.v = max(0, min(self.v + (self.acc * DELTA_T), AGENT_MAX_VELOCITY))
-        self.acc = (self.v - prev_vel) / DELTA_T
-
     def _discrete(self):
         if self.stored_action == 0:
             self.acc = 1
@@ -170,11 +166,11 @@ class Agent(Car):
             self._manual_control()
 
     def step(self, eval_mode, action_steps, agent_type):
-        # if eval_mode:
-        #     if action_steps > 3000:
-        #         self.agent_type = agent_type
-        #     else:
-        #         self.agent_type = "idm"
+        if eval_mode:
+            if action_steps > 3000:
+                self.agent_type = agent_type
+            else:
+                self.agent_type = "idm"
         self._run_control()
         self.update_positions()
 
