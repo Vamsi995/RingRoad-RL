@@ -50,7 +50,7 @@ class StateExtractor:
 
         this_vel = front_veh.v
         next_vel = this_vel + action * DELTA_T
-        h = self.gap_front(agent)
+        h = agent.gap_front()
 
         if next_vel > 0:
             # the second and third terms cover (conservatively) the extra
@@ -77,7 +77,7 @@ class StateExtractor:
 
     def get_safe_velocity_action(self, action, front_veh, agent):
 
-        h = self.gap_front(agent)
+        h = agent.gap_front()
         dv = front_veh.v - agent.v
 
         safe_velocity = 2 * h / DELTA_T + dv - agent.v * (2 * self.delay)
@@ -97,7 +97,6 @@ class StateExtractor:
         if accel == None:
             return None
 
-        accel = accel[0]
         front_veh = None
         agent = None
         for ag in self.env.agents:
@@ -106,5 +105,5 @@ class StateExtractor:
 
         accel = self.get_safe_action_instantaneous(accel, front_veh, agent)
         accel = self.get_safe_velocity_action(accel, front_veh, agent)
-
-        return np.array(accel)
+        accel = np.clip(accel, -1, 1)
+        return accel

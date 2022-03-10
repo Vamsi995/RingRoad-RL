@@ -105,6 +105,8 @@ class Metrics:
             plt.savefig("Plots/DQN/SpaceTime_New1.png")
         elif self.env.algorithm == "ppo":
             plt.savefig("Plots/PPO/SpaceTime_New1.png")
+        elif self.env.algorithm == "fs":
+            plt.savefig("Plots/FollowerStopper/SpaceTime_New1.png")
 
     def plot_velocities(self):
         plt.figure(figsize=(15, 5))
@@ -120,6 +122,8 @@ class Metrics:
             plt.savefig("Plots/DQN/VelocityProfile_New1.png")
         elif self.env.algorithm == "ppo":
             plt.savefig("Plots/PPO/VelocityProfile_New1.png")
+        elif self.env.algorithm == "fs":
+            plt.savefig("Plots/FollowerStopper/VelocityProfile_New1.png")
 
     def plot_avg_vel(self):
         plt.figure(figsize=(15, 5))
@@ -136,3 +140,6 @@ class Metrics:
             plt.savefig("Plots/DQN/AverageVelocity_New1.png")
         elif self.env.algorithm == "ppo":
             plt.savefig("Plots/PPO/AverageVelocity_New1.png")
+        elif self.env.algorithm == "fs":
+            plt.savefig("Plots/FollowerStopper/AverageVelocity_New1.png")
+

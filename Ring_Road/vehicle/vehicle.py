@@ -59,6 +59,8 @@ class Car(pygame.sprite.Sprite):
         self.v = max(0, min((old_velocity) + (self.acc * DELTA_T), v0))
         self.acc = (self.v - old_velocity) / DELTA_T  # adjustment to acc due to clamping of velocity
 
+        return None
+
 
 class Agent(Car):
     def __init__(self, rad, velocity, acceleration, id, agent_type):
@@ -88,8 +90,6 @@ class Agent(Car):
         delta_x2 = initial_x[1] + (1 / (2 * curvatures[1])) * (delta_v ** 2)
         delta_x3 = initial_x[2] + (1 / (2 * curvatures[2])) * (delta_v ** 2)
         v = min(max(v_lead, 0), self.desired_vel)
-        # v = max(v_lead, 0)
-        # print(v)
         s = self.gap_front()
 
         v_cmd = 0
@@ -102,7 +102,8 @@ class Agent(Car):
         elif s > delta_x3:
             v_cmd = self.desired_vel
 
-        self.v = max(0, v_cmd)
+        self.acc = (v_cmd - self.v) / DELTA_T
+        return self.acc
 
     def _pi_controller(self, v_catch=1, gl=7, gu=30):
 
@@ -125,11 +126,12 @@ class Agent(Car):
         self.acc = (self.v_cmd - self.v) / DELTA_T
 
         self.acc = min(self.acc, 1)
-        self.v = max(0, self.v + (self.acc * DELTA_T))
+        return self.acc
 
     def _continuous(self):
         self.acc = self.stored_action[0]
-        self.v = max(0, min(self.v + (self.acc * DELTA_T), AGENT_MAX_VELOCITY))
+
+        return self.acc
 
     def _discrete(self):
         if self.stored_action == 0:
@@ -137,9 +139,7 @@ class Agent(Car):
         elif self.stored_action == 1:
             self.acc = -2
 
-        prev_vel = self.v
-        self.v = max(0, min(self.v + (self.acc * DELTA_T), AGENT_MAX_VELOCITY))
-        self.acc = (self.v - prev_vel) / DELTA_T
+        return self.acc
 
     def _manual_control(self):
         if self.stored_action == 0:
@@ -147,31 +147,40 @@ class Agent(Car):
         else:
             self.acc = -1
 
-        prev_vel = self.v
-        self.v = max(0, min(self.v + (self.acc * DELTA_T), AGENT_MAX_VELOCITY))
-        self.acc = (self.v - prev_vel) / DELTA_T
+        return self.acc
 
     def _run_control(self):
+        accel_action = None
         if self.agent_type == "idm":
-            self.idm_control()
+            accel_action = self.idm_control()
         elif self.agent_type == "discrete":
-            self._discrete()
+            accel_action = self._discrete()
         elif self.agent_type == "continuous":
-            self._continuous()
+            accel_action = self._continuous()
         elif self.agent_type == "fs":
-            self._follower_stopper(4.15, [1.5, 1, 0.5], [4.5, 5.25, 6])
+            accel_action = self._follower_stopper(4.15, [1.5, 1, 0.5], [4.5, 5.25, 6])
         elif self.agent_type == "pi":
-            self._pi_controller()
+            accel_action = self._pi_controller()
         elif self.agent_type == "man":
-            self._manual_control()
+            accel_action = self._manual_control()
 
-    def step(self, eval_mode, action_steps, agent_type):
-        # if eval_mode:
-        #     if action_steps > 3000:
-        #         self.agent_type = agent_type
-        #     else:
-        #         self.agent_type = "idm"
-        self._run_control()
+        return accel_action
+
+    def _update_vel(self, accel_action):
+        if accel_action == None:
+            return
+        self.v = max(0, min(self.v + (accel_action * DELTA_T), AGENT_MAX_VELOCITY))
+
+    def step(self, eval_mode, action_steps, agent_type, state_extractor):
+        if eval_mode:
+            if action_steps > 3000:
+                self.agent_type = agent_type
+            else:
+                self.agent_type = "idm"
+
+        accel_action = self._run_control()
+        accel_action = state_extractor.failsafe_action(accel_action)
+        self._update_vel(accel_action)
         self.update_positions()
 
 

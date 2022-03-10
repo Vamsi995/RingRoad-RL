@@ -107,7 +107,7 @@ class RingRoad(gym.Env):
                     agent.stored_action = action
 
             for agents in self.agents:
-                agents.step(self.eval_mode, self.action_steps, self.agent_type)
+                agents.step(self.eval_mode, self.action_steps, self.agent_type, self.state_extractor)
             for env_veh in self.env_veh:
                 env_veh.step()
             self._handle_collisions()
@@ -187,7 +187,7 @@ class RingRoad(gym.Env):
         if self.eval_mode:
             self._initialize_state()
         else:
-            env_vehicles = np.random.randint(20, 32)
+            env_vehicles = np.random.randint(18, 25)
             self._initialize_state(env_vehicles)
             self._warmup_steps()
             self._set_agent_type(self.agent_type)
@@ -198,7 +198,6 @@ class RingRoad(gym.Env):
     def step(self, action=None):
 
         self.action_steps += 1
-        action = self.state_extractor.failsafe_action(action)
         self._simulate(action)
 
         self.state = self.state_extractor.neighbour_states()

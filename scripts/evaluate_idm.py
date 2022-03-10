@@ -7,7 +7,8 @@ def evaluate():
     env_config = {
         "enable_render": False,
         "agent_type": "fs",
-        "eval_mode": True
+        "eval_mode": True,
+        "algorithm": "fs"
     }
 
     env = RingRoad(env_config)
