@@ -3,7 +3,7 @@ from ray.rllib.agents import ppo
 from experiment import Experiment
 
 env_config = {
-    "enable_render": True,
+    "enable_render": False,
     "agent_type": "continuous",
     "eval_mode": True,
     "algorithm": "ppo",
