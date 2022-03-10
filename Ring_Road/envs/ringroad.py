@@ -6,7 +6,7 @@ from gym import spaces
 from gym.utils import seeding
 
 from Ring_Road.constants import DISCOUNT_FACTOR, ENV_VEHICLES, AGENTS, FPS, MAX_EPISODE_LENGTH, ACTION_FREQ, \
-    INITIAL_ACCELERATION, AGENT_MAX_VELOCITY, REWARD_ALPHA, WARMUP_STEPS, EVAL_EPISODE_LENGTH
+    INITIAL_ACCELERATION, AGENT_MAX_VELOCITY, REWARD_ALPHA, WARMUP_STEPS, EVAL_EPISODE_LENGTH, DELTA_T
 from Ring_Road.render.render import Render
 from Ring_Road.vehicle.state import StateExtractor
 from Ring_Road.vehicle.vehicle import EnvVehicle, Agent
@@ -198,6 +198,7 @@ class RingRoad(gym.Env):
     def step(self, action=None):
 
         self.action_steps += 1
+        action = self.state_extractor.failsafe_action(action)
         self._simulate(action)
 
         self.state = self.state_extractor.neighbour_states()
