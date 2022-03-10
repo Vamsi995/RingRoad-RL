@@ -138,10 +138,10 @@ class RingRoad(gym.Env):
 
         # reward average velocity
         eta_2 = 4.
-        reward = eta_2 * self._get_average_vel() / 20
+        reward = self._get_average_vel()
 
         # punish accelerations (should lead to reduced stop-and-go waves)
-        eta = 5  # 0.25
+        eta = 0.1  # 0.25
         mean_actions = np.mean(np.abs(np.array(action)))
         accel_threshold = 0
 
