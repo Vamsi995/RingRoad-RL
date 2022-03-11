@@ -190,7 +190,7 @@ class RingRoad(gym.Env):
     def step(self, action=None):
 
         self.action_steps += 1
-        if isinstance(self.action_space, spaces.Box):
+        if isinstance(self.action_space, spaces.Box) and action is not None:
             lb, ub = self.action_space.low, self.action_space.high
             scaled_action = lb + (action[0] + 1.) * 0.5 * (ub - lb)
             scaled_action = np.array(np.clip(scaled_action, lb, ub))
