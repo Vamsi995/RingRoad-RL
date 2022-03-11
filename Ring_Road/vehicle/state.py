@@ -107,3 +107,12 @@ class StateExtractor:
         accel = self.get_safe_velocity_action(accel, front_veh, agent)
         accel = np.clip(accel, -1, 1)
         return accel
+
+    def get_average_vel(self):
+
+        vel = []
+        for ag in self.env.env_veh:
+            vel.append(ag.v)
+        for ag in self.env.agents:
+            vel.append(ag.v)
+        return sum(vel) / len(vel)

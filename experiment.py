@@ -71,10 +71,16 @@ class Experiment:
         met = Metrics(env)
         while not done:
             action = self.agent.compute_single_action(obs)
+
+            if action[0] < 1.0 and action[0] > -1.0:
+                print("Action:", action)
+            else:
+                print("Action:", action)
+                break
             obs, reward, done, info = env.step(action)
             met.step()
             episode_reward += reward
             # env.render()
-            print(env.action_steps, reward)
+            # print(env.action_steps, reward)
         met.plot()
         return episode_reward

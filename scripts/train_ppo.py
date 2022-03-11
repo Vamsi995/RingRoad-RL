@@ -24,6 +24,7 @@ config["num_workers"] = 8
 config["lr"] = 0.0001
 config["horizon"] = 3000
 config["model"]["fcnet_hiddens"] = [256, 256, 256]
+config["clip_actions"] = True
 config["evaluation_interval"] = 2
 config["evaluation_duration"] = 20
 config["framework"] = "torch"

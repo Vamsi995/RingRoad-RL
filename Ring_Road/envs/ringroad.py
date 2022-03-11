@@ -28,7 +28,7 @@ class RingRoad(gym.Env):
         features_high = np.array([1, 1, 1], dtype=np.float64)
 
         if self.agent_type == "continuous":
-            self.action_space = spaces.Box(low=np.array([-1]), high=np.array([1]), dtype=np.float64)
+            self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(1,), dtype=np.float64)
         else:
             self.action_space = spaces.Discrete(2)
 
@@ -119,14 +119,6 @@ class RingRoad(gym.Env):
             if self.collision:
                 break
 
-    def _get_average_vel(self):
-
-        vel = []
-        for ag in self.env_veh:
-            vel.append(ag.v)
-        for ag in self.agents:
-            vel.append(ag.v)
-        return sum(vel) / len(vel)
 
     def _reward(self, action):
 
@@ -138,11 +130,11 @@ class RingRoad(gym.Env):
 
         # reward average velocity
         eta_2 = 4.
-        reward = self._get_average_vel()
+        reward = self.state_extractor.get_average_vel()
 
         # punish accelerations (should lead to reduced stop-and-go waves)
         eta = 0.1  # 0.25
-        mean_actions = np.mean(np.abs(np.array(action)))
+        mean_actions = eta * np.abs(action)
         accel_threshold = 0
 
         if mean_actions > accel_threshold:
@@ -198,6 +190,7 @@ class RingRoad(gym.Env):
     def step(self, action=None):
 
         self.action_steps += 1
+        # print(action)
         self._simulate(action)
 
         self.state = self.state_extractor.neighbour_states()
