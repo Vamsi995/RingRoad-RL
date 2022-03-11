@@ -134,7 +134,7 @@ class RingRoad(gym.Env):
 
         # punish accelerations (should lead to reduced stop-and-go waves)
         eta = 0.1  # 0.25
-        mean_actions = eta * np.abs(action)
+        mean_actions = eta * np.mean(np.abs(action))
         accel_threshold = 0
 
         if mean_actions > accel_threshold:
@@ -190,13 +190,18 @@ class RingRoad(gym.Env):
     def step(self, action=None):
 
         self.action_steps += 1
-        # print(action)
-        self._simulate(action)
+        if isinstance(self.action_space, spaces.Box):
+            lb, ub = self.action_space.low, self.action_space.high
+            scaled_action = lb + (action[0] + 1.) * 0.5 * (ub - lb)
+            scaled_action = np.array(np.clip(scaled_action, lb, ub))
+        else:
+            scaled_action = action
 
+        self._simulate(scaled_action)
         self.state = self.state_extractor.neighbour_states()
-        reward = self._reward(action)
+        reward = self._reward(scaled_action)
         terminal = self._is_done()
-        info = {}
+        info = {"action": scaled_action}
         return self.state, reward, terminal, info
 
     def render(self, mode='human'):

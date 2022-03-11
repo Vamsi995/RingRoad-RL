@@ -7,7 +7,7 @@ env_config = {
     "agent_type": "continuous",
     "eval_mode": True,
     "algorithm": "ppo",
-    "time_steps": 1000000
+    "time_steps": 200000
 }
 
 config = ppo.DEFAULT_CONFIG.copy()
@@ -24,7 +24,7 @@ config["num_workers"] = 8
 config["lr"] = 0.0001
 config["horizon"] = 3000
 config["model"]["fcnet_hiddens"] = [256, 256, 256]
-config["clip_actions"] = True
+# config["clip_actions"] = True
 config["evaluation_interval"] = 2
 config["evaluation_duration"] = 20
 config["framework"] = "torch"
