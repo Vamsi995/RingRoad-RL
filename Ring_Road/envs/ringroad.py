@@ -140,6 +140,7 @@ class RingRoad(gym.Env):
         if mean_actions > accel_threshold:
             reward += eta * (accel_threshold - mean_actions)
 
+        print(reward)
         return float(reward)
 
     def _is_done(self):
@@ -179,7 +180,7 @@ class RingRoad(gym.Env):
         if self.eval_mode:
             self._initialize_state()
         else:
-            env_vehicles = np.random.randint(15, 23)
+            env_vehicles = np.random.randint(15, 24)
             self._initialize_state(env_vehicles)
             self._warmup_steps()
             self._set_agent_type(self.agent_type)

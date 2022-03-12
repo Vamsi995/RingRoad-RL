@@ -7,7 +7,7 @@ env_config = {
     "agent_type": "continuous",
     "eval_mode": True,
     "algorithm": "ppo",
-    "time_steps": 200000
+    "time_steps": 1000000
 }
 
 config = ppo.DEFAULT_CONFIG.copy()
