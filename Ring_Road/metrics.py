@@ -1,4 +1,5 @@
 import math
+from typing import List
 
 import numpy as np
 
@@ -104,7 +105,7 @@ class Metrics:
         if self.env.algorithm == "dqn":
             plt.savefig("Plots/DQN/SpaceTime_New1.png")
         elif self.env.algorithm == "ppo":
-            plt.savefig("Plots/PPO/SpaceTime_New1.png")
+            plt.savefig("Plots/PPO/SpaceTimeSmoothed_New1.png")
         elif self.env.algorithm == "fs":
             plt.savefig("Plots/FollowerStopper/SpaceTime_New1.png")
 
@@ -115,13 +116,13 @@ class Metrics:
             plt.plot(self.convert_action_steps_to_time(x), y, color='gray')
         for ag in self.env.agents:
             x, y = zip(*self.velocity[ag.id])
-            plt.plot(self.convert_action_steps_to_time(x), y, color='r')
+            plt.plot(self.convert_action_steps_to_time(x), self.smooth(y, 0.9), color='r')
         plt.xlabel("Time (s)")
         plt.ylabel("Velocity (m/s)")
         if self.env.algorithm == "dqn":
             plt.savefig("Plots/DQN/VelocityProfile_New1.png")
         elif self.env.algorithm == "ppo":
-            plt.savefig("Plots/PPO/VelocityProfile_New1.png")
+            plt.savefig("Plots/PPO/VelocityProfileSmoothed_New1.png")
         elif self.env.algorithm == "fs":
             plt.savefig("Plots/FollowerStopper/VelocityProfile_New1.png")
 
@@ -139,7 +140,16 @@ class Metrics:
         if self.env.algorithm == "dqn":
             plt.savefig("Plots/DQN/AverageVelocity_New1.png")
         elif self.env.algorithm == "ppo":
-            plt.savefig("Plots/PPO/AverageVelocity_New1.png")
+            plt.savefig("Plots/PPO/AverageVelocitySmoothed_New1.png")
         elif self.env.algorithm == "fs":
             plt.savefig("Plots/FollowerStopper/AverageVelocity_New1.png")
 
+    def smooth(self, scalars: List[float], weight: float) -> List[float]:  # Weight between 0 and 1
+        last = scalars[0]  # First value in the plot (first timestep)
+        smoothed = list()
+        for point in scalars:
+            smoothed_val = last * weight + (1 - weight) * point  # Calculate smoothed value
+            smoothed.append(smoothed_val)  # Save it
+            last = smoothed_val  # Anchor the last smoothed value
+
+        return smoothed

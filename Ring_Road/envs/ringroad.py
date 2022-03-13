@@ -92,13 +92,6 @@ class RingRoad(gym.Env):
                 self.collision = False
                 agent.crashed = False
 
-    def _linear_map(self, value, leftMax, leftMin, rightMax, rightMin):
-        leftSpan = leftMax - leftMin
-        rightSpan = rightMax - rightMin
-
-        valueScaled = float(value - leftMin) / float(leftSpan)
-        return rightMin + (valueScaled * rightSpan)
-
     def _simulate(self, action):
         frames = int(FPS // ACTION_FREQ)
         for frame in range(frames):
@@ -107,7 +100,7 @@ class RingRoad(gym.Env):
                     agent.stored_action = action
 
             for agents in self.agents:
-                agents.step(self.eval_mode, self.action_steps, self.agent_type, self.state_extractor)
+                agents.step(self.eval_mode, self.action_steps, self.agent_type, self.state_extractor, self.state_extractor.get_average_vel())
             for env_veh in self.env_veh:
                 env_veh.step()
             self._handle_collisions()
@@ -133,7 +126,7 @@ class RingRoad(gym.Env):
         reward = self.state_extractor.get_average_vel()
 
         # punish accelerations (should lead to reduced stop-and-go waves)
-        eta = 2  # 0.25
+        eta = 0.5  # 0.25
         mean_actions = eta * np.mean(np.abs(action))
         accel_threshold = 0
 

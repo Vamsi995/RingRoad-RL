@@ -102,7 +102,7 @@ class Agent(Car):
             v_cmd = v * ((s - delta_x1) / (delta_x2 - delta_x1))
             print("delta2: {}".format(v_cmd))
         elif s <= delta_x3:
-            v_cmd = v + (abs(self.desired_vel - v) * ((s - delta_x2) / (delta_x3 - delta_x2)))
+            v_cmd = v + ((self.desired_vel - v) * ((s - delta_x2) / (delta_x3 - delta_x2)))
             print("delta3: {}".format(v_cmd))
         elif s > delta_x3:
             v_cmd = self.desired_vel
@@ -155,7 +155,7 @@ class Agent(Car):
 
         return self.acc
 
-    def _run_control(self):
+    def _run_control(self, avg_vel=None):
         accel_action = None
         if self.agent_type == "idm":
             accel_action = self.idm_control()
@@ -164,7 +164,7 @@ class Agent(Car):
         elif self.agent_type == "continuous":
             accel_action = self._continuous()
         elif self.agent_type == "fs":
-            accel_action = self._follower_stopper(4.15, [1.5, 1, 0.5], [4.5, 5.25, 6])
+            accel_action = self._follower_stopper(avg_vel, [1.5, 1, 0.5], [4.5, 5.25, 6])
         elif self.agent_type == "pi":
             accel_action = self._pi_controller()
         elif self.agent_type == "man":
@@ -178,14 +178,14 @@ class Agent(Car):
         self.v = max(0, min(self.v + (accel_action * DELTA_T), AGENT_MAX_VELOCITY))
         # print("Updated Velocity: {}".format(self.v))
 
-    def step(self, eval_mode, action_steps, agent_type, state_extractor):
+    def step(self, eval_mode, action_steps, agent_type, state_extractor, avg_vel):
         if eval_mode:
             if action_steps > 3000:
                 self.agent_type = agent_type
             else:
                 self.agent_type = "idm"
 
-        accel_action = self._run_control()
+        accel_action = self._run_control(avg_vel)
         accel_action = state_extractor.failsafe_action(accel_action)
         self._update_vel(accel_action)
         self.update_positions()
