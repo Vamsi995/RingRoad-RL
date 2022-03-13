@@ -6,7 +6,8 @@ from Ring_Road import RingRoad
 env_config = {
         "enable_render": True,
         "agent_type": "man",
-        "eval_mode": False
+        "eval_mode": False,
+        "algorithm": "man"
     }
 env = RingRoad(env_config)
 obs = env.reset()

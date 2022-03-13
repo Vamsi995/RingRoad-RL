@@ -133,14 +133,13 @@ class RingRoad(gym.Env):
         reward = self.state_extractor.get_average_vel()
 
         # punish accelerations (should lead to reduced stop-and-go waves)
-        eta = 0.1  # 0.25
+        eta = 2  # 0.25
         mean_actions = eta * np.mean(np.abs(action))
         accel_threshold = 0
 
         if mean_actions > accel_threshold:
             reward += eta * (accel_threshold - mean_actions)
 
-        print(reward)
         return float(reward)
 
     def _is_done(self):
@@ -150,7 +149,7 @@ class RingRoad(gym.Env):
             else:
                 return False
         else:
-            if self.action_steps >= MAX_EPISODE_LENGTH or self.collision:
+            if self.action_steps >= MAX_EPISODE_LENGTH + WARMUP_STEPS or self.collision:
                 return True
             else:
                 return False

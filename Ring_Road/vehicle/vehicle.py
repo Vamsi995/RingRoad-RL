@@ -89,18 +89,24 @@ class Agent(Car):
         delta_x1 = initial_x[0] + (1 / (2 * curvatures[0])) * (delta_v ** 2)
         delta_x2 = initial_x[1] + (1 / (2 * curvatures[1])) * (delta_v ** 2)
         delta_x3 = initial_x[2] + (1 / (2 * curvatures[2])) * (delta_v ** 2)
-        v = min(max(v_lead, 0), self.desired_vel)
+        # v = min(max(v_lead, 0), self.desired_vel)
         s = self.gap_front()
+        v = v_lead
+
 
         v_cmd = 0
         if s <= delta_x1:
             v_cmd = 0
+            print("delta1: {}".format(v_cmd))
         elif s <= delta_x2:
             v_cmd = v * ((s - delta_x1) / (delta_x2 - delta_x1))
+            print("delta2: {}".format(v_cmd))
         elif s <= delta_x3:
-            v_cmd = v + ((self.desired_vel - v) * ((s - delta_x2) / (delta_x3 - delta_x2)))
+            v_cmd = v + (abs(self.desired_vel - v) * ((s - delta_x2) / (delta_x3 - delta_x2)))
+            print("delta3: {}".format(v_cmd))
         elif s > delta_x3:
             v_cmd = self.desired_vel
+        print("Gap Front: {}, Delta_x1: {}, Delta_x2: {}, Delta_x3: {}, v_cmd: {}, v: {}".format(s, delta_x1, delta_x2, delta_x3, v_cmd, v))
 
         self.acc = (v_cmd - self.v) / DELTA_T
         return self.acc
@@ -170,6 +176,7 @@ class Agent(Car):
         if accel_action == None:
             return
         self.v = max(0, min(self.v + (accel_action * DELTA_T), AGENT_MAX_VELOCITY))
+        # print("Updated Velocity: {}".format(self.v))
 
     def step(self, eval_mode, action_steps, agent_type, state_extractor):
         if eval_mode:

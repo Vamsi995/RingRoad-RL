@@ -1,5 +1,6 @@
 from ray.rllib.agents import ppo
 
+from Ring_Road.constants import MAX_EPISODE_LENGTH, WARMUP_STEPS
 from experiment import Experiment
 
 env_config = {
@@ -22,7 +23,7 @@ config["env"] = "ringroad-v1"
 config["num_gpus"] = 1
 config["num_workers"] = 8
 config["lr"] = 0.0001
-config["horizon"] = 3000
+config["horizon"] = MAX_EPISODE_LENGTH + WARMUP_STEPS
 config["model"]["fcnet_hiddens"] = [256, 256, 256]
 # config["clip_actions"] = True
 config["evaluation_interval"] = 2
