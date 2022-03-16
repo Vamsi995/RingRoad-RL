@@ -26,7 +26,8 @@ class Experiment:
                                stop={"timesteps_total": self.time_steps},
                                # restore="/home/vamsi/Documents/GitHub/RingRoad-RL/Models/DQN/DQNTrainer_2022-02-26_18-33-46/DQNTrainer_ringroad-v1_88476_00000_0_2022-02-26_18-33-46/checkpoint_000096/checkpoint-96",
                                local_dir="Models/DQN/",
-                               checkpoint_freq=2
+                               checkpoint_at_end=True,
+                               checkpoint_freq=20
                                )
             checkpoint_path = results.get_last_checkpoint()
             print("Checkpoint path:", checkpoint_path)
@@ -38,7 +39,8 @@ class Experiment:
                                config=self.config,
                                stop={"timesteps_total": self.time_steps},
                                local_dir="Models/PPO/",
-                               checkpoint_freq=2
+                               checkpoint_at_end=True,
+                               checkpoint_freq=20
                                )
         checkpoint_path = results.get_last_checkpoint()
         print("Checkpoint path:", checkpoint_path)

@@ -113,7 +113,7 @@ class Metrics:
         plt.figure(figsize=(15, 5))
         for veh in self.env.env_veh:
             x, y = zip(*self.velocity[veh.id])
-            plt.plot(self.convert_action_steps_to_time(x), y, color='gray')
+            plt.plot(self.convert_action_steps_to_time(x), self.smooth(y, 0.9), color='gray')
         for ag in self.env.agents:
             x, y = zip(*self.velocity[ag.id])
             plt.plot(self.convert_action_steps_to_time(x), self.smooth(y, 0.9), color='r')
