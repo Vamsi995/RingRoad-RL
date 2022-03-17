@@ -89,7 +89,7 @@ class Agent(Car):
         delta_x1 = initial_x[0] + (1 / (2 * curvatures[0])) * (delta_v ** 2)
         delta_x2 = initial_x[1] + (1 / (2 * curvatures[1])) * (delta_v ** 2)
         delta_x3 = initial_x[2] + (1 / (2 * curvatures[2])) * (delta_v ** 2)
-        # v = min(max(v_lead, 0), self.desired_vel)
+        v = min(max(v_lead, 0), self.desired_vel)
         s = self.gap_front()
         v = v_lead
 

@@ -107,7 +107,7 @@ class Metrics:
         elif self.env.algorithm == "ppo":
             plt.savefig("Plots/PPO/SpaceTimeSmoothed_New1.png")
         elif self.env.algorithm == "fs":
-            plt.savefig("Plots/FollowerStopper/SpaceTime_New1.png")
+            plt.savefig("Plots/FollowerStopper/SpaceTimeSmoothed_New1.png")
 
     def plot_velocities(self):
         plt.figure(figsize=(15, 5))
@@ -124,7 +124,7 @@ class Metrics:
         elif self.env.algorithm == "ppo":
             plt.savefig("Plots/PPO/VelocityProfileSmoothed_New1.png")
         elif self.env.algorithm == "fs":
-            plt.savefig("Plots/FollowerStopper/VelocityProfile_New1.png")
+            plt.savefig("Plots/FollowerStopper/VelocityProfileSmoothed_New1.png")
 
     def plot_avg_vel(self):
         plt.figure(figsize=(15, 5))
@@ -142,7 +142,7 @@ class Metrics:
         elif self.env.algorithm == "ppo":
             plt.savefig("Plots/PPO/AverageVelocitySmoothed_New1.png")
         elif self.env.algorithm == "fs":
-            plt.savefig("Plots/FollowerStopper/AverageVelocity_New1.png")
+            plt.savefig("Plots/FollowerStopper/AverageVelocitySmoothed_New1.png")
 
     def smooth(self, scalars: List[float], weight: float) -> List[float]:  # Weight between 0 and 1
         last = scalars[0]  # First value in the plot (first timestep)
