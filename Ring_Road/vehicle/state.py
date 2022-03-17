@@ -37,14 +37,14 @@ class StateExtractor:
         return sf, sb
 
     def neighbour_states(self):
-        feature_list = []
-        for ag in self.env.agents:
-            feature_list.append(ag.v / AGENT_MAX_VELOCITY)
-            feature_list.append((ag.front_vehicle.v - ag.v) / AGENT_MAX_VELOCITY)
-            slead, sback = self._calculate_distances(ag)
-            feature_list.append(slead / TRACK_LENGTH)
-
-        return np.array(feature_list)
+        feature_dict = {}
+        max_speed = 15
+        for ag_id, agent in self.env.agents.items():
+            feat_list = [agent.v / max_speed, (agent.front_vehicle.v - agent.v) / max_speed]
+            s_lead, s_back = self._calculate_distances(agent)
+            feat_list.append(s_lead / TRACK_LENGTH)
+            feature_dict[ag_id] = np.array(feat_list)
+        return feature_dict
 
     def get_safe_action_instantaneous(self, action, front_veh, agent):
 
