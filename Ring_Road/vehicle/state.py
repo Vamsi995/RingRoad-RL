@@ -93,15 +93,9 @@ class StateExtractor:
         else:
             return action
 
-    def failsafe_action(self, accel):
+    def failsafe_action(self, accel, front_veh, agent):
         if accel == None:
             return None
-
-        front_veh = None
-        agent = None
-        for ag in self.env.agents:
-            front_veh = ag.front_vehicle
-            agent = ag
 
         accel = self.get_safe_action_instantaneous(accel, front_veh, agent)
         accel = self.get_safe_velocity_action(accel, front_veh, agent)
@@ -113,6 +107,6 @@ class StateExtractor:
         vel = []
         for ag in self.env.env_veh:
             vel.append(ag.v)
-        for ag in self.env.agents:
-            vel.append(ag.v)
+        for ag_id, agent in self.env.agents.items():
+            vel.append(agent.v)
         return sum(vel) / len(vel)

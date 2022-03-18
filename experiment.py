@@ -2,7 +2,7 @@ import gym
 import ray
 from ray import tune
 from ray.rllib.agents import dqn, ppo
-from Ring_Road import RingRoad
+from Ring_Road import RingRoad, MultiAgentRingRoad
 from Ring_Road.metrics import Metrics
 
 
@@ -15,7 +15,7 @@ class Experiment:
         self.time_steps = env_config["time_steps"]
         self.agent = None
         self.config = config
-        self.env = RingRoad(env_config)
+        self.env = MultiAgentRingRoad(env_config)
 
     def train(self):
         global results
@@ -39,8 +39,7 @@ class Experiment:
                                config=self.config,
                                stop={"timesteps_total": self.time_steps},
                                local_dir="Models/PPO/",
-                               checkpoint_at_end=True,
-                               checkpoint_freq=20
+                               checkpoint_at_end=True
                                )
         checkpoint_path = results.get_last_checkpoint()
         print("Checkpoint path:", checkpoint_path)
@@ -67,12 +66,12 @@ class Experiment:
 
         # run until episode ends
         episode_reward = 0
-        done = False
+        done = {"__all__": False}
         obs = env.reset()
 
         met = Metrics(env)
-        while not done:
-            action = self.agent.compute_single_action(obs)
+        while not done["__all__"]:
+            action = self.agent.compute_actions(obs)
 
             obs, reward, done, info = env.step(action)
 
@@ -85,7 +84,7 @@ class Experiment:
             #     print("Action invalid:", action)
             #     break
             met.step()
-            episode_reward += reward
+            # episode_reward += reward
             # env.render()
             print(env.action_steps, reward)
         met.plot()

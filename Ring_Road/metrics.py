@@ -27,7 +27,7 @@ class Metrics:
         for veh in self.env.env_veh:
             self.position[veh.id] = []
             self.velocity[veh.id] = []
-        for veh in self.env.agents:
+        for ag_id, veh in self.env.agents.items():
             self.position[veh.id] = []
             self.velocity[veh.id] = []
         self.total_veh = len(self.position)
@@ -36,14 +36,14 @@ class Metrics:
         for veh in self.env.env_veh:
             distance = veh.central_angle * RADIUS
             self.position[veh.id].append((t, distance))
-        for veh in self.env.agents:
+        for ag_id, veh in self.env.agents.items():
             distance = veh.central_angle * RADIUS
             self.position[veh.id].append((t, distance))
 
     def store_v(self, t):
         for veh in self.env.env_veh:
             self.velocity[veh.id].append((t, veh.v))
-        for veh in self.env.agents:
+        for ag_id, veh in self.env.agents.items():
             self.velocity[veh.id].append((t, veh.v))
 
     def running_mean_vel(self, t):
@@ -94,7 +94,7 @@ class Metrics:
     def plot_positions(self):
         plt.figure(figsize=(15, 5))
         global s
-        plot_data = self.env.env_veh + self.env.agents
+        plot_data = self.env.env_veh + list(self.env.agents.values())
         for veh in plot_data:
             x, y = zip(*self.position[veh.id])
             t, v = zip(*self.velocity[veh.id])
@@ -114,7 +114,7 @@ class Metrics:
         for veh in self.env.env_veh:
             x, y = zip(*self.velocity[veh.id])
             plt.plot(self.convert_action_steps_to_time(x), self.smooth(y, 0.9), color='gray')
-        for ag in self.env.agents:
+        for ag_id, ag in self.env.agents.items():
             x, y = zip(*self.velocity[ag.id])
             plt.plot(self.convert_action_steps_to_time(x), self.smooth(y, 0.9), color='r')
         plt.xlabel("Time (s)")

@@ -17,6 +17,7 @@ class MultiAgentRingRoad(MultiAgentEnv):
         self.enable_render = env_config["enable_render"]
         self.agent_type = env_config["agent_type"]
         self.eval_mode = env_config["eval_mode"]
+        self.algorithm = env_config["algorithm"]
 
         self.agents = {}
         self.env_veh = []
@@ -131,7 +132,7 @@ class MultiAgentRingRoad(MultiAgentEnv):
         action_dict = {}
         for ag_id, act in action.items():
 
-            if isinstance(self.action_space, spaces.Box) and action is not None:
+            if isinstance(self.action_space, spaces.Box) and act is not None:
                 lb, ub = self.action_space.low, self.action_space.high
                 scaled_action = lb + (act[0] + 1.) * 0.5 * (ub - lb)
                 action_dict[ag_id] = np.array(np.clip(scaled_action, lb, ub))
@@ -141,11 +142,11 @@ class MultiAgentRingRoad(MultiAgentEnv):
 
     def _reward(self, action):
 
-        if action is None:
-            return 0
+        if all([elem is None for elem in list(action.values())]):
+            return {ag_id: 0 for ag_id in action.keys()}
 
         if self.collision:
-            return 0.
+            return {ag_id: 0. for ag_id in action.keys()}
 
         # reward average velocity
         eta_2 = 4.
@@ -161,11 +162,26 @@ class MultiAgentRingRoad(MultiAgentEnv):
 
         return {ag_id: reward for ag_id in action.keys()}
 
+    def _destroy(self):
+        self.env_veh.clear()
+        self.agents.clear()
+        self.agents = {}
+
+    def _set_agent_type(self, agent_type):
+        for ag_id, agent in self.agents.items():
+            agent.agent_type = agent_type
+
+    def _warmup_steps(self):
+        self._set_agent_type("idm")
+        for i in range(WARMUP_STEPS):
+            action_none = {key: None for key in self.agents.keys()}
+            self.step(action_none)
+
     def reset(self, *, seed: Optional[int] = None, return_info: bool = False, options: Optional[dict] = None):
 
         # super().reset(seed=seed)
         self._destroy()
-        self.done = False
+        self.done = {key: False for key in self.agents.keys()}
         self.simulation_time = 0
         self.action_steps = 0
         self.collision = False
@@ -189,7 +205,7 @@ class MultiAgentRingRoad(MultiAgentEnv):
         self.state = self.state_extractor.neighbour_states()
         reward = self._reward(scaled_action)
         terminal = self._is_done()
-        info = {"action": scaled_action}
+        info = {}
         return self.state, reward, terminal, info
 
     def render(self, mode='human'):

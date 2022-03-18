@@ -1,4 +1,4 @@
-import scripts.train_dqn, scripts.evaluate_idm, scripts.train_ppo
+import scripts.train_dqn, scripts.evaluate_idm, scripts.train_ppo, scripts.multiagent_train_ppo
 import argparse
 
 
@@ -12,6 +12,12 @@ def main():
 
     elif args.type == "train_ppo":
         scripts.train_ppo.train()
+
+    elif args.type == "multiagent_ppo":
+        scripts.multiagent_train_ppo.train()
+
+    elif args.type == "multiagent_evalppo":
+        scripts.multiagent_train_ppo.evaluate("/home/vamsi/Documents/GitHub/RingRoad-RL/Models/PPO/PPOTrainer_2022-03-19_04-27-57/PPOTrainer_multiagent_ringroad-v1_da622_00000_0_2022-03-19_04-27-57/checkpoint_000022/checkpoint-22")
 
     elif args.type == "eval_dqn":
         scripts.train_dqn.evaluate("/home/vamsi/Documents/GitHub/RingRoad-RL/Models/DQN/DQNTrainer_2022-03-03_19-28-07/DQNTrainer_ringroad-v1_f4621_00000_0_2022-03-03_19-28-08/checkpoint_000488/checkpoint-488")
