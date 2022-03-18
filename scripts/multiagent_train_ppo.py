@@ -8,7 +8,7 @@ env_config = {
     "agent_type": "continuous",
     "eval_mode": True,
     "algorithm": "ppo",
-    "time_steps": 100000
+    "time_steps": 1000000
 }
 
 config = ppo.DEFAULT_CONFIG.copy()
@@ -26,7 +26,7 @@ config["lambda"] = 0.97
 config["kl_target"] = 0.02
 config["num_sgd_iter"] = 10
 config["num_gpus"] = 1
-config["num_workers"] = 2
+config["num_workers"] = 8
 config["lr"] = 0.0001
 config["horizon"] = MAX_EPISODE_LENGTH + WARMUP_STEPS
 config["model"]["fcnet_hiddens"] = [256, 256, 256]
