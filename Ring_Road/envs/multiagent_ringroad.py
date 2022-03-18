@@ -4,7 +4,8 @@ import numpy as np
 from gym import spaces
 from ray.rllib import MultiAgentEnv
 
-from Ring_Road.constants import DISCOUNT_FACTOR, INITIAL_ACCELERATION, AGENTS, ENV_VEHICLES
+from Ring_Road.constants import DISCOUNT_FACTOR, INITIAL_ACCELERATION, AGENTS, ENV_VEHICLES, FPS, ACTION_FREQ, \
+    MAX_EPISODE_LENGTH, WARMUP_STEPS
 from Ring_Road.render.render import Render
 from Ring_Road.vehicle.state import StateExtractor
 from Ring_Road.vehicle.vehicle import EnvVehicle, Agent
@@ -32,7 +33,7 @@ class MultiAgentRingRoad(MultiAgentEnv):
 
         self.simulation_time = 0  # Simulation time
         self.action_steps = 0  # Actions performed
-        self.done = False
+        self.done = {key: False for key in self.agents.keys()}
 
         self.state = None
         self.reward = None
@@ -81,18 +82,84 @@ class MultiAgentRingRoad(MultiAgentEnv):
                 self.agents[agent_counter] = cur_veh
                 agent_counter += 1
 
-    def clip_actions(self, action):
+    def _is_done(self):
+        if self.action_steps >= MAX_EPISODE_LENGTH + WARMUP_STEPS or self.collision:
+            self.done = {key: True for key in self.agents.keys()}
+            self.done['__all__'] = True
+        else:
+            self.done['__all__'] = False
+        return self.done
 
-        for ag_id, action in action.items():
+    def _handle_collisions(self):
+
+        crash_list = []
+        for ag_id, agent in self.agents.items():
+            if self.state_extractor.gap_front(agent) <= 0:
+                agent.crashed = True
+                crash_list.append(ag_id)
+            else:
+                agent.crashed = False
+
+        if len(crash_list) > 0:
+            self.collision = True
+        else:
+            self.collision = False
+
+    def _simulate(self, action):
+        frames = int(FPS // ACTION_FREQ)
+        for frame in range(frames):
+            if action is not None and self.simulation_time % frames == 0:
+                for ag_id, agents in self.agents.items():
+                    agents.stored_action = action[ag_id]
+
+            for ag_id, agents in self.agents.items():
+                agents.step(self.eval_mode, self.action_steps, self.agent_type, self.state_extractor,
+                            self.state_extractor.get_average_vel())
+            for env_veh in self.env_veh:
+                env_veh.step()
+            self._handle_collisions()
+            self.simulation_time += 1
+
+            if frame < frames - 1:
+                self.render()
+
+            if self.collision:
+                break
+
+    def _clip_actions(self, action):
+
+        action_dict = {}
+        for ag_id, act in action.items():
 
             if isinstance(self.action_space, spaces.Box) and action is not None:
                 lb, ub = self.action_space.low, self.action_space.high
-                scaled_action = lb + (action[0] + 1.) * 0.5 * (ub - lb)
-                scaled_action = np.array(np.clip(scaled_action, lb, ub))
+                scaled_action = lb + (act[0] + 1.) * 0.5 * (ub - lb)
+                action_dict[ag_id] = np.array(np.clip(scaled_action, lb, ub))
             else:
-                scaled_action = action
+                action_dict[ag_id] = act
+        return action_dict
 
-        return scaled_action
+    def _reward(self, action):
+
+        if action is None:
+            return 0
+
+        if self.collision:
+            return 0.
+
+        # reward average velocity
+        eta_2 = 4.
+        reward = self.state_extractor.get_average_vel()
+
+        # punish accelerations (should lead to reduced stop-and-go waves)
+        eta = 0.25  # 0.25
+        mean_actions = eta * np.mean(np.abs(list(action.values())))
+        accel_threshold = 0
+
+        if mean_actions > accel_threshold:
+            reward += eta * (accel_threshold - mean_actions)
+
+        return {ag_id: reward for ag_id in action.keys()}
 
     def reset(self, *, seed: Optional[int] = None, return_info: bool = False, options: Optional[dict] = None):
 
@@ -117,7 +184,7 @@ class MultiAgentRingRoad(MultiAgentEnv):
     def step(self, action=None):
 
         self.action_steps += 1
-        scaled_action = self.clip_actions(action)
+        scaled_action = self._clip_actions(action)
         self._simulate(scaled_action)
         self.state = self.state_extractor.neighbour_states()
         reward = self._reward(scaled_action)
