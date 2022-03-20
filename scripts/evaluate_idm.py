@@ -6,9 +6,9 @@ from Ring_Road.metrics import Metrics
 def evaluate():
     env_config = {
         "enable_render": False,
-        "agent_type": "fs",
+        "agent_type": "pi",
         "eval_mode": True,
-        "algorithm": "fs"
+        "algorithm": "pi"
     }
 
     env = RingRoad(env_config)
