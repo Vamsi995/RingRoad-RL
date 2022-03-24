@@ -85,8 +85,8 @@ class Experiment:
             #     print("Action invalid:", action)
             #     break
             met.step()
-            episode_reward += reward
+            # episode_reward += reward
             # env.render()
-            print(env.action_steps, reward)
+            # print(env.action_steps, reward)
         met.plot()
         return episode_reward

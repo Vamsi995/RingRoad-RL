@@ -105,7 +105,7 @@ class Metrics:
         if self.env.algorithm == "dqn":
             plt.savefig("Plots/DQN/SpaceTime_New1.png")
         elif self.env.algorithm == "ppo":
-            plt.savefig("Plots/PPO/SpaceTimeSmoothed_New1.png")
+            plt.savefig("Plots/PPO/SpaceTimeSmoothed_New2.png")
         elif self.env.algorithm == "fs":
             plt.savefig("Plots/FollowerStopper/SpaceTimeSmoothed_New1.png")
         elif self.env.algorithm == "pi":
@@ -124,7 +124,7 @@ class Metrics:
         if self.env.algorithm == "dqn":
             plt.savefig("Plots/DQN/VelocityProfile_New1.png")
         elif self.env.algorithm == "ppo":
-            plt.savefig("Plots/PPO/VelocityProfileSmoothed_New1.png")
+            plt.savefig("Plots/PPO/VelocityProfileSmoothed_New2.png")
         elif self.env.algorithm == "fs":
             plt.savefig("Plots/FollowerStopper/VelocityProfileSmoothed_New1.png")
         elif self.env.algorithm == "pi":
@@ -144,7 +144,7 @@ class Metrics:
         if self.env.algorithm == "dqn":
             plt.savefig("Plots/DQN/AverageVelocity_New1.png")
         elif self.env.algorithm == "ppo":
-            plt.savefig("Plots/PPO/AverageVelocitySmoothed_New1.png")
+            plt.savefig("Plots/PPO/AverageVelocitySmoothed_New2.png")
         elif self.env.algorithm == "fs":
             plt.savefig("Plots/FollowerStopper/AverageVelocitySmoothed_New1.png")
         elif self.env.algorithm == "pi":

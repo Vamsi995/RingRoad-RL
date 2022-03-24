@@ -179,11 +179,11 @@ class Agent(Car):
         # print("Updated Velocity: {}".format(self.v))
 
     def step(self, eval_mode, action_steps, agent_type, state_extractor, avg_vel):
-        if eval_mode:
-            if action_steps > 3000:
-                self.agent_type = agent_type
-            else:
-                self.agent_type = "idm"
+        # if eval_mode:
+        #     if action_steps > 3000:
+        #         self.agent_type = agent_type
+        #     else:
+        #         self.agent_type = "idm"
 
         accel_action = self._run_control(avg_vel)
         accel_action = state_extractor.failsafe_action(accel_action)
