@@ -34,6 +34,7 @@ config["model"]["use_lstm"] = True
 config["model"]["lstm_cell_size"] = 256
 config["model"]["lstm_use_prev_action_reward"] = True
 config["model"]["lstm_use_prev_action"] = True
+config["model"]["max_seq_len"] = 20
 # config["clip_actions"] = True
 config["evaluation_interval"] = 2
 config["evaluation_duration"] = 20

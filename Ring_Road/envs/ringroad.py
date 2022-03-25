@@ -126,7 +126,7 @@ class RingRoad(gym.Env):
         reward = self.state_extractor.get_average_vel() / 5
 
         # punish accelerations (should lead to reduced stop-and-go waves)
-        eta = 5  # 0.25
+        eta = 6  # 0.25
         mean_actions = eta * np.mean(np.abs(action))
         accel_threshold = 0
 
