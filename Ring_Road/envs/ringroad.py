@@ -112,7 +112,6 @@ class RingRoad(gym.Env):
             if self.collision:
                 break
 
-
     def _reward(self, action):
 
         if action is None:
@@ -123,10 +122,10 @@ class RingRoad(gym.Env):
 
         # reward average velocity
         eta_2 = 4.
-        reward = self.state_extractor.get_average_vel() / 5
+        reward = self.state_extractor.get_average_vel() / 30
 
         # punish accelerations (should lead to reduced stop-and-go waves)
-        eta = 6  # 0.25
+        eta = 0.25  # 0.25
         mean_actions = eta * np.mean(np.abs(action))
         accel_threshold = 0
 

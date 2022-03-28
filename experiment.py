@@ -1,4 +1,5 @@
 import gym
+import numpy as np
 import ray
 from ray import tune
 from ray.rllib.agents import dqn, ppo
@@ -58,7 +59,6 @@ class Experiment:
         elif self.algorithm == "ppo":
             self.agent = ppo.PPOTrainer(config=self.config)
 
-        policy = self.agent.get_policy()
 
         self.agent.restore(path)
 
@@ -71,22 +71,40 @@ class Experiment:
         obs = env.reset()
 
         met = Metrics(env)
-        while not done:
-            action = self.agent.compute_single_action(obs)
 
-            obs, reward, done, info = env.step(action)
+        if self.config["model"]["use_lstm"]:
+            state = [np.zeros(self.config["model"]["lstm_cell_size"], np.float32) for _ in range(2)]
+            prev_a = 0
+            prev_r = 0
 
-            #
-            # if info["action"] <= 1.0 and info["action"] >= -1.0:
-            #     print("Action:", info["action"])
-            #     print(env.action_steps, reward)
-            # else:
-            #     # print("Action:", action)
-            #     print("Action invalid:", action)
-            #     break
-            met.step()
-            # episode_reward += reward
-            # env.render()
-            # print(env.action_steps, reward)
-        met.plot()
-        return episode_reward
+            while not done:
+                action, state_out, _ = self.agent.compute_single_action(obs, state=state, prev_action=prev_a, prev_reward=prev_r)
+                obs, reward, done, info = env.step(action)
+                episode_reward += reward
+
+                met.step()
+                prev_a = action[0]
+                prev_r = reward
+                state = state_out
+
+            met.plot()
+            return episode_reward
+
+        else:
+            while not done:
+                action = self.agent.compute_single_action(obs)
+
+                obs, reward, done, info = env.step(action)
+                # if info["action"] <= 1.0 and info["action"] >= -1.0:
+                #     print("Action:", info["action"])
+                #     print(env.action_steps, reward)
+                # else:
+                #     # print("Action:", action)
+                #     print("Action invalid:", action)
+                #     break
+                met.step()
+                # episode_reward += reward
+                # env.render()
+                # print(env.action_steps, reward)
+            met.plot()
+            return episode_reward
