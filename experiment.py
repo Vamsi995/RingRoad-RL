@@ -1,8 +1,13 @@
+import random
+
 import gym
 import ray
 from ray import tune
 from ray.rllib.agents import dqn, ppo
+from ray.rllib.policy.policy import PolicySpec
+
 from Ring_Road import RingRoad, MultiAgentRingRoad
+from Ring_Road.constants import AGENTS
 from Ring_Road.metrics import Metrics
 
 
@@ -16,6 +21,36 @@ class Experiment:
         self.agent = None
         self.config = config
         self.env = MultiAgentRingRoad(env_config)
+
+    def train_multiple_policy(self):
+
+        def gen_policy(i):
+            config = {"gamma": 0.99}
+            return PolicySpec(config=config)
+
+        policies = {"policy_{}".format(i): gen_policy(i) for i in range(AGENTS)}
+        policy_ids = list(policies.keys())
+
+        def policy_mapping_fn(agent_id, episode, worker, **kwargs):
+            pol_id = random.choice(policy_ids)
+            return pol_id
+
+        self.config["multiagent"]["policies"] = policies
+        self.config["multiagent"]["policy_mapping_fn"] = policy_mapping_fn
+
+        global results
+
+        if self.algorithm == "ppo":
+            results = tune.run(ppo.PPOTrainer,
+                               verbose=1,
+                               config=self.config,
+                               stop={"timesteps_total": self.time_steps},
+                               local_dir="Models/PPO/",
+                               checkpoint_at_end=True
+                               )
+            checkpoint_path = results.get_last_checkpoint()
+            print("Checkpoint path:", checkpoint_path)
+            return checkpoint_path, results
 
     def train(self):
         global results
