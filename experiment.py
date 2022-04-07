@@ -92,8 +92,6 @@ class Experiment:
         elif self.algorithm == "ppo":
             self.agent = ppo.PPOTrainer(config=self.config)
 
-        policy = self.agent.get_policy()
-
         self.agent.restore(path)
 
         env = self.env
