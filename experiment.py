@@ -2,6 +2,7 @@ import collections
 import random
 
 import gym
+import numpy as np
 import ray
 from ray import tune
 from ray.rllib.agents import dqn, ppo
@@ -121,7 +122,7 @@ class Experiment:
 
         mapping_cache = {}  # in case policy_agent_mapping is stochastic
         agent_states = DefaultMapping(
-            lambda agent_id: obs[agent_id]
+            lambda agent_id: [np.zeros([self.config["lstm_cell_size"]], np.float32) for _ in range(2)]
         )
         prev_actions = DefaultMapping(
             lambda agent_id: flatten_to_single_ndarray(self.env.action_space.sample())
@@ -142,26 +143,26 @@ class Experiment:
                     policy_id = mapping_cache.setdefault(
                         agent_id, policy_agent_mapping(agent_id)
                     )
-                    # p_use_lstm = use_lstm[policy_id]
-                    # if p_use_lstm:
-                    #     a_action, p_state, _ = self.agent.compute_single_action(
-                    #         a_obs,
-                    #         state=agent_states[agent_id],
-                    #         prev_action=prev_actions[agent_id],
-                    #         prev_reward=prev_rewards[agent_id],
-                    #         policy_id=policy_id,
-                    #     )
-                    #     agent_states[agent_id] = p_state
-                    # else:
-                    a_action = self.agent.compute_single_action(
-                        a_obs,
-                        prev_action=prev_actions[agent_id],
-                        prev_reward=prev_rewards[agent_id],
-                        policy_id=policy_id,
-                    )
-                    a_action = flatten_to_single_ndarray(a_action)
-                    action_dict[agent_id] = a_action
-                    prev_actions[agent_id] = a_action
+                    p_use_lstm = use_lstm[policy_id]
+                    if p_use_lstm:
+                        a_action, p_state, _ = self.agent.compute_single_action(
+                            a_obs,
+                            state=agent_states[agent_id],
+                            prev_action=prev_actions[agent_id],
+                            prev_reward=prev_rewards[agent_id],
+                            policy_id=policy_id,
+                        )
+                        agent_states[agent_id] = p_state
+                    else:
+                        a_action = self.agent.compute_single_action(
+                            a_obs,
+                            prev_action=prev_actions[agent_id],
+                            prev_reward=prev_rewards[agent_id],
+                            policy_id=policy_id,
+                        )
+                        a_action = flatten_to_single_ndarray(a_action)
+                        action_dict[agent_id] = a_action
+                        prev_actions[agent_id] = a_action
                 action = action_dict
 
             next_obs, reward, done, info = env.step(action)
@@ -175,6 +176,7 @@ class Experiment:
 
             print(env.action_steps)
             # env.render()
+            episode_reward += reward_total
         met.plot()
         return episode_reward
 
@@ -184,21 +186,6 @@ class Experiment:
         self.config["env_config"]["eval_mode"] = True
         self.config["env_config"]["enable_render"] = True
         self.config["num_workers"] = 0
-
-        def gen_policy(i):
-            config = {"gamma": 0.99}
-            return PolicySpec(config=config)
-
-        policies = {"policy_{}".format(i): gen_policy(i) for i in range(AGENTS)}
-        policy_ids = list(policies.keys())
-
-        def policy_mapping_fn(agent_id, **kwargs):
-            pol_id = random.choice(policy_ids)
-            return pol_id
-
-        self.config["multiagent"]["policies"] = policies
-        self.config["multiagent"]["policy_mapping_fn"] = policy_mapping_fn
-
 
         if self.algorithm == "dqn":
             self.agent = dqn.DQNTrainer(config=self.config)
