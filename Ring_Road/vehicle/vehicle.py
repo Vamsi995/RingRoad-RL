@@ -176,7 +176,6 @@ class Agent(Car):
         if accel_action == None:
             return
         self.v = max(0, min(self.v + (accel_action * DELTA_T), AGENT_MAX_VELOCITY))
-        # print("Updated Velocity: {}".format(self.v))
 
     def step(self, eval_mode, action_steps, agent_type, state_extractor, avg_vel):
         if eval_mode:

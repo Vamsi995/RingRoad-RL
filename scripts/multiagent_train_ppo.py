@@ -26,12 +26,12 @@ config["lambda"] = 0.97
 config["kl_target"] = 0.02
 config["num_sgd_iter"] = 10
 config["num_gpus"] = 1
-config["num_workers"] = 8
+config["num_workers"] = 2
 config["lr"] = 0.00001
 config["horizon"] = MAX_EPISODE_LENGTH + WARMUP_STEPS
 config["model"]["fcnet_hiddens"] = [256, 256, 256]
-config["model"]["use_lstm"] = True
-config["model"]["lstm_cell_size"] = 256
+# config["model"]["use_lstm"] = True
+# config["model"]["lstm_cell_size"] = 256
 # config["clip_actions"] = True
 config["evaluation_interval"] = 2
 config["evaluation_duration"] = 20
@@ -43,6 +43,16 @@ def train():
     checkpoint_path, results = exp.train()
     print(exp.evaluate(checkpoint_path))
 
+
+def train_multiagent():
+    exp = Experiment(env_config, config)
+    checkpoint_path, results = exp.train_multiple_policy()
+    print(exp.evaluate(checkpoint_path))
+
+def evaluate_multiagent(path):
+    exp = Experiment(env_config, config)
+    episode_reward = exp.evaluate_multiple_policy(path)
+    print(episode_reward)
 
 def evaluate(path):
     exp = Experiment(env_config, config)
