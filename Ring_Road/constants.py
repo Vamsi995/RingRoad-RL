@@ -35,7 +35,7 @@ def clean_image(mycar_image):
                 mycar_image.set_at((x, y), (0, 0, 0, 0))
 
 
-cwd = "/home/vamsi/Documents/GitHub/RingRoad-RL"
+cwd = "/home/vamsi/GitHub/RingRoad-RL"
 
 env_car_image = pygame.image.load(cwd + "/Ring_Road/sprites/env_vehicle.png")
 env_car_image = pygame.transform.scale(env_car_image, (CAR_PIX_LENGTH, CAR_PIX_WIDTH))
@@ -70,7 +70,7 @@ MAX_EPISODE_LENGTH = 3000
 EVAL_EPISODE_LENGTH = 6000
 WARMUP_STEPS = 750
 AGENT_MAX_VELOCITY = 30
-ENV_VEHICLES = 21
-AGENTS = 1
+ENV_VEHICLES = 19
+AGENTS = 3
 CONTROL_XPOS = 0
 CONTROL_YPOS = 700
