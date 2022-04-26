@@ -20,10 +20,10 @@ def main():
         scripts.multiagent_train_ppo.train_multiagent()
 
     elif args.type == "multiagent_evalppo":
-        scripts.multiagent_train_ppo.evaluate("/home/vamsi/Documents/GitHub/RingRoad-RL/Models/PPO/PPOTrainer_2022-04-22_00-23-20/PPOTrainer_multiagent_ringroad-v1_4fdaf_00000_0_2022-04-22_00-23-20/checkpoint_000003/checkpoint-3")
+        scripts.multiagent_train_ppo.evaluate("/home/vamsi/Documents/GitHub/RingRoad-RL/Models/PPO/PPOTrainer_2022-04-06_10-23-24/PPOTrainer_ringroad-v1_7d822_00000_0_2022-04-06_10-23-24/checkpoint_000250/checkpoint-250")
 
     elif args.type == "multiagent_evalppo_ind":
-        scripts.multiagent_train_ppo.evaluate_multiagent("/home/vamsi/Documents/GitHub/RingRoad-RL/Models/PPO/PPOTrainer_2022-04-22_00-23-20/PPOTrainer_multiagent_ringroad-v1_4fdaf_00000_0_2022-04-22_00-23-20/checkpoint_000003/checkpoint-3")
+        scripts.multiagent_train_ppo.evaluate_multiagent("/home/vamsi/Documents/GitHub/RingRoad-RL/Models/PPO/PPOTrainer_2022-04-26_16-51-18/PPOTrainer_multiagent_ringroad-v1_fe68c_00000_0_2022-04-26_16-51-18/checkpoint_000003/checkpoint-3")
 
 
     elif args.type == "eval_dqn":

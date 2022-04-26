@@ -49,6 +49,7 @@ class Experiment:
                                config=self.config,
                                stop={"timesteps_total": self.time_steps},
                                local_dir="Models/PPO/",
+                               checkpoint_freq=1,
                                checkpoint_at_end=True
                                )
             checkpoint_path = results.get_last_checkpoint()
@@ -117,31 +118,31 @@ class Experiment:
         obs = env.reset()
 
         met = Metrics(env)
+
+        mapping_cache = {}  # in case policy_agent_mapping is stochastic
+        agent_states = DefaultMapping(
+            lambda agent_id: obs[agent_id]
+        )
+        prev_actions = DefaultMapping(
+            lambda agent_id: flatten_to_single_ndarray(self.env.action_space.sample())
+        )
+
+        use_lstm = {"policy_{}".format(p): len(s) > 0 for p, s in obs.items()}
+        policy_agent_mapping = self.agent.config["multiagent"]["policy_mapping_fn"]
+
+        prev_rewards = collections.defaultdict(lambda: 0.0)
+        reward_total = 0.0
         while not done["__all__"]:
-            mapping_cache = {}  # in case policy_agent_mapping is stochastic
-            obs = env.reset()
-            agent_states = DefaultMapping(
-                lambda agent_id: obs[agent_id]
-            )
-            prev_actions = DefaultMapping(
-                lambda agent_id: flatten_to_single_ndarray(self.env.action_space.sample())
-            )
-
-            use_lstm = {"policy_{}".format(p): len(s) > 0 for p, s in obs.items()}
-            print(use_lstm)
-
-            prev_rewards = collections.defaultdict(lambda: 0.0)
-            reward_total = 0.0
 
             multi_obs = obs
-            policy_agent_mapping = self.agent.config["multiagent"]["policy_mapping_fn"]
             action_dict = {}
+            action = None
             for agent_id, a_obs in multi_obs.items():
                 if a_obs is not None:
                     policy_id = mapping_cache.setdefault(
                         agent_id, policy_agent_mapping(agent_id)
                     )
-                    p_use_lstm = use_lstm[policy_id]
+                    # p_use_lstm = use_lstm[policy_id]
                     # if p_use_lstm:
                     #     a_action, p_state, _ = self.agent.compute_single_action(
                     #         a_obs,
@@ -163,14 +164,17 @@ class Experiment:
                     prev_actions[agent_id] = a_action
                 action = action_dict
 
-                next_obs, reward, done, info = env.step(action)
+            next_obs, reward, done, info = env.step(action)
 
-                for agent_id, r in reward.items():
-                    prev_rewards[agent_id] = r
+            for agent_id, r in reward.items():
+                prev_rewards[agent_id] = r
 
-                reward_total += sum(r for r in reward.values() if r is not None)
-                obs = next_obs
-                met.step()
+            reward_total += sum(r for r in reward.values() if r is not None)
+            obs = next_obs
+            met.step()
+
+            print(env.action_steps)
+            # env.render()
         met.plot()
         return episode_reward
 
@@ -217,5 +221,6 @@ class Experiment:
             obs, reward, done, info = env.step(action)
             met.step()
             print(env.action_steps, reward)
+            # env.render()
         met.plot()
         return episode_reward
