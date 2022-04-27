@@ -87,7 +87,7 @@ class Experiment:
 
         mapping_cache = {}  # in case policy_agent_mapping is stochastic
         agent_states = DefaultMapping(
-            lambda agent_id: [np.zeros([self.config["lstm_cell_size"]], np.float32) for _ in range(2)]
+            lambda agent_id: [np.zeros([self.config["model"]["lstm_cell_size"]], np.float32) for _ in range(2)]
         )
         prev_actions = DefaultMapping(
             lambda agent_id: flatten_to_single_ndarray(self.env.action_space.sample())
@@ -125,9 +125,9 @@ class Experiment:
                             prev_reward=prev_rewards[agent_id],
                             policy_id=policy_id,
                         )
-                        a_action = flatten_to_single_ndarray(a_action)
-                        action_dict[agent_id] = a_action
-                        prev_actions[agent_id] = a_action
+                    a_action = flatten_to_single_ndarray(a_action)
+                    action_dict[agent_id] = a_action
+                    prev_actions[agent_id] = a_action
                 action = action_dict
 
             next_obs, reward, done, info = env.step(action)
@@ -142,7 +142,7 @@ class Experiment:
             print(env.action_steps)
             # env.render()
             episode_reward += reward_total
-        met.plot()
+        met.plot(self.config)
         return episode_reward
 
     def train(self):
@@ -208,5 +208,5 @@ class Experiment:
             met.step()
             print(env.action_steps, reward)
             # env.render()
-        met.plot()
+        met.plot(self.config)
         return episode_reward
