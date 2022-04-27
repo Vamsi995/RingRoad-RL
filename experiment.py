@@ -26,8 +26,7 @@ class Experiment:
         self.config = config
         self.env = MultiAgentRingRoad(env_config)
 
-    def train_multiple_policy(self):
-
+    def update_multiagent_config(self):
         def gen_policy(i):
             config = {"gamma": 0.99}
             return PolicySpec(config=config)
@@ -42,6 +41,8 @@ class Experiment:
         self.config["multiagent"]["policies"] = policies
         self.config["multiagent"]["policy_mapping_fn"] = policy_mapping_fn
 
+    def train_multiple_policy(self):
+        self.update_multiagent_config()
         global results
 
         if self.algorithm == "ppo":
@@ -49,8 +50,7 @@ class Experiment:
                                verbose=1,
                                config=self.config,
                                stop={"timesteps_total": self.time_steps},
-                               local_dir="Models/PPO/",
-                               checkpoint_freq=1,
+                               local_dir="Models/MultiAgent/NonSharedPolicy/",
                                checkpoint_at_end=True
                                )
             checkpoint_path = results.get_last_checkpoint()
@@ -62,20 +62,7 @@ class Experiment:
         self.config["env_config"]["enable_render"] = True
         self.config["num_workers"] = 0
 
-        def gen_policy(i):
-            config = {"gamma": 0.99}
-            return PolicySpec(config=config)
-
-        policies = {"policy_{}".format(i): gen_policy(i) for i in range(AGENTS)}
-        policy_ids = list(policies.keys())
-
-        def policy_mapping_fn(agent_id, **kwargs):
-            pol_id = random.choice(policy_ids)
-            return pol_id
-
-        self.config["multiagent"]["policies"] = policies
-        self.config["multiagent"]["policy_mapping_fn"] = policy_mapping_fn
-
+        self.update_multiagent_config()
         if self.algorithm == "dqn":
             self.agent = dqn.DQNTrainer(config=self.config)
         elif self.algorithm == "ppo":
@@ -195,7 +182,6 @@ class Experiment:
         self.agent.restore(path)
 
         env = self.env
-
 
         # run until episode ends
         episode_reward = 0
