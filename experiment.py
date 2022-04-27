@@ -22,9 +22,9 @@ class Experiment:
 
         save_path = ""
         if self.config["model"]["use_lstm"]:
-            save_path = "Models/SingleAgent/LSTM/"
+            save_path = "Models/PPO/SingleAgent/LSTM/"
         else:
-            save_path = "Models/SingleAgent/"
+            save_path = "Models/PPO/SingleAgent/"
 
         global results
         if self.algorithm == "dqn":
