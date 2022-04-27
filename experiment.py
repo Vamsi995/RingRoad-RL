@@ -57,34 +57,6 @@ class Experiment:
             print("Checkpoint path:", checkpoint_path)
             return checkpoint_path, results
 
-    def train(self):
-        global results
-        if self.algorithm == "dqn":
-            results = tune.run(dqn.DQNTrainer,
-                               verbose=1,
-                               config=self.config,
-                               stop={"timesteps_total": self.time_steps},
-                               # restore="/home/vamsi/Documents/GitHub/RingRoad-RL/Models/DQN/DQNTrainer_2022-02-26_18-33-46/DQNTrainer_ringroad-v1_88476_00000_0_2022-02-26_18-33-46/checkpoint_000096/checkpoint-96",
-                               local_dir="Models/DQN/",
-                               checkpoint_at_end=True,
-                               checkpoint_freq=20
-                               )
-            checkpoint_path = results.get_last_checkpoint()
-            print("Checkpoint path:", checkpoint_path)
-            return checkpoint_path, results
-
-        elif self.algorithm == "ppo":
-            results = tune.run(ppo.PPOTrainer,
-                               verbose=1,
-                               config=self.config,
-                               stop={"timesteps_total": self.time_steps},
-                               local_dir="Models/PPO/",
-                               checkpoint_at_end=True
-                               )
-        checkpoint_path = results.get_last_checkpoint()
-        print("Checkpoint path:", checkpoint_path)
-        return checkpoint_path, results
-
     def evaluate_multiple_policy(self, path):
         self.config["env_config"]["eval_mode"] = True
         self.config["env_config"]["enable_render"] = True
@@ -179,6 +151,34 @@ class Experiment:
             episode_reward += reward_total
         met.plot()
         return episode_reward
+
+    def train(self):
+        global results
+        if self.algorithm == "dqn":
+            results = tune.run(dqn.DQNTrainer,
+                               verbose=1,
+                               config=self.config,
+                               stop={"timesteps_total": self.time_steps},
+                               # restore="/home/vamsi/Documents/GitHub/RingRoad-RL/Models/DQN/DQNTrainer_2022-02-26_18-33-46/DQNTrainer_ringroad-v1_88476_00000_0_2022-02-26_18-33-46/checkpoint_000096/checkpoint-96",
+                               local_dir="Models/DQN/",
+                               checkpoint_at_end=True,
+                               checkpoint_freq=20
+                               )
+            checkpoint_path = results.get_last_checkpoint()
+            print("Checkpoint path:", checkpoint_path)
+            return checkpoint_path, results
+
+        elif self.algorithm == "ppo":
+            results = tune.run(ppo.PPOTrainer,
+                               verbose=1,
+                               config=self.config,
+                               stop={"timesteps_total": self.time_steps},
+                               local_dir="Models/PPO/",
+                               checkpoint_at_end=True
+                               )
+        checkpoint_path = results.get_last_checkpoint()
+        print("Checkpoint path:", checkpoint_path)
+        return checkpoint_path, results
 
     def evaluate(self, path):
         """Test trained agent for a single episode. Return the episode reward"""

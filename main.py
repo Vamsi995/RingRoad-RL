@@ -7,33 +7,22 @@ def main():
     parser.add_argument('--type', type=str, required=True)
     args = parser.parse_args()
 
-    if args.type == "train_dqn":
-        scripts.train_dqn.train()
-
-    elif args.type == "train_ppo":
-        scripts.train_ppo.train()
-
-    elif args.type == "multiagent_ppo":
+    if args.type == "multiagent_shared_ppo":
         scripts.multiagent_train_ppo.train()
 
-    elif args.type == "multiagent_ppo_ind":
+    elif args.type == "multiagent_shared_evalppo":
+        scripts.multiagent_train_ppo.evaluate(
+            "/home/vamsi/Documents/GitHub/RingRoad-RL/Models/PPO/PPOTrainer_2022-04-26_11-15-06/PPOTrainer_multiagent_ringroad-v1_07147_00000_0_2022-04-26_11-15-07/checkpoint_000221/checkpoint-221")
+
+    elif args.type == "multiagent_nonshared_ppo":
         scripts.multiagent_train_ppo.train_multiagent()
 
-    elif args.type == "multiagent_evalppo":
-        scripts.multiagent_train_ppo.evaluate("/home/vamsi/Documents/GitHub/RingRoad-RL/Models/PPO/PPOTrainer_2022-04-26_11-15-06/PPOTrainer_multiagent_ringroad-v1_07147_00000_0_2022-04-26_11-15-07/checkpoint_000221/checkpoint-221")
-
-    elif args.type == "multiagent_evalppo_ind":
-        scripts.multiagent_train_ppo.evaluate_multiagent("/home/vamsi/Documents/GitHub/RingRoad-RL/Models/PPO/PPOTrainer_2022-04-26_11-15-06/PPOTrainer_multiagent_ringroad-v1_07147_00000_0_2022-04-26_11-15-07/checkpoint_000221/checkpoint-221")
-
-    elif args.type == "eval_dqn":
-        scripts.train_dqn.evaluate("/home/vamsi/Documents/GitHub/RingRoad-RL/Models/DQN/DQNTrainer_2022-03-03_19-28-07/DQNTrainer_ringroad-v1_f4621_00000_0_2022-03-03_19-28-08/checkpoint_000488/checkpoint-488")
-
-    elif args.type == "eval_ppo":
-        scripts.train_ppo.evaluate("/home/vamsi/Documents/GitHub/RingRoad-RL/Models/PPO/PPOTrainer_2022-03-16_19-00-00/PPOTrainer_ringroad-v1_2dc8d_00000_0_2022-03-16_19-00-00/checkpoint_000250/checkpoint-250")
+    elif args.type == "multiagent_nonshared_evalppo":
+        scripts.multiagent_train_ppo.evaluate_multiagent(
+            "/home/vamsi/Documents/GitHub/RingRoad-RL/Models/PPO/PPOTrainer_2022-04-26_11-15-06/PPOTrainer_multiagent_ringroad-v1_07147_00000_0_2022-04-26_11-15-07/checkpoint_000221/checkpoint-221")
 
     elif args.type == "eval_idm":
         scripts.evaluate_idm.evaluate()
-
 
 
 if __name__ == "__main__":
