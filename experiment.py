@@ -34,7 +34,7 @@ class Experiment:
         policies = {"policy_{}".format(i): gen_policy(i) for i in range(AGENTS)}
         policy_ids = list(policies.keys())
 
-        def policy_mapping_fn(agent_id, episode, worker, **kwargs):
+        def policy_mapping_fn(agent_id, **kwargs):
             pol_id = random.choice(policy_ids)
             return pol_id
 
@@ -45,12 +45,18 @@ class Experiment:
         self.update_multiagent_config()
         global results
 
+        save_path = ""
+        if self.config["model"]["use_lstm"]:
+            save_path = "Models/MultiAgent/NonSharedPolicy/LSTM/"
+        else:
+            save_path = "Models/MultiAgent/NonSharedPolicy/"
+
         if self.algorithm == "ppo":
             results = tune.run(ppo.PPOTrainer,
                                verbose=1,
                                config=self.config,
                                stop={"timesteps_total": self.time_steps},
-                               local_dir="Models/MultiAgent/NonSharedPolicy/",
+                               local_dir=save_path,
                                checkpoint_at_end=True
                                )
             checkpoint_path = results.get_last_checkpoint()
@@ -140,6 +146,13 @@ class Experiment:
         return episode_reward
 
     def train(self):
+
+        save_path = ""
+        if self.config["model"]["use_lstm"]:
+            save_path = "Models/PPO/SharedPolicy/LSTM/"
+        else:
+            save_path = "Models/PPO/SharedPolicy/"
+
         global results
         if self.algorithm == "dqn":
             results = tune.run(dqn.DQNTrainer,
@@ -160,7 +173,7 @@ class Experiment:
                                verbose=1,
                                config=self.config,
                                stop={"timesteps_total": self.time_steps},
-                               local_dir="Models/PPO/",
+                               local_dir=save_path,
                                checkpoint_at_end=True
                                )
         checkpoint_path = results.get_last_checkpoint()

@@ -44,6 +44,11 @@ def train():
     print(exp.evaluate(checkpoint_path))
 
 
+def evaluate(path):
+    exp = Experiment(env_config, config)
+    episode_reward = exp.evaluate(path)
+    print(episode_reward)
+
 def train_multiagent():
     exp = Experiment(env_config, config)
     checkpoint_path, results = exp.train_multiple_policy()
@@ -55,8 +60,3 @@ def evaluate_multiagent(path):
     episode_reward = exp.evaluate_multiple_policy(path)
     print(episode_reward)
 
-
-def evaluate(path):
-    exp = Experiment(env_config, config)
-    episode_reward = exp.evaluate(path)
-    print(episode_reward)
