@@ -2,6 +2,7 @@ import math
 from typing import List
 
 import numpy as np
+from ray.rllib import MultiAgentEnv
 
 from Ring_Road.constants import RADIUS_PIX, FPS, ACTION_FREQ, RADIUS
 from matplotlib import pyplot as plt
@@ -86,12 +87,35 @@ class Metrics:
         new_x = np.linspace(0, time_sec, len(x))
         return new_x
 
-    def plot(self):
-        self.plot_positions()
-        self.plot_velocities()
-        self.plot_avg_vel()
+    def save_fig(self, name, config):
+        if self.env.algorithm == "dqn":
+            plt.savefig("Plots/DQN/" + name + ".png")
+        elif self.env.algorithm == "ppo":
+            if isinstance(self.env, MultiAgentEnv):
+                if bool(config["multiagent"]):
+                    if config["model"]["use_lstm"]:
+                        plt.savefig("Plots/PPO/MultiAgent/NonSharedPolicy/" + name + ".png")
+                    else:
+                        plt.savefig("Plots/PPO/MultiAgent/NonSharedPolicy/" + name + ".png")
+                else:
+                    if config["model"]["use_lstm"]:
+                        plt.savefig("Plots/PPO/MultiAgent/SharedPolicy/" + name + ".png")
+                    else:
+                        plt.savefig("Plots/PPO/MultiAgent/SharedPolicy/" + name + ".png")
+            else:
+                if config["model"]["use_lstm"]:
+                    plt.savefig("Plots/PPO/SingleAgent/LSTM/" + name + ".png")
+                else:
+                    plt.savefig("Plots/PPO/SingleAgent/" + name + ".png")
+        elif self.env.algorithm == "fs":
+            plt.savefig("Plots/FollowerStopper/" + name + ".png")
 
-    def plot_positions(self):
+    def plot(self, config):
+        self.plot_positions(config)
+        self.plot_velocities(config)
+        self.plot_avg_vel(config)
+
+    def plot_positions(self, config):
         plt.figure(figsize=(15, 5))
         global s
         plot_data = self.env.env_veh + self.env.agents
@@ -102,16 +126,9 @@ class Metrics:
         plt.colorbar(s, label="Velocity (m/s)")
         plt.xlabel("Time (s)")
         plt.ylabel("Position (m)")
-        if self.env.algorithm == "dqn":
-            plt.savefig("Plots/DQN/SpaceTime_New1.png")
-        elif self.env.algorithm == "ppo":
-            plt.savefig("Plots/PPO/SpaceTimeSmoothed_New2.png")
-        elif self.env.algorithm == "fs":
-            plt.savefig("Plots/FollowerStopper/SpaceTimeSmoothed_New1.png")
-        elif self.env.algorithm == "pi":
-            plt.savefig("Plots/PISaturation/SpaceTimeSmoothed_New1.png")
+        self.save_fig("SpaceTime", config)
 
-    def plot_velocities(self):
+    def plot_velocities(self, config):
         plt.figure(figsize=(15, 5))
         for veh in self.env.env_veh:
             x, y = zip(*self.velocity[veh.id])
@@ -121,16 +138,9 @@ class Metrics:
             plt.plot(self.convert_action_steps_to_time(x), self.smooth(y, 0.9), color='r')
         plt.xlabel("Time (s)")
         plt.ylabel("Velocity (m/s)")
-        if self.env.algorithm == "dqn":
-            plt.savefig("Plots/DQN/VelocityProfile_New1.png")
-        elif self.env.algorithm == "ppo":
-            plt.savefig("Plots/PPO/VelocityProfileSmoothed_New2.png")
-        elif self.env.algorithm == "fs":
-            plt.savefig("Plots/FollowerStopper/VelocityProfileSmoothed_New1.png")
-        elif self.env.algorithm == "pi":
-            plt.savefig("Plots/PISaturation/VelocityProfileSmoothed_New1.png")
+        self.save_fig("VelocityProfile", config)
 
-    def plot_avg_vel(self):
+    def plot_avg_vel(self, config):
         plt.figure(figsize=(15, 5))
         plt.plot(self.convert_action_steps_to_time(self.running_mean), self.running_mean, color='#1B2ACC')
 
@@ -141,14 +151,7 @@ class Metrics:
 
         plt.xlabel("Time (s)")
         plt.ylabel("Spatially-Averaged Velocity (m/s)")
-        if self.env.algorithm == "dqn":
-            plt.savefig("Plots/DQN/AverageVelocity_New1.png")
-        elif self.env.algorithm == "ppo":
-            plt.savefig("Plots/PPO/AverageVelocitySmoothed_New2.png")
-        elif self.env.algorithm == "fs":
-            plt.savefig("Plots/FollowerStopper/AverageVelocitySmoothed_New1.png")
-        elif self.env.algorithm == "pi":
-            plt.savefig("Plots/PISaturation/AverageVelocitySmoothed_New1.png")
+        self.save_fig("AverageVelocity", config)
 
     def smooth(self, scalars: List[float], weight: float) -> List[float]:  # Weight between 0 and 1
         last = scalars[0]  # First value in the plot (first timestep)

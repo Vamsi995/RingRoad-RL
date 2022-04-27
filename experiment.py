@@ -94,7 +94,7 @@ class Experiment:
                 prev_r = reward
                 state = state_out
 
-            met.plot()
+            met.plot(self.config)
             return episode_reward
 
         else:
@@ -113,5 +113,5 @@ class Experiment:
                 # episode_reward += reward
                 # env.render()
                 # print(env.action_steps, reward)
-            met.plot()
+            met.plot(self.config)
             return episode_reward
