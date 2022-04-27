@@ -19,6 +19,13 @@ class Experiment:
         self.env = RingRoad(env_config)
 
     def train(self):
+
+        save_path = ""
+        if self.config["model"]["use_lstm"]:
+            save_path = "Models/SingleAgent/LSTM/"
+        else:
+            save_path = "Models/SingleAgent/"
+
         global results
         if self.algorithm == "dqn":
             results = tune.run(dqn.DQNTrainer,
@@ -39,7 +46,7 @@ class Experiment:
                                verbose=1,
                                config=self.config,
                                stop={"timesteps_total": self.time_steps},
-                               local_dir="Models/PPO/",
+                               local_dir=save_path,
                                checkpoint_at_end=True,
                                checkpoint_freq=20
                                )
