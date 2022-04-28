@@ -66,11 +66,9 @@ class Experiment:
         elif self.algorithm == "ppo":
             self.agent = ppo.PPOTrainer(config=self.config)
 
-
         self.agent.restore(path)
 
         env = self.env
-
 
         # run until episode ends
         episode_reward = 0
@@ -85,7 +83,8 @@ class Experiment:
             prev_r = 0
 
             while not done:
-                action, state_out, _ = self.agent.compute_single_action(obs, state=state, prev_action=prev_a, prev_reward=prev_r)
+                action, state_out, _ = self.agent.compute_single_action(obs, state=state, prev_action=prev_a,
+                                                                        prev_reward=prev_r)
                 obs, reward, done, info = env.step(action)
                 episode_reward += reward
 
@@ -94,6 +93,7 @@ class Experiment:
                 prev_r = reward
                 state = state_out
 
+                print(env.action_steps, reward)
             met.plot(self.config)
             return episode_reward
 
@@ -112,6 +112,6 @@ class Experiment:
                 met.step()
                 # episode_reward += reward
                 # env.render()
-                # print(env.action_steps, reward)
+                print(env.action_steps, reward)
             met.plot(self.config)
             return episode_reward

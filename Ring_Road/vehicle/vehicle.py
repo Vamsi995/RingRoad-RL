@@ -158,7 +158,7 @@ class Agent(Car):
     def _run_control(self, avg_vel=None, noise=0):
         accel_action = None
         if self.agent_type == "idm":
-            accel_action = self.idm_control(noise=0)
+            accel_action = self.idm_control(noise=noise)
         elif self.agent_type == "discrete":
             accel_action = self._discrete()
         elif self.agent_type == "continuous":
@@ -179,14 +179,12 @@ class Agent(Car):
         # print("Updated Velocity: {}".format(self.v))
 
     def step(self, eval_mode, action_steps, agent_type, state_extractor, avg_vel):
-        noise = 0
+        noise = 0.2
         if eval_mode:
             if action_steps > 3000:
                 self.agent_type = agent_type
-                noise = 0
             else:
                 self.agent_type = "idm"
-                noise = 0.2
 
         accel_action = self._run_control(avg_vel, noise)
         accel_action = state_extractor.failsafe_action(accel_action)
