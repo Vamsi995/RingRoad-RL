@@ -100,17 +100,8 @@ class Experiment:
         else:
             while not done:
                 action = self.agent.compute_single_action(obs)
-
                 obs, reward, done, info = env.step(action)
-                # if info["action"] <= 1.0 and info["action"] >= -1.0:
-                #     print("Action:", info["action"])
-                #     print(env.action_steps, reward)
-                # else:
-                #     # print("Action:", action)
-                #     print("Action invalid:", action)
-                #     break
                 met.step()
-                # episode_reward += reward
                 # env.render()
                 print(env.action_steps, reward)
             met.plot(self.config)
