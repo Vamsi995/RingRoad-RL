@@ -4,15 +4,21 @@ import random
 import gym
 import numpy as np
 import ray
+from gym.spaces import Tuple
 from ray import tune
 from ray.rllib.agents import dqn, ppo
 from ray.rllib.evaluate import DefaultMapping
+
+from ray.rllib.examples.models.centralized_critic_models import TorchCentralizedCriticModel, CentralizedCriticModel
+from ray.rllib.models import ModelCatalog
 from ray.rllib.policy.policy import PolicySpec
 from ray.rllib.utils.spaces.space_utils import flatten_to_single_ndarray
+from ray.tune import register_env
 
 from Ring_Road import RingRoad, MultiAgentRingRoad
 from Ring_Road.constants import AGENTS
 from Ring_Road.metrics import Metrics
+from scripts.centralized_critic import CCTrainer, CCPPOTorchPolicy
 
 
 class Experiment:
@@ -210,3 +216,87 @@ class Experiment:
             # env.render()
         met.plot(self.config)
         return episode_reward
+
+    def train_centralized_critic(self):
+        """Train centralized critic"""
+        save_path = "Models/PPO/CentralizedCritic/"
+        ModelCatalog.register_custom_model(
+            "cc_model",
+            TorchCentralizedCriticModel
+            if self.config["framework"] == "torch"
+            else CentralizedCriticModel,
+        )
+
+        self.config["batch_mode"] = "complete_episodes"
+        self.update_multiagent_config()
+        self.config["model"]["custom_model"] = "cc_model"
+
+        result = tune.run(CCTrainer,
+                          verbose=1,
+                          config=self.config,
+                          stop={"timesteps_total": self.time_steps},
+                          local_dir=save_path,
+                          checkpoint_freq=1,
+                          checkpoint_at_end=True
+                          )
+        checkpoint_path = result.get_last_checkpoint()
+        print("Checkpoint path:", checkpoint_path)
+        return checkpoint_path, results
+
+    # def evaluate_centralized_critic(self):
+
+    def train_qmix(self):
+
+        grouping = {
+            "group_1": [i for i in range(AGENTS)],
+        }
+
+        self.env.action_space = gym.spaces.Discrete(2)
+        self.env.agent_type = "discrete"
+
+        obs_space = Tuple(
+            [
+                self.env.observation_space for _ in range(AGENTS)
+            ]
+        )
+        act_space = Tuple(
+            [
+                self.env.action_space for _ in range(AGENTS)
+            ]
+        )
+        register_env(
+            "grouped_ringroad",
+            lambda config: self.env.with_agent_groups(
+                grouping, obs_space=obs_space, act_space=act_space
+            ),
+        )
+
+        config = {
+            "env": "grouped_ringroad",
+            "rollout_fragment_length": 4,
+            "train_batch_size": 32,
+            "exploration_config": {
+                "final_epsilon": 0.0,
+            },
+            "num_workers": 0,
+            "mixer": "qmix",  # vdn
+            "env_config": {
+                "separate_state_space": True,
+                "one_hot_state_encoding": False,
+            },
+            # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
+            "num_gpus": 1,
+        }
+
+        save_path = "Models/QMIX/"
+
+        results = tune.run("QMIX",
+                           verbose=1,
+                           config=config,
+                           stop={"timesteps_total": self.time_steps},
+                           local_dir=save_path,
+                           checkpoint_at_end=True
+                           )
+        checkpoint_path = results.get_last_checkpoint()
+        print("Checkpoint path:", checkpoint_path)
+        return checkpoint_path, results

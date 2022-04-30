@@ -27,7 +27,7 @@ config["kl_target"] = 0.02
 config["num_sgd_iter"] = 10
 config["num_gpus"] = 1
 config["num_workers"] = 2
-config["lr"] = 0.00001
+config["lr"] = 1e-6
 config["horizon"] = MAX_EPISODE_LENGTH + WARMUP_STEPS
 config["model"]["fcnet_hiddens"] = [32, 32, 32]
 # config["model"]["use_lstm"] = True
@@ -54,9 +54,19 @@ def train_multiagent():
     checkpoint_path, results = exp.train_multiple_policy()
     print(exp.evaluate(checkpoint_path))
 
-
 def evaluate_multiagent(path):
     exp = Experiment(env_config, config)
     episode_reward = exp.evaluate_multiple_policy(path)
     print(episode_reward)
 
+
+def train_multiagent_centralized_critic():
+    exp = Experiment(env_config, config)
+    checkpoint_path, results = exp.train_centralized_critic()
+    print(exp.evaluate(checkpoint_path))
+
+
+def train_qmix():
+    exp = Experiment(env_config, config)
+    checkpoint_path, results = exp.train_qmix()
+    print(exp.evaluate(checkpoint_path))

@@ -14,6 +14,7 @@ from Ring_Road.vehicle.vehicle import EnvVehicle, Agent
 class MultiAgentRingRoad(MultiAgentEnv):
 
     def __init__(self, env_config):
+        super().__init__()
         self.enable_render = env_config["enable_render"]
         self.agent_type = env_config["agent_type"]
         self.eval_mode = env_config["eval_mode"]
@@ -206,6 +207,7 @@ class MultiAgentRingRoad(MultiAgentEnv):
         reward = self._reward(scaled_action)
         terminal = self._is_done()
         info = {}
+        print("State", self.state)
         return self.state, reward, terminal, info
 
     def render(self, mode='human'):
