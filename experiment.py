@@ -3,6 +3,9 @@ import numpy as np
 import ray
 from ray import tune
 from ray.rllib.agents import dqn, ppo
+from ray.rllib.examples.models.centralized_critic_models import TorchCentralizedCriticModel, CentralizedCriticModel
+from ray.rllib.models import ModelCatalog
+
 from Ring_Road import RingRoad
 from Ring_Road.metrics import Metrics
 
@@ -106,3 +109,58 @@ class Experiment:
                 print(env.action_steps, reward)
             met.plot(self.config)
             return episode_reward
+
+
+    def train_centralized_critic(self):
+
+        ModelCatalog.register_custom_model(
+            "cc_model",
+            TorchCentralizedCriticModel
+            if self.config["framework"] == "torch"
+            else CentralizedCriticModel,
+        )
+
+        self.config["batch_mode"] = "complete_episodes"
+        self.config["custom_model"] = "cc_model"
+
+        config = {
+            "env": "ringroad-v1",
+            "batch_mode": "complete_episodes",
+            # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
+            "multiagent": {
+                "policies": {
+                    "pol1": (
+                        None,
+                        Discrete(6),
+                        TwoStepGame.action_space,
+                        {
+                            "framework": args.framework,
+                        },
+                    ),
+                    "pol2": (
+                        None,
+                        Discrete(6),
+                        TwoStepGame.action_space,
+                        {
+                            "framework": args.framework,
+                        },
+                    ),
+                },
+                "policy_mapping_fn": (lambda aid, **kwargs: "pol1" if aid == 0 else "pol2"),
+            },
+            "model": {
+                "custom_model": "cc_model",
+            },
+        }
+
+        stop = {
+            "training_iteration": args.stop_iters,
+            "timesteps_total": args.stop_timesteps,
+            "episode_reward_mean": args.stop_reward,
+        }
+
+        results = tune.run(CCTrainer, config=config, stop=stop, verbose=1)
+
+
+
+

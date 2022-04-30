@@ -46,7 +46,7 @@ class Car(pygame.sprite.Sprite):
 
         return s
 
-    def idm_control(self, noise=0):
+    def idm_control(self):
         delta_v = self.v - self.front_vehicle.v
 
         s = self.gap_front()
@@ -54,7 +54,7 @@ class Car(pygame.sprite.Sprite):
             s = 0.0001
 
         s_star = s0 + max(0, (self.v * T) + ((self.v * delta_v) / (2 * np.power(a * b, 0.5))))
-        self.acc = a * (1 - np.power(self.v / v0, IDM_DELTA) - np.power(s_star / s, 2)) + np.random.normal(0, noise)
+        self.acc = a * (1 - np.power(self.v / v0, IDM_DELTA) - np.power(s_star / s, 2)) + np.random.normal(0, 0.2)
         old_velocity = self.v
         self.v = max(0, min((old_velocity) + (self.acc * DELTA_T), v0))
         self.acc = (self.v - old_velocity) / DELTA_T  # adjustment to acc due to clamping of velocity
@@ -155,10 +155,10 @@ class Agent(Car):
 
         return self.acc
 
-    def _run_control(self, avg_vel=None, noise=0):
+    def _run_control(self, avg_vel=None):
         accel_action = None
         if self.agent_type == "idm":
-            accel_action = self.idm_control(noise=noise)
+            accel_action = self.idm_control()
         elif self.agent_type == "discrete":
             accel_action = self._discrete()
         elif self.agent_type == "continuous":
@@ -186,7 +186,7 @@ class Agent(Car):
             else:
                 self.agent_type = "idm"
 
-        accel_action = self._run_control(avg_vel, noise)
+        accel_action = self._run_control(avg_vel)
         accel_action = state_extractor.failsafe_action(accel_action)
         self._update_vel(accel_action)
         self.update_positions()
