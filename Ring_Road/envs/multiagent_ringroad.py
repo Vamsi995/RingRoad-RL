@@ -1,3 +1,4 @@
+import random
 from typing import Optional
 
 import numpy as np
@@ -59,7 +60,7 @@ class MultiAgentRingRoad(MultiAgentEnv):
         agent_counter = 0
 
         if AGENTS > 0:
-            agent_pos = np.random.randint(0, total_no, AGENTS)
+            agent_pos = random.sample(range(0, total_no), AGENTS)
         else:
             agent_pos = []
 
@@ -83,6 +84,7 @@ class MultiAgentRingRoad(MultiAgentEnv):
             else:
                 self.agents[agent_counter] = cur_veh
                 agent_counter += 1
+
 
     def _is_done(self):
         if self.eval_mode:

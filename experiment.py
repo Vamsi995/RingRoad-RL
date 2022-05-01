@@ -277,6 +277,8 @@ class Experiment:
                 self.env.action_space for _ in range(AGENTS)
             ]
         )
+
+        print(obs_space, act_space)
         register_env(
             "grouped_ringroad",
             lambda config: self.env.with_agent_groups(
@@ -308,6 +310,7 @@ class Experiment:
                            config=config,
                            stop={"timesteps_total": self.time_steps},
                            local_dir=save_path,
+                           checkpoint_freq=10,
                            checkpoint_at_end=True
                            )
         checkpoint_path = results.get_last_checkpoint()
