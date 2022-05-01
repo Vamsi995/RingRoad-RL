@@ -151,7 +151,7 @@ class MultiAgentRingRoad(MultiAgentEnv):
 
         # reward average velocity
         eta_2 = 4.
-        reward = self.state_extractor.get_average_vel() / 10
+        reward = self.state_extractor.get_average_vel()
 
         # punish accelerations (should lead to reduced stop-and-go waves)
         eta = 0.25  # 0.25
@@ -190,7 +190,7 @@ class MultiAgentRingRoad(MultiAgentEnv):
         if self.eval_mode:
             self._initialize_state()
         else:
-            env_vehicles = np.random.randint(15, ENV_VEHICLES + 2)
+            env_vehicles = np.random.randint(15, AGENTS + ENV_VEHICLES + 2)
             self._initialize_state(env_vehicles)
             self._warmup_steps()
             self._set_agent_type(self.agent_type)
@@ -207,7 +207,6 @@ class MultiAgentRingRoad(MultiAgentEnv):
         reward = self._reward(scaled_action)
         terminal = self._is_done()
         info = {}
-        print("State", self.state)
         return self.state, reward, terminal, info
 
     def render(self, mode='human'):

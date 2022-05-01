@@ -4,12 +4,13 @@ import random
 import gym
 import numpy as np
 import ray
-from gym.spaces import Tuple
+from gym.spaces import Tuple, Dict
 from ray import tune
 from ray.rllib.agents import dqn, ppo
 from ray.rllib.evaluate import DefaultMapping
 
-from ray.rllib.examples.models.centralized_critic_models import TorchCentralizedCriticModel, CentralizedCriticModel
+from ray.rllib.examples.models.centralized_critic_models import TorchCentralizedCriticModel, CentralizedCriticModel, \
+    YetAnotherTorchCentralizedCriticModel, YetAnotherCentralizedCriticModel
 from ray.rllib.models import ModelCatalog
 from ray.rllib.policy.policy import PolicySpec
 from ray.rllib.utils.spaces.space_utils import flatten_to_single_ndarray
@@ -18,7 +19,7 @@ from ray.tune import register_env
 from Ring_Road import RingRoad, MultiAgentRingRoad
 from Ring_Road.constants import AGENTS
 from Ring_Road.metrics import Metrics
-from scripts.centralized_critic import CCTrainer, CCPPOTorchPolicy
+from scripts.centralized_critic import FillInActions, central_critic_observer
 
 
 class Experiment:
@@ -219,19 +220,33 @@ class Experiment:
 
     def train_centralized_critic(self):
         """Train centralized critic"""
-        save_path = "Models/PPO/CentralizedCritic/"
+
         ModelCatalog.register_custom_model(
             "cc_model",
-            TorchCentralizedCriticModel
+            YetAnotherTorchCentralizedCriticModel
             if self.config["framework"] == "torch"
-            else CentralizedCriticModel,
+            else YetAnotherCentralizedCriticModel,
         )
 
+        action_space = self.env.action_space
+        observer_space = Dict(
+            {
+                "own_obs": self.env.observation_space,
+                # These two fields are filled in by the CentralCriticObserver, and are
+                # not used for inference, only for training.
+                "opponent_obs": self.env.observation_space,
+                "opponent_action": self.env.action_space,
+            }
+        )
+
+        save_path = "Models/PPO/CentralizedCritic/"
         self.config["batch_mode"] = "complete_episodes"
         self.update_multiagent_config()
+        self.config["multiagent"]["observation_fn"] = central_critic_observer
         self.config["model"]["custom_model"] = "cc_model"
+        self.config["callbacks"] = FillInActions
 
-        result = tune.run(CCTrainer,
+        result = tune.run(ppo.PPOTrainer,
                           verbose=1,
                           config=self.config,
                           stop={"timesteps_total": self.time_steps},
@@ -242,8 +257,6 @@ class Experiment:
         checkpoint_path = result.get_last_checkpoint()
         print("Checkpoint path:", checkpoint_path)
         return checkpoint_path, results
-
-    # def evaluate_centralized_critic(self):
 
     def train_qmix(self):
 
@@ -300,3 +313,4 @@ class Experiment:
         checkpoint_path = results.get_last_checkpoint()
         print("Checkpoint path:", checkpoint_path)
         return checkpoint_path, results
+
