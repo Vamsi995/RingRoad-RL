@@ -156,9 +156,9 @@ class Experiment:
 
         save_path = ""
         if self.config["model"]["use_lstm"]:
-            save_path = "Models/PPO/SharedPolicy/LSTM/"
+            save_path = "Models/PPO/MultiAgent/SharedPolicy/LSTM/"
         else:
-            save_path = "Models/PPO/SharedPolicy/"
+            save_path = "Models/PPO/MultiAgent/SharedPolicy/"
 
         global results
         if self.algorithm == "dqn":
@@ -214,7 +214,7 @@ class Experiment:
             obs, reward, done, info = env.step(action)
             met.step()
             print(env.action_steps, reward)
-            # env.render()
+            env.render()
         met.plot(self.config)
         return episode_reward
 

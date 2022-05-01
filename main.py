@@ -12,7 +12,7 @@ def main():
 
     elif args.type == "multiagent_shared_evalppo":
         scripts.multiagent_train_ppo.evaluate(
-            "/home/vamsi/Documents/GitHub/RingRoad-RL/Models/PPO/PPOTrainer_2022-04-26_11-15-06/PPOTrainer_multiagent_ringroad-v1_07147_00000_0_2022-04-26_11-15-07/checkpoint_000221/checkpoint-221")
+            "/home/vamsi/Documents/GitHub/RingRoad-RL/Models/PPO/MultiAgent/SharedPolicy/PPOTrainer_2022-05-01_01-34-57/PPOTrainer_multiagent_ringroad-v1_cef30_00000_0_2022-05-01_01-34-57/checkpoint_000221/checkpoint-221")
 
     elif args.type == "multiagent_nonshared_ppo":
         scripts.multiagent_train_ppo.train_multiagent()

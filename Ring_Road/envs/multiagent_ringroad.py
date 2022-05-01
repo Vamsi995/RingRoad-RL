@@ -5,7 +5,7 @@ from gym import spaces
 from ray.rllib import MultiAgentEnv
 
 from Ring_Road.constants import DISCOUNT_FACTOR, INITIAL_ACCELERATION, AGENTS, ENV_VEHICLES, FPS, ACTION_FREQ, \
-    MAX_EPISODE_LENGTH, WARMUP_STEPS
+    MAX_EPISODE_LENGTH, WARMUP_STEPS, EVAL_EPISODE_LENGTH
 from Ring_Road.render.render import Render
 from Ring_Road.vehicle.state import StateExtractor
 from Ring_Road.vehicle.vehicle import EnvVehicle, Agent
@@ -85,11 +85,18 @@ class MultiAgentRingRoad(MultiAgentEnv):
                 agent_counter += 1
 
     def _is_done(self):
-        if self.action_steps >= MAX_EPISODE_LENGTH + WARMUP_STEPS or self.collision:
-            self.done = {key: True for key in self.agents.keys()}
-            self.done['__all__'] = True
+        if self.eval_mode:
+            if self.action_steps >= EVAL_EPISODE_LENGTH or self.collision:
+                self.done = {key: True for key in self.agents.keys()}
+                self.done['__all__'] = True
+            else:
+                self.done['__all__'] = False
         else:
-            self.done['__all__'] = False
+            if self.action_steps >= MAX_EPISODE_LENGTH + WARMUP_STEPS or self.collision:
+                self.done = {key: True for key in self.agents.keys()}
+                self.done['__all__'] = True
+            else:
+                self.done['__all__'] = False
         return self.done
 
     def _handle_collisions(self):

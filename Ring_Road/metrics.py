@@ -92,14 +92,14 @@ class Metrics:
             plt.savefig("Plots/DQN/" + name + ".png")
         elif self.env.algorithm == "ppo":
             if isinstance(self.env, MultiAgentEnv):
-                if bool(config["multiagent"]):
+                if not bool(config["multiagent"]):
                     if config["model"]["use_lstm"]:
-                        plt.savefig("Plots/PPO/MultiAgent/NonSharedPolicy/" + name + ".png")
+                        plt.savefig("Plots/PPO/MultiAgent/NonSharedPolicy/LSTM/" + name + ".png")
                     else:
                         plt.savefig("Plots/PPO/MultiAgent/NonSharedPolicy/" + name + ".png")
                 else:
                     if config["model"]["use_lstm"]:
-                        plt.savefig("Plots/PPO/MultiAgent/SharedPolicy/" + name + ".png")
+                        plt.savefig("Plots/PPO/MultiAgent/SharedPolicy/LSTM/" + name + ".png")
                     else:
                         plt.savefig("Plots/PPO/MultiAgent/SharedPolicy/" + name + ".png")
             else:
