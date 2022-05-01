@@ -6,7 +6,7 @@ import numpy as np
 import ray
 from gym.spaces import Tuple, Dict
 from ray import tune
-from ray.rllib.agents import dqn, ppo
+from ray.rllib.agents import dqn, ppo, qmix
 from ray.rllib.evaluate import DefaultMapping
 
 from ray.rllib.examples.models.centralized_critic_models import TorchCentralizedCriticModel, CentralizedCriticModel, \
@@ -80,6 +80,7 @@ class Experiment:
             self.agent = dqn.DQNTrainer(config=self.config)
         elif self.algorithm == "ppo":
             self.agent = ppo.PPOTrainer(config=self.config)
+
 
         self.agent.restore(path)
 
@@ -317,3 +318,81 @@ class Experiment:
         print("Checkpoint path:", checkpoint_path)
         return checkpoint_path, results
 
+    def eval_qmix(self, path):
+        self.config["env_config"]["eval_mode"] = True
+        self.config["env_config"]["enable_render"] = True
+        self.config["num_workers"] = 0
+
+        self.update_multiagent_config()
+        self.agent = qmix.QMixTrainer(config=self.config)
+
+        self.agent.restore(path)
+
+        env = self.env
+
+        # run until episode ends
+        episode_reward = 0
+        done = {"__all__": False}
+        obs = env.reset()
+
+        met = Metrics(env)
+
+        mapping_cache = {}  # in case policy_agent_mapping is stochastic
+        agent_states = DefaultMapping(
+            lambda agent_id: [np.zeros([self.config["model"]["lstm_cell_size"]], np.float32) for _ in range(2)]
+        )
+        prev_actions = DefaultMapping(
+            lambda agent_id: flatten_to_single_ndarray(self.env.action_space.sample())
+        )
+
+        use_lstm = {"policy_{}".format(p): len(s) > 0 for p, s in obs.items()}
+        policy_agent_mapping = self.agent.config["multiagent"]["policy_mapping_fn"]
+
+        prev_rewards = collections.defaultdict(lambda: 0.0)
+        reward_total = 0.0
+        while not done["__all__"]:
+
+            multi_obs = obs
+            action_dict = {}
+            action = None
+            for agent_id, a_obs in multi_obs.items():
+                if a_obs is not None:
+                    policy_id = mapping_cache.setdefault(
+                        agent_id, policy_agent_mapping(agent_id)
+                    )
+                    p_use_lstm = use_lstm[policy_id]
+                    if p_use_lstm:
+                        a_action, p_state, _ = self.agent.compute_single_action(
+                            a_obs,
+                            state=agent_states[agent_id],
+                            prev_action=prev_actions[agent_id],
+                            prev_reward=prev_rewards[agent_id],
+                            policy_id=policy_id,
+                        )
+                        agent_states[agent_id] = p_state
+                    else:
+                        a_action = self.agent.compute_single_action(
+                            a_obs,
+                            prev_action=prev_actions[agent_id],
+                            prev_reward=prev_rewards[agent_id],
+                            policy_id=policy_id,
+                        )
+                    a_action = flatten_to_single_ndarray(a_action)
+                    action_dict[agent_id] = a_action
+                    prev_actions[agent_id] = a_action
+                action = action_dict
+
+            next_obs, reward, done, info = env.step(action)
+
+            for agent_id, r in reward.items():
+                prev_rewards[agent_id] = r
+
+            reward_total += sum(r for r in reward.values() if r is not None)
+            obs = next_obs
+            met.step()
+
+            print(env.action_steps)
+            # env.render()
+            episode_reward += reward_total
+        met.plot(self.config)
+        return episode_reward

@@ -70,3 +70,8 @@ def train_qmix():
     exp = Experiment(env_config, config)
     checkpoint_path, results = exp.train_qmix()
     print(exp.evaluate(checkpoint_path))
+
+def evaluate_qmix(path):
+    exp = Experiment(env_config, config)
+    episode_reward = exp.eval_qmix(path)
+    print(episode_reward)
