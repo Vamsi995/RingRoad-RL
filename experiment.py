@@ -54,9 +54,9 @@ class Experiment:
 
         save_path = ""
         if self.config["model"]["use_lstm"]:
-            save_path = "Models/MultiAgent/NonSharedPolicy/LSTM/"
+            save_path = "Models/PPO/MultiAgent/NonSharedPolicy/LSTM/"
         else:
-            save_path = "Models/MultiAgent/NonSharedPolicy/"
+            save_path = "Models/PPO/MultiAgent/NonSharedPolicy/"
 
         if self.algorithm == "ppo":
             results = tune.run(ppo.PPOTrainer,
