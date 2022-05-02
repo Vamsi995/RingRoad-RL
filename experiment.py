@@ -322,7 +322,7 @@ class Experiment:
         self.config["env_config"]["enable_render"] = True
         self.config["num_workers"] = 0
 
-        self.update_multiagent_config()
+        # self.update_multiagent_config()
         grouping = {
             "group_1": [i for i in range(AGENTS)],
         }
@@ -377,73 +377,15 @@ class Experiment:
 
         met = Metrics(env)
 
-        mapping_cache = {}  # in case policy_agent_mapping is stochastic
-        agent_states = None
-
-        if self.config["model"]["use_lstm"]:
-            agent_states = DefaultMapping(
-                lambda agent_id: [np.zeros([self.config["model"]["lstm_cell_size"]], np.float32) for _ in range(2)]
-            )
-        else:
-            agent_states = DefaultMapping(
-                lambda agent_id: obs[agent_id]
-            )
-        prev_actions = DefaultMapping(
-            lambda agent_id: flatten_to_single_ndarray(self.env.action_space.sample())
-        )
-
-        use_lstm = {"policy_{}".format(p): len(s) > 0 for p, s in obs.items()}
-        policy_agent_mapping = self.agent.config["multiagent"]["policy_mapping_fn"]
-
-        prev_rewards = collections.defaultdict(lambda: 0.0)
-        reward_total = 0.0
-
-        print(self.agent.compute_single_action(obs))
-
+        print(obs)
 
         while not done["__all__"]:
 
-            multi_obs = obs
-            action_dict = {}
-            action = None
-            for agent_id, a_obs in multi_obs.items():
-                if a_obs is not None:
-                    policy_id = mapping_cache.setdefault(
-                        agent_id, policy_agent_mapping(agent_id)
-                    )
-                    p_use_lstm = use_lstm[policy_id]
-                    if p_use_lstm:
-                        a_action, p_state, _ = self.agent.compute_single_action(
-                            a_obs,
-                            state=agent_states[agent_id],
-                            prev_action=prev_actions[agent_id],
-                            prev_reward=prev_rewards[agent_id],
-                            policy_id=policy_id,
-                        )
-                        agent_states[agent_id] = p_state
-                    else:
-                        a_action = self.agent.compute_single_action(
-                            a_obs,
-                            prev_action=prev_actions[agent_id],
-                            prev_reward=prev_rewards[agent_id],
-                            policy_id=policy_id,
-                        )
-                    a_action = flatten_to_single_ndarray(a_action)
-                    action_dict[agent_id] = a_action
-                    prev_actions[agent_id] = a_action
-                action = action_dict
-
-            next_obs, reward, done, info = env.step(action)
-
-            for agent_id, r in reward.items():
-                prev_rewards[agent_id] = r
-
-            reward_total += sum(r for r in reward.values() if r is not None)
-            obs = next_obs
+            action = self.agent.compute_actions(obs)
+            obs, reward, done, info = env.step(action)
             met.step()
+            print(env.action_steps, reward)
+            env.render()
 
-            print(env.action_steps)
-            # env.render()
-            episode_reward += reward_total
         met.plot(self.config)
         return episode_reward
