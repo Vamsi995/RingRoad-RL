@@ -147,7 +147,7 @@ class Experiment:
             obs = next_obs
             met.step()
 
-            print(env.action_steps)
+            print(env.action_steps, action)
             # env.render()
             episode_reward += reward_total
         met.plot(self.config)
@@ -279,7 +279,6 @@ class Experiment:
             ]
         )
 
-        print(obs_space, act_space)
         register_env(
             "grouped_ringroad",
             lambda config: self.env.with_agent_groups(
@@ -324,7 +323,48 @@ class Experiment:
         self.config["num_workers"] = 0
 
         self.update_multiagent_config()
-        self.agent = qmix.QMixTrainer(config=self.config)
+        grouping = {
+            "group_1": [i for i in range(AGENTS)],
+        }
+
+        self.env.action_space = gym.spaces.Discrete(2)
+        self.env.agent_type = "discrete"
+
+        obs_space = Tuple(
+            [
+                self.env.observation_space for _ in range(AGENTS)
+            ]
+        )
+        act_space = Tuple(
+            [
+                self.env.action_space for _ in range(AGENTS)
+            ]
+        )
+
+        register_env(
+            "grouped_ringroad",
+            lambda config: self.env.with_agent_groups(
+                grouping, obs_space=obs_space, act_space=act_space
+            ),
+        )
+
+        config = {
+            "env": "grouped_ringroad",
+            "rollout_fragment_length": 4,
+            "train_batch_size": 32,
+            "exploration_config": {
+                "final_epsilon": 0.0,
+            },
+            "num_workers": 0,
+            "mixer": "qmix",  # vdn
+            "env_config": {
+                "separate_state_space": True,
+                "one_hot_state_encoding": False,
+            },
+            # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
+            "num_gpus": 1,
+        }
+        self.agent = qmix.QMixTrainer(config=config)
 
         self.agent.restore(path)
 
@@ -338,9 +378,16 @@ class Experiment:
         met = Metrics(env)
 
         mapping_cache = {}  # in case policy_agent_mapping is stochastic
-        agent_states = DefaultMapping(
-            lambda agent_id: [np.zeros([self.config["model"]["lstm_cell_size"]], np.float32) for _ in range(2)]
-        )
+        agent_states = None
+
+        if self.config["model"]["use_lstm"]:
+            agent_states = DefaultMapping(
+                lambda agent_id: [np.zeros([self.config["model"]["lstm_cell_size"]], np.float32) for _ in range(2)]
+            )
+        else:
+            agent_states = DefaultMapping(
+                lambda agent_id: obs[agent_id]
+            )
         prev_actions = DefaultMapping(
             lambda agent_id: flatten_to_single_ndarray(self.env.action_space.sample())
         )
@@ -350,6 +397,10 @@ class Experiment:
 
         prev_rewards = collections.defaultdict(lambda: 0.0)
         reward_total = 0.0
+
+        print(self.agent.compute_single_action(obs))
+
+
         while not done["__all__"]:
 
             multi_obs = obs
