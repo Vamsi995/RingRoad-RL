@@ -50,8 +50,8 @@ class Experiment:
                                config=self.config,
                                stop={"timesteps_total": self.time_steps},
                                local_dir=save_path,
-                               checkpoint_at_end=True,
-                               checkpoint_freq=20
+                               checkpoint_freq=20,
+                               checkpoint_at_end=True
                                )
         checkpoint_path = results.get_last_checkpoint()
         print("Checkpoint path:", checkpoint_path)
