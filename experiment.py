@@ -368,24 +368,41 @@ class Experiment:
 
         self.agent.restore(path)
 
-        env = self.env
+        env = self.env.with_agent_groups(
+                grouping, obs_space=obs_space, act_space=act_space
+            )
 
         # run until episode ends
         episode_reward = 0
         done = {"__all__": False}
         obs = env.reset()
 
-        met = Metrics(env)
 
-        print(obs)
+        agent_states = DefaultMapping(
+            lambda agent_id: [np.zeros([self.config["model"]["lstm_cell_size"]], np.float32) for _ in range(2)]
+        )
+        prev_actions = DefaultMapping(
+            lambda agent_id: flatten_to_single_ndarray(self.env.action_space.sample())
+        )
+
+
+        a_action, p_state, _ = self.agent.compute_single_action(
+            obs['group_1'],
+            state=agent_states[agent_id],
+            prev_action=prev_actions[agent_id],
+            prev_reward=prev_rewards[agent_id]
+        )
+        agent_states[agent_id] = p_state
+
 
         while not done["__all__"]:
 
-            action = self.agent.compute_actions(obs)
+            action = self.agent.compute_single_action(obs['group_1'])
             obs, reward, done, info = env.step(action)
-            met.step()
+            # met.step()
             print(env.action_steps, reward)
-            env.render()
+            # env.render()
 
-        met.plot(self.config)
+        # met.plot(self.config)
         return episode_reward
+        # return 0
