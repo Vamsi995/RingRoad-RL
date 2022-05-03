@@ -353,8 +353,9 @@ class Experiment:
             "rollout_fragment_length": 4,
             "train_batch_size": 32,
             "exploration_config": {
-                "final_epsilon": 0.0,
+                "final_epsilon": 0.005,
             },
+            "explore": False,
             "num_workers": 0,
             "mixer": "qmix",  # vdn
             "env_config": {
@@ -377,32 +378,39 @@ class Experiment:
         done = {"__all__": False}
         obs = env.reset()
 
+        state = [np.zeros((3, 64), np.float32) for _ in range(2)]
+        prev_a = 0
+        prev_r = 0
 
-        agent_states = DefaultMapping(
-            lambda agent_id: [np.zeros([self.config["model"]["lstm_cell_size"]], np.float32) for _ in range(2)]
-        )
-        prev_actions = DefaultMapping(
-            lambda agent_id: flatten_to_single_ndarray(self.env.action_space.sample())
-        )
-
-
-        a_action, p_state, _ = self.agent.compute_single_action(
-            obs['group_1'],
-            state=agent_states[agent_id],
-            prev_action=prev_actions[agent_id],
-            prev_reward=prev_rewards[agent_id]
-        )
-        agent_states[agent_id] = p_state
-
+        def convert_action_tupletodict(action_tuple):
+            action_dict = {}
+            for i in range(len(action_tuple)):
+                action_dict[i] = action_tuple[i]
+            return action_dict
 
         while not done["__all__"]:
+            action, state_out, _ = self.agent.compute_action(obs['group_1'], state=state, prev_a=prev_a, prev_r=prev_r)
+            action_dict = convert_action_tupletodict(action)
+            print(action_dict)
+            obs, reward, done, info = env.step(action_dict)
+            # episode_reward += reward
 
-            action = self.agent.compute_single_action(obs['group_1'])
-            obs, reward, done, info = env.step(action)
             # met.step()
-            print(env.action_steps, reward)
-            # env.render()
+            prev_a = action
+            prev_r = reward
+            state = state_out
 
+            print(reward)
         # met.plot(self.config)
+
+        #
+        # while not done["__all__"]:
+        #
+        #     action = self.agent.compute_single_action(obs['group_1'])
+        #     obs, reward, done, info = env.step(action)
+        #     # met.step()
+        #     print(env.action_steps, reward)
+        #     # env.render()
+        #
+        # # met.plot(self.config)
         return episode_reward
-        # return 0
