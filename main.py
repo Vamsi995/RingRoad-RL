@@ -17,7 +17,7 @@ def main():
         scripts.train_dqn.evaluate("/home/vamsi/Documents/GitHub/RingRoad-RL/Models/DQN/DQNTrainer_2022-03-03_19-28-07/DQNTrainer_ringroad-v1_f4621_00000_0_2022-03-03_19-28-08/checkpoint_000488/checkpoint-488")
 
     elif args.type == "eval_ppo":
-        scripts.train_ppo.evaluate("/home/vamsi/Documents/GitHub/RingRoad-RL/Models/PPO/SingleAgent/LSTM/PPOTrainer_2022-05-02_17-13-40/PPOTrainer_ringroad-v1_1c66a_00000_0_2022-05-02_17-13-40/checkpoint_000250/checkpoint-250")
+        scripts.train_ppo.evaluate("/home/vamsi/Documents/GitHub/RingRoad-RL/Models/PPO/SingleAgent/LSTM/PPOTrainer_2022-05-03_01-26-19/PPOTrainer_ringroad-v1_ef00b_00000_0_2022-05-03_01-26-19/checkpoint_000250/checkpoint-250")
 
     elif args.type == "eval_idm":
         scripts.evaluate_idm.evaluate()
