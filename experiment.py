@@ -21,7 +21,6 @@ from Ring_Road.constants import AGENTS
 from Ring_Road.metrics import Metrics
 from scripts.centralized_critic import FillInActions, central_critic_observer
 
-
 class Experiment:
 
     def __init__(self, env_config, config):
@@ -259,7 +258,7 @@ class Experiment:
         print("Checkpoint path:", checkpoint_path)
         return checkpoint_path, results
 
-    def train_qmix(self):
+    def train_qmix(self, mixer="qmix"):
 
         grouping = {
             "group_1": [i for i in range(AGENTS)],
@@ -286,24 +285,24 @@ class Experiment:
             ),
         )
 
-        config = {
-            "env": "grouped_ringroad",
-            "rollout_fragment_length": 4,
-            "train_batch_size": 32,
-            "exploration_config": {
-                "final_epsilon": 0.0,
-            },
-            "num_workers": 0,
-            "mixer": "qmix",  # vdn
-            "env_config": {
-                "separate_state_space": True,
-                "one_hot_state_encoding": False,
-            },
-            # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
-            "num_gpus": 1,
-        }
+        config = qmix.DEFAULT_CONFIG.copy()
+        config["env"] = "grouped_ringroad"
+        config["train_batch_size"] = 32
+        config["evaluation_interval"] = 2
+        config["mixer"] = mixer
+        config["num_workers"] = 2
+        config["num_gpus"] = 1
+        config["buffer_size"] = 1000
+        config["lr"] = 1e-3
+        config["framework"] = "torch"
+        config["model"]["lstm_cell_size"] = 32
+        config["model"]["max_seq_len"] = 10
 
-        save_path = "Models/QMIX/"
+        save_path = None
+        if mixer == "vdn":
+            save_path = "Models/VDN/"
+        else:
+            save_path = "Models/QMIX/"
 
         results = tune.run("QMIX",
                            verbose=1,
@@ -317,12 +316,11 @@ class Experiment:
         print("Checkpoint path:", checkpoint_path)
         return checkpoint_path, results
 
-    def eval_qmix(self, path):
+    def eval_qmix(self, path, mixer="qmix"):
         self.config["env_config"]["eval_mode"] = True
         self.config["env_config"]["enable_render"] = True
         self.config["num_workers"] = 0
 
-        # self.update_multiagent_config()
         grouping = {
             "group_1": [i for i in range(AGENTS)],
         }
@@ -348,23 +346,21 @@ class Experiment:
             ),
         )
 
-        config = {
-            "env": "grouped_ringroad",
-            "rollout_fragment_length": 4,
-            "train_batch_size": 32,
-            "exploration_config": {
-                "final_epsilon": 0.005,
-            },
-            "explore": False,
-            "num_workers": 0,
-            "mixer": "qmix",  # vdn
-            "env_config": {
-                "separate_state_space": True,
-                "one_hot_state_encoding": False,
-            },
-            # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
-            "num_gpus": 1,
-        }
+        config = qmix.DEFAULT_CONFIG.copy()
+        config["env"] = "grouped_ringroad"
+        config["train_batch_size"] = 32
+        config["evaluation_interval"] = 2
+        config["mixer"] = mixer
+        config["num_workers"] = 0
+        config["num_gpus"] = 1
+        config["buffer_size"] = 1000
+        config["lr"] = 1e-3
+        config["framework"] = "torch"
+        config["model"]["lstm_cell_size"] = 32
+        config["model"]["max_seq_len"] = 10
+
+        config["explore"] = False
+
         self.agent = qmix.QMixTrainer(config=config)
 
         self.agent.restore(path)
@@ -378,9 +374,10 @@ class Experiment:
         done = {"__all__": False}
         obs = env.reset()
 
-        state = [np.zeros((3, 64), np.float32) for _ in range(2)]
+        state = [np.zeros((AGENTS,  config["model"]["lstm_cell_size"]), np.float32) for _ in range(2)]
         prev_a = 0
         prev_r = 0
+        met = Metrics(env.env)
 
         def convert_action_tupletodict(action_tuple):
             action_dict = {}
@@ -391,26 +388,13 @@ class Experiment:
         while not done["__all__"]:
             action, state_out, _ = self.agent.compute_action(obs['group_1'], state=state, prev_a=prev_a, prev_r=prev_r)
             action_dict = convert_action_tupletodict(action)
-            print(action_dict)
             obs, reward, done, info = env.step(action_dict)
-            # episode_reward += reward
 
-            # met.step()
+            met.step()
             prev_a = action
             prev_r = reward
             state = state_out
 
-            print(reward)
-        # met.plot(self.config)
-
-        #
-        # while not done["__all__"]:
-        #
-        #     action = self.agent.compute_single_action(obs['group_1'])
-        #     obs, reward, done, info = env.step(action)
-        #     # met.step()
-        #     print(env.action_steps, reward)
-        #     # env.render()
-        #
-        # # met.plot(self.config)
+            print(env.env.action_steps, reward)
+        met.plot(self.config)
         return episode_reward

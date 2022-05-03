@@ -90,6 +90,10 @@ class Metrics:
     def save_fig(self, name, config):
         if self.env.algorithm == "dqn":
             plt.savefig("Plots/DQN/" + name + ".png")
+        elif self.env.algorithm == "qmix":
+            plt.savefig("Plots/QMIX/" + name + ".png")
+        elif self.env.algorithm == "vdn":
+            plt.savefig("Plots/VDN/" + name + ".png")
         elif self.env.algorithm == "ppo":
             if isinstance(self.env, MultiAgentEnv):
                 if not bool(config["multiagent"]):

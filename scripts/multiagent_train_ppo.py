@@ -7,7 +7,7 @@ env_config = {
     "enable_render": False,
     "agent_type": "continuous",
     "eval_mode": True,
-    "algorithm": "ppo",
+    "algorithm": "vdn",
     "time_steps": 1000000
 }
 
@@ -66,12 +66,12 @@ def train_multiagent_centralized_critic():
     print(exp.evaluate(checkpoint_path))
 
 
-def train_qmix():
+def train_qmix(mixer):
     exp = Experiment(env_config, config)
-    checkpoint_path, results = exp.train_qmix()
+    checkpoint_path, results = exp.train_qmix(mixer)
     print(exp.evaluate(checkpoint_path))
 
-def evaluate_qmix(path):
+def evaluate_qmix(path, mixer):
     exp = Experiment(env_config, config)
-    episode_reward = exp.eval_qmix(path)
+    episode_reward = exp.eval_qmix(path, mixer)
     print(episode_reward)

@@ -1,6 +1,7 @@
 import scripts.train_dqn, scripts.evaluate_idm, scripts.train_ppo, scripts.multiagent_train_ppo
 import argparse
 
+mixer = "vdn"
 
 def main():
     parser = argparse.ArgumentParser()
@@ -26,11 +27,11 @@ def main():
         scripts.multiagent_train_ppo.train_multiagent_centralized_critic()
 
     elif args.type == "multiagent_qmix":
-        scripts.multiagent_train_ppo.train_qmix()
+        scripts.multiagent_train_ppo.train_qmix(mixer)
 
     elif args.type == "multiagent_qmix_eval":
         scripts.multiagent_train_ppo.evaluate_qmix(
-            "/home/vamsi/Documents/GitHub/RingRoad-RL/Models/QMIX/QMIX/QMIX_grouped_ringroad_564c3_00000_0_2022-05-01_19-39-38/checkpoint_000170/checkpoint-170")
+            "/home/vamsi/Documents/GitHub/RingRoad-RL/Models/VDN/QMIX/QMIX_grouped_ringroad_af722_00000_0_2022-05-03_19-25-26/checkpoint_000020/checkpoint-20", mixer)
     elif args.type == "eval_idm":
         scripts.evaluate_idm.evaluate()
 
