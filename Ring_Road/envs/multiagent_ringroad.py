@@ -178,7 +178,7 @@ class MultiAgentRingRoad(MultiAgentEnv):
         if mean_actions > accel_threshold:
             reward += eta * (accel_threshold - mean_actions)
 
-        rew = {ag_id: reward for ag_id in action.keys()}
+        rew = {ag_id: reward for ag_id in self.agents.keys()}
         for ag_id, agent in self.agents.items():
             if agent.v == 0:
                 rew[ag_id] = -5
