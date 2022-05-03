@@ -162,15 +162,27 @@ class MultiAgentRingRoad(MultiAgentEnv):
         eta_2 = 4.
         reward = self.state_extractor.get_average_vel() / 5
 
+
+        action_dict = {}
+        for ag_id, action in action.items():
+            if action == 0:
+                action_dict[ag_id] = 1
+            else:
+                action_dict[ag_id] = -2
+
         # punish accelerations (should lead to reduced stop-and-go waves)
         eta = 0.25  # 0.25
-        mean_actions = eta * np.mean(np.abs(list(action.values())))
+        mean_actions = eta * np.mean(np.abs(list(action_dict.values())))
         accel_threshold = 0
 
         if mean_actions > accel_threshold:
             reward += eta * (accel_threshold - mean_actions)
 
-        return {ag_id: reward for ag_id in action.keys()}
+        rew = {ag_id: reward for ag_id in action.keys()}
+        for ag_id, agent in self.agents.items():
+            if agent.v == 0:
+                rew[ag_id] = -5
+        return rew
 
     def _destroy(self):
         self.env_veh.clear()
