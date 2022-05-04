@@ -99,7 +99,7 @@ class StateExtractor:
 
         accel = self.get_safe_action_instantaneous(accel, front_veh, agent)
         accel = self.get_safe_velocity_action(accel, front_veh, agent)
-        accel = np.clip(accel, -100, 1)
+        accel = np.clip(accel, -10, 1)
         return accel
 
     def get_average_vel(self):
