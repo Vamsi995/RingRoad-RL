@@ -85,7 +85,6 @@ class MultiAgentRingRoad(MultiAgentEnv):
                 self.agents[agent_counter] = cur_veh
                 agent_counter += 1
 
-
     def _is_done(self):
         if self.eval_mode:
             if self.action_steps >= EVAL_EPISODE_LENGTH or self.collision:
@@ -162,10 +161,9 @@ class MultiAgentRingRoad(MultiAgentEnv):
         eta_2 = 4.
         reward = self.state_extractor.get_average_vel() / 5
 
-
         action_dict = {}
-        for ag_id, action in action.items():
-            if action == 0:
+        for ag_id, act in action.items():
+            if act == 0:
                 action_dict[ag_id] = 1
             else:
                 action_dict[ag_id] = -2
@@ -181,7 +179,7 @@ class MultiAgentRingRoad(MultiAgentEnv):
         rew = {ag_id: reward for ag_id in self.agents.keys()}
         for ag_id, agent in self.agents.items():
             if agent.v == 0:
-                rew[ag_id] = -5
+                rew[ag_id] = 0
         return rew
 
     def _destroy(self):
