@@ -7,7 +7,7 @@ env_config = {
     "enable_render": False,
     "agent_type": "continuous",
     "eval_mode": True,
-    "algorithm": "vdn",
+    "algorithm": "qmix",
     "time_steps": 1000000
 }
 
