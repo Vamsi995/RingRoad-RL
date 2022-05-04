@@ -354,7 +354,7 @@ class Experiment:
         config["num_workers"] = 0
         config["num_gpus"] = 1
         config["buffer_size"] = 1000
-        config["lr"] = 1e-3
+        config["lr"] = 1e-6
         config["framework"] = "torch"
         config["model"]["lstm_cell_size"] = 32
         config["model"]["max_seq_len"] = 10
