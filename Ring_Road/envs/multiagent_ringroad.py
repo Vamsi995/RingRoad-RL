@@ -155,7 +155,7 @@ class MultiAgentRingRoad(MultiAgentEnv):
             return {ag_id: 0 for ag_id in action.keys()}
 
         if self.collision:
-            return {ag_id: 0. for ag_id in action.keys()}
+            return {ag_id: -5 for ag_id in action.keys()}
 
         # reward average velocity
         eta_2 = 4.
