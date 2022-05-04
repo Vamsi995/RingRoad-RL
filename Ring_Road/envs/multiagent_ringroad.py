@@ -166,7 +166,7 @@ class MultiAgentRingRoad(MultiAgentEnv):
             if act == 0:
                 action_dict[ag_id] = 1
             else:
-                action_dict[ag_id] = -2
+                action_dict[ag_id] = -1
 
         # punish accelerations (should lead to reduced stop-and-go waves)
         eta = 0.5  # 0.25

@@ -143,7 +143,7 @@ class Agent(Car):
         if self.stored_action == 0:
             self.acc = 1
         elif self.stored_action == 1:
-            self.acc = -2
+            self.acc = -1
 
         return self.acc
 
