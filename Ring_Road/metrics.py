@@ -139,7 +139,7 @@ class Metrics:
             plt.plot(self.convert_action_steps_to_time(x), self.smooth(y, 0.9), color='gray')
         for ag_id, ag in self.env.agents.items():
             x, y = zip(*self.velocity[ag.id])
-            plt.plot(self.convert_action_steps_to_time(x), self.smooth(y, 0.9), color='r')
+            plt.plot(self.convert_action_steps_to_time(x), self.smooth(y, 0.9))
         plt.xlabel("Time (s)")
         plt.ylabel("Velocity (m/s)")
 

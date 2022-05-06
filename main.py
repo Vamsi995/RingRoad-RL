@@ -31,7 +31,7 @@ def main():
 
     elif args.type == "multiagent_qmix_eval":
         scripts.multiagent_train_ppo.evaluate_qmix(
-            "/home/vamsi/Documents/GitHub/RingRoad-RL/Models/QMIX/QMIX/QMIX_grouped_ringroad_06c37_00000_0_2022-05-04_18-58-04/checkpoint_000103/checkpoint-103", mixer)
+            "/home/vamsi/Documents/GitHub/RingRoad-RL/Models/QMIX/QMIX/QMIX_grouped_ringroad_ff91a_00000_0_2022-05-04_20-59-33/checkpoint_000100/checkpoint-100", mixer)
     elif args.type == "eval_idm":
         scripts.evaluate_idm.evaluate()
 
