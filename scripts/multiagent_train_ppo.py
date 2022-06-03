@@ -4,10 +4,10 @@ from Ring_Road.constants import MAX_EPISODE_LENGTH, WARMUP_STEPS
 from experiment import Experiment
 
 env_config = {
-    "enable_render": False,
+    "enable_render": True,
     "agent_type": "continuous",
     "eval_mode": True,
-    "algorithm": "qmix",
+    "algorithm": "vdn",
     "time_steps": 1000000
 }
 

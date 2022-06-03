@@ -394,6 +394,7 @@ class Experiment:
             prev_a = action
             prev_r = reward
             state = state_out
+            env.render()
 
             print(env.env.action_steps, reward)
         met.plot(self.config)

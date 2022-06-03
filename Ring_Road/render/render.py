@@ -6,8 +6,9 @@ from Ring_Road.constants import DISPLAY_WIDTH, DISPLAY_HEIGHT, WHITE, BLACK, FPS
 
 class Render:
 
-    def __init__(self, env):
-        self.env = env
+    def __init__(self, agents, vehicles):
+        self.agents = agents
+        self.env_veh = vehicles
         pygame.init()
         pygame.display.set_caption("RingRoad Env")
         self.screen = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
@@ -25,7 +26,7 @@ class Render:
 
     def _display_action(self):
 
-        for agents in self.env.agents:
+        for agents in self.agents:
 
             if isinstance(agents.stored_action, numpy.ndarray):
                 if agents.stored_action[0] > 0:
@@ -43,9 +44,9 @@ class Render:
         self._check_quit()
         self._create_background()
 
-        for agent in self.env.agents:
+        for ag_id, agent in self.agents.items():
             self._rotate_image_display(agent.image, agent.rotation, agent.xpos, agent.ypos)
-        for env_veh in self.env.env_veh:
+        for env_veh in self.env_veh:
             self._rotate_image_display(env_veh.image, env_veh.rotation, env_veh.xpos, env_veh.ypos)
 
         self._display_action()
