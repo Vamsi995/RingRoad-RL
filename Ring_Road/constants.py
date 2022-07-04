@@ -7,15 +7,17 @@ DISPLAY_WIDTH = 1200
 DISPLAY_HEIGHT = 1000
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-RING_RADIUS = 42.5
-ROAD_WIDTH = 2.5
-CAR_WIDTH = 2
-CAR_LENGTH = 4
-RADIUS = 41.25
+
+CAR_WIDTH = 2.5
+CAR_LENGTH = 5
+
 velocity = 0
 INITIAL_ACCELERATION = 0
 PIXEL_CONVERSION = 10
-TRACK_LENGTH = 2 * np.pi * RADIUS
+TRACK_LENGTH = 260
+RADIUS = TRACK_LENGTH / (2 * np.pi)
+RING_RADIUS = RADIUS + 1.5
+ROAD_WIDTH = 2 * (RING_RADIUS - RADIUS)
 
 CAR_PIX_LENGTH = CAR_LENGTH * PIXEL_CONVERSION
 CAR_PIX_WIDTH = CAR_WIDTH * PIXEL_CONVERSION
@@ -35,7 +37,7 @@ def clean_image(mycar_image):
                 mycar_image.set_at((x, y), (0, 0, 0, 0))
 
 
-cwd = "/home/vamsi/GitHub/RingRoad-RL"
+cwd = "/home/vamsi/Documents/GitHub/RingRoad-RL"
 
 env_car_image = pygame.image.load(cwd + "/Ring_Road/sprites/env_vehicle.png")
 env_car_image = pygame.transform.scale(env_car_image, (CAR_PIX_LENGTH, CAR_PIX_WIDTH))

@@ -43,7 +43,6 @@ class Car(pygame.sprite.Sprite):
             s = (2 * math.pi - self.central_angle + self.front_vehicle.central_angle) * RADIUS - CAR_LENGTH
         else:
             s = (self.front_vehicle.central_angle - self.central_angle) * RADIUS - CAR_LENGTH
-
         return s
 
     def idm_control(self):
@@ -84,16 +83,13 @@ class Agent(Car):
         v_lead = self.front_vehicle.v
         delta_v = min(v_lead - self.v, 0)
 
-        self.desired_vel = desired_velocity
+        self.desired_vel = 4.15
 
-        delta_x1 = initial_x[0] + (1 / (2 * curvatures[0])) * (delta_v ** 2)
-        delta_x2 = initial_x[1] + (1 / (2 * curvatures[1])) * (delta_v ** 2)
-        delta_x3 = initial_x[2] + (1 / (2 * curvatures[2])) * (delta_v ** 2)
+        delta_x1 = initial_x[0] + (1 / (2 * curvatures[0])) * (3 ** 2)
+        delta_x2 = initial_x[1] + (1 / (2 * curvatures[1])) * (3 ** 2)
+        delta_x3 = initial_x[2] + (1 / (2 * curvatures[2])) * (3 ** 2)
         v = min(max(v_lead, 0), self.desired_vel)
         s = self.gap_front()
-        v = v_lead
-
-
         v_cmd = 0
         if s <= delta_x1:
             v_cmd = 0
@@ -102,11 +98,12 @@ class Agent(Car):
             v_cmd = v * ((s - delta_x1) / (delta_x2 - delta_x1))
             print("delta2: {}".format(v_cmd))
         elif s <= delta_x3:
-            v_cmd = v + ((self.desired_vel - v) * ((s - delta_x2) / (delta_x3 - delta_x2)))
+            v_cmd = v + ((self.desired_vel - self.v) * ((s - delta_x2) / (delta_x3 - delta_x2)))
             print("delta3: {}".format(v_cmd))
         elif s > delta_x3:
             v_cmd = self.desired_vel
-        print("Gap Front: {}, Delta_x1: {}, Delta_x2: {}, Delta_x3: {}, v_cmd: {}, v: {}".format(s, delta_x1, delta_x2, delta_x3, v_cmd, v))
+        print("Gap Front: {}, Delta_x1: {}, Delta_x2: {}, Delta_x3: {}, v_cmd: {}, v: {}".format(s, delta_x1, delta_x2,
+                                                                                                 delta_x3, v_cmd, v))
 
         self.acc = (v_cmd - self.v) / DELTA_T
         return self.acc
@@ -179,7 +176,7 @@ class Agent(Car):
         # print("Updated Velocity: {}".format(self.v))
 
     def step(self, eval_mode, action_steps, agent_type, state_extractor, avg_vel):
-        noise = 0.2
+
         if eval_mode:
             if action_steps > 3000:
                 self.agent_type = agent_type
@@ -187,7 +184,7 @@ class Agent(Car):
                 self.agent_type = "idm"
 
         accel_action = self._run_control(avg_vel)
-        accel_action = state_extractor.failsafe_action(accel_action)
+        # accel_action = state_extractor.failsafe_action(accel_action)
         self._update_vel(accel_action)
         self.update_positions()
 

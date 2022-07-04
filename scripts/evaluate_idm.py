@@ -6,9 +6,9 @@ from Ring_Road.metrics import Metrics
 def evaluate():
     env_config = {
         "enable_render": False,
-        "agent_type": "pi",
+        "agent_type": "fs",
         "eval_mode": True,
-        "algorithm": "pi"
+        "algorithm": "fs"
     }
 
     env = RingRoad(env_config)
@@ -21,6 +21,7 @@ def evaluate():
         obs, rew, done, info = env.step()
         met.step()
         print(env.action_steps)
+        env.render()
 
-    met.plot()
+    met.plot(env_config)
     env.close()

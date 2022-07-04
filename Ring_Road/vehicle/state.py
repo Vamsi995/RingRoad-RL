@@ -106,7 +106,40 @@ class StateExtractor:
         accel = self.get_safe_action_instantaneous(accel, front_veh, agent)
         accel = self.get_safe_velocity_action(accel, front_veh, agent)
         accel = np.clip(accel, -1, 1)
+        accel = self.obey_speed_limit(accel, front_veh, agent)
         return accel
+
+
+    def obey_speed_limit(self, accel, front_veh, agent):
+        """Perform the "obey_speed_limit" failsafe action.
+                Checks if the computed acceleration would put us above edge speed limit.
+                If it would, output the acceleration that would put at the speed limit
+                velocity.
+                Parameters
+                ----------
+                env : flow.envs.Env
+                    current environment, which contains information of the state of the
+                    network at the current time step
+                action : float
+                    requested acceleration action
+                Returns
+                -------
+                float
+                    the requested action clipped by the speed limit
+                """
+
+        edge_speed_limit = 30
+
+        this_vel = agent.v
+        sim_step = DELTA_T
+
+        if this_vel + accel * sim_step > edge_speed_limit:
+            if edge_speed_limit > 0:
+                return (edge_speed_limit - this_vel) / sim_step
+            else:
+                return -this_vel / sim_step
+        else:
+            return accel
 
     def get_average_vel(self):
 
