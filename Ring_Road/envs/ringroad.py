@@ -140,7 +140,7 @@ class RingRoad(gym.Env):
             else:
                 return False
         else:
-            if self.action_steps >= MAX_EPISODE_LENGTH + WARMUP_STEPS or self.collision:
+            if self.action_steps >= MAX_EPISODE_LENGTH or self.collision:
                 return True
             else:
                 return False
@@ -148,7 +148,8 @@ class RingRoad(gym.Env):
     def _warmup_steps(self):
         self._set_agent_type("idm")
         for i in range(WARMUP_STEPS):
-            self.step(None)
+            self._simulate(None)
+        self._set_agent_type(self.agent_type)
 
     def _destroy(self):
         self.agents.clear()
@@ -160,7 +161,6 @@ class RingRoad(gym.Env):
 
     def reset(self, *, seed: Optional[int] = None, return_info: bool = False, options: Optional[dict] = None):
 
-        # super().reset(seed=seed)
         self._destroy()
         self.done = False
         self.simulation_time = 0
@@ -173,7 +173,6 @@ class RingRoad(gym.Env):
             env_vehicles = np.random.randint(15, 24)
             self._initialize_state(env_vehicles)
             self._warmup_steps()
-            self._set_agent_type(self.agent_type)
 
         self.state = self.state_extractor.neighbour_states()
         return self.state
