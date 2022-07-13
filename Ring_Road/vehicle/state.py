@@ -8,7 +8,7 @@ from Ring_Road.constants import RADIUS, CAR_LENGTH, RADIUS, AGENT_MAX_VELOCITY, 
 class StateExtractor:
     def __init__(self, env):
         self.env = env
-        self.delay = 0
+        self.delay = 0.5
 
     def gap_front(self, veh):
         if veh.front_vehicle.central_angle - veh.central_angle < 0:
@@ -61,11 +61,11 @@ class StateExtractor:
                 # next time step (assuming the vehicle ahead of it is not
                 # moving), then stop immediately
                 # if self.display_warnings:
-                #     print(
-                #         "=====================================\n"
-                #         "Vehicle {} is about to crash. Instantaneous acceleration "
-                #         "clipping applied.\n"
-                #         "=====================================".format(self.veh_id))
+                print(
+                    "=====================================\n"
+                    "Vehicle {} is about to crash. Instantaneous acceleration "
+                    "clipping applied.\n"
+                    "=====================================".format("Agent"))
 
                 return -this_vel / DELTA_T
             else:
