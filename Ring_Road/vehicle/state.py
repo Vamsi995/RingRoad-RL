@@ -81,7 +81,6 @@ class StateExtractor:
         dv = front_veh.v - agent.v
 
         safe_velocity = 2 * h / DELTA_T + dv - agent.v * (2 * self.delay)
-
         this_vel = agent.v
         sim_step = DELTA_T
 
