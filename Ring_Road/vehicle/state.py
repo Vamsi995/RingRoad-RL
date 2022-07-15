@@ -105,7 +105,7 @@ class StateExtractor:
 
         accel = self.get_safe_action_instantaneous(accel, front_veh, agent)
         accel = self.get_safe_velocity_action(accel, front_veh, agent)
-        accel = np.clip(accel, -0.5, 1)
+        accel = np.clip(accel, -1, 1)
         accel = self.obey_speed_limit(accel, front_veh, agent)
         return accel
 
