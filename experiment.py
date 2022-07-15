@@ -21,6 +21,7 @@ from Ring_Road.constants import AGENTS
 from Ring_Road.metrics import Metrics
 from scripts.centralized_critic import FillInActions, central_critic_observer
 
+
 class Experiment:
 
     def __init__(self, env_config, config):
@@ -79,7 +80,6 @@ class Experiment:
             self.agent = dqn.DQNTrainer(config=self.config)
         elif self.algorithm == "ppo":
             self.agent = ppo.PPOTrainer(config=self.config)
-
 
         self.agent.restore(path)
 
@@ -323,7 +323,7 @@ class Experiment:
 
     def eval_qmix(self, path, mixer="qmix"):
         self.config["env_config"]["eval_mode"] = True
-        self.config["env_config"]["enable_render"] = True
+        self.config["env_config"]["enable_render"] = False
         self.config["num_workers"] = 0
 
         grouping = {
@@ -371,15 +371,15 @@ class Experiment:
         self.agent.restore(path)
 
         env = self.env.with_agent_groups(
-                grouping, obs_space=obs_space, act_space=act_space
-            )
+            grouping, obs_space=obs_space, act_space=act_space
+        )
 
         # run until episode ends
         episode_reward = 0
         done = {"__all__": False}
         obs = env.reset()
 
-        state = [np.zeros((AGENTS,  config["model"]["lstm_cell_size"]), np.float32) for _ in range(2)]
+        state = [np.zeros((AGENTS, config["model"]["lstm_cell_size"]), np.float32) for _ in range(2)]
         prev_a = 0
         prev_r = 0
         met = Metrics(env.env)

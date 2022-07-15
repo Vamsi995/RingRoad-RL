@@ -45,8 +45,8 @@ class MultiAgentRingRoad(MultiAgentEnv):
         self.crashed_state = None
         self.state_extractor = StateExtractor(self)
 
-        # if self.enable_render:
-        self.viewer = Render(self.agents, self.env_veh)
+        if self.enable_render:
+            self.viewer = Render(self.agents, self.env_veh)
         self.collision = False
         np.random.seed(42)
 
@@ -210,11 +210,9 @@ class MultiAgentRingRoad(MultiAgentEnv):
         if self.eval_mode:
             self._initialize_state()
         else:
-            env_vehicles = np.random.randint(15, AGENTS + ENV_VEHICLES + 2)
+            env_vehicles = ENV_VEHICLES
             self._initialize_state(env_vehicles)
             self._warmup_steps()
-
-
         self.state = self.state_extractor.neighbour_states()
         return self.state
 

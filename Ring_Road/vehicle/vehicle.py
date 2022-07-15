@@ -185,6 +185,7 @@ class Agent(Car):
                 self.agent_type = "idm"
 
         accel_action = self._run_control(avg_vel)
+        print(accel_action)
         accel_action = state_extractor.failsafe_action(accel_action, self.front_vehicle, self)
         self._update_vel(accel_action)
         self.update_positions()

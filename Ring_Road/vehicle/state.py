@@ -8,7 +8,7 @@ from Ring_Road.constants import RADIUS, CAR_LENGTH, RADIUS, AGENT_MAX_VELOCITY, 
 class StateExtractor:
     def __init__(self, env):
         self.env = env
-        self.delay = 0.5
+        self.delay = 0.9
 
     def gap_front(self, veh):
         if veh.front_vehicle.central_angle - veh.central_angle < 0:

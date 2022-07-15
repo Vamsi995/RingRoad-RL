@@ -4,7 +4,7 @@ from Ring_Road.constants import MAX_EPISODE_LENGTH, WARMUP_STEPS
 from experiment import Experiment
 
 env_config = {
-    "enable_render": True,
+    "enable_render": False,
     "agent_type": "continuous",
     "eval_mode": True,
     "algorithm": "vdn",
@@ -30,9 +30,9 @@ config["num_workers"] = 8
 config["lr"] = 1e-6
 config["horizon"] = MAX_EPISODE_LENGTH
 config["model"]["fcnet_hiddens"] = [512, 512, 512]
-# config["model"]["use_lstm"] = True
-# config["model"]["lstm_cell_size"] = 256
-# config["clip_actions"] = True
+config["model"]["use_lstm"] = True
+config["model"]["lstm_cell_size"] = 256
+config["clip_actions"] = True
 config["evaluation_interval"] = 2
 config["evaluation_duration"] = 20
 config["framework"] = "torch"
