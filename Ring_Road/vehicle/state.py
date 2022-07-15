@@ -83,9 +83,8 @@ class StateExtractor:
         this_vel = agent.v
         sim_step = DELTA_T
 
-        print(h, safe_velocity)
-
         if this_vel + action * sim_step > safe_velocity:
+            print(h, safe_velocity)
             if safe_velocity > 0:
                 return (safe_velocity - this_vel) / sim_step
             else:
