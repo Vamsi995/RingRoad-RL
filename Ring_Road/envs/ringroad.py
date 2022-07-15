@@ -48,7 +48,7 @@ class RingRoad(gym.Env):
         if self.enable_render:
             self.viewer = Render(self)
         self.collision = False
-        np.random.seed(42)
+        np.random.seed(15)
 
     def _initialize_state(self, env_vehicles=ENV_VEHICLES):
 
@@ -94,6 +94,7 @@ class RingRoad(gym.Env):
 
     def _simulate(self, action):
         frames = int(FPS // ACTION_FREQ)
+
         for frame in range(frames):
             if action is not None and self.simulation_time % frames == 0:
                 for agent in self.agents:
@@ -187,6 +188,7 @@ class RingRoad(gym.Env):
         else:
             scaled_action = action
 
+        print(action)
         self._simulate(scaled_action)
         self.state = self.state_extractor.neighbour_states()
         reward = self._reward(scaled_action)

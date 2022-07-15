@@ -8,7 +8,7 @@ from Ring_Road.constants import RADIUS, CAR_LENGTH, RADIUS, AGENT_MAX_VELOCITY, 
 class StateExtractor:
     def __init__(self, env):
         self.env = env
-        self.delay = 0.5
+        self.delay = 0.4
 
     def gap_front(self, veh):
         if veh.front_vehicle.central_angle - veh.central_angle < 0:
@@ -55,8 +55,7 @@ class StateExtractor:
         if next_vel > 0:
             # the second and third terms cover (conservatively) the extra
             # distance the vehicle will cover before it fully decelerates
-            if h < DELTA_T * next_vel + this_vel * 1e-3 + \
-                    0.5 * this_vel * DELTA_T:
+            if h < DELTA_T * next_vel + this_vel * 1e-3 + 0.5 * this_vel * DELTA_T:
                 # if the vehicle will crash into the vehicle ahead of it in the
                 # next time step (assuming the vehicle ahead of it is not
                 # moving), then stop immediately
@@ -84,6 +83,8 @@ class StateExtractor:
         this_vel = agent.v
         sim_step = DELTA_T
 
+        print(h, safe_velocity)
+
         if this_vel + action * sim_step > safe_velocity:
             if safe_velocity > 0:
                 return (safe_velocity - this_vel) / sim_step
@@ -104,7 +105,7 @@ class StateExtractor:
 
         accel = self.get_safe_action_instantaneous(accel, front_veh, agent)
         accel = self.get_safe_velocity_action(accel, front_veh, agent)
-        accel = np.clip(accel, -1, 1)
+        accel = np.clip(accel, -0.5, 1)
         accel = self.obey_speed_limit(accel, front_veh, agent)
         return accel
 
