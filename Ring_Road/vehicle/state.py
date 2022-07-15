@@ -8,7 +8,7 @@ from Ring_Road.constants import RADIUS, CAR_LENGTH, RADIUS, AGENT_MAX_VELOCITY, 
 class StateExtractor:
     def __init__(self, env):
         self.env = env
-        self.delay = 0
+        self.delay = 0.5
 
     def gap_front(self, veh):
         if veh.front_vehicle.central_angle - veh.central_angle < 0:
@@ -38,11 +38,10 @@ class StateExtractor:
 
     def neighbour_states(self):
         feature_dict = {}
-        max_speed = 15
+        max_speed = 30
         for ag_id, agent in self.env.agents.items():
-            feat_list = [agent.v / max_speed, (agent.front_vehicle.v - agent.v) / max_speed]
-            s_lead, s_back = self._calculate_distances(agent)
-            feat_list.append(s_lead / TRACK_LENGTH)
+            s_lead, _ = self._calculate_distances(agent)
+            feat_list = [agent.v / max_speed, (agent.front_vehicle.v - agent.v) / max_speed, s_lead / TRACK_LENGTH]
             feature_dict[ag_id] = np.array(feat_list)
         return feature_dict
 
@@ -61,11 +60,11 @@ class StateExtractor:
                 # next time step (assuming the vehicle ahead of it is not
                 # moving), then stop immediately
                 # if self.display_warnings:
-                #     print(
-                #         "=====================================\n"
-                #         "Vehicle {} is about to crash. Instantaneous acceleration "
-                #         "clipping applied.\n"
-                #         "=====================================".format(self.veh_id))
+                print(
+                    "=====================================\n"
+                    "Vehicle {} is about to crash. Instantaneous acceleration "
+                    "clipping applied.\n"
+                    "=====================================".format("Agent"))
 
                 return -this_vel / DELTA_T
             else:
@@ -86,6 +85,7 @@ class StateExtractor:
         sim_step = DELTA_T
 
         if this_vel + action * sim_step > safe_velocity:
+            print(h, safe_velocity)
             if safe_velocity > 0:
                 return (safe_velocity - this_vel) / sim_step
             else:
@@ -99,8 +99,41 @@ class StateExtractor:
 
         accel = self.get_safe_action_instantaneous(accel, front_veh, agent)
         accel = self.get_safe_velocity_action(accel, front_veh, agent)
-        # accel = np.clip(accel, -1, 1)
+        accel = np.clip(accel, -1, 1)
+        accel = self.obey_speed_limit(accel, front_veh, agent)
+
         return accel
+
+    def obey_speed_limit(self, accel, front_veh, agent):
+        """Perform the "obey_speed_limit" failsafe action.
+                Checks if the computed acceleration would put us above edge speed limit.
+                If it would, output the acceleration that would put at the speed limit
+                velocity.
+                Parameters
+                ----------
+                env : flow.envs.Env
+                    current environment, which contains information of the state of the
+                    network at the current time step
+                action : float
+                    requested acceleration action
+                Returns
+                -------
+                float
+                    the requested action clipped by the speed limit
+                """
+
+        edge_speed_limit = 30
+
+        this_vel = agent.v
+        sim_step = DELTA_T
+
+        if this_vel + accel * sim_step > edge_speed_limit:
+            if edge_speed_limit > 0:
+                return (edge_speed_limit - this_vel) / sim_step
+            else:
+                return -this_vel / sim_step
+        else:
+            return accel
 
     def get_average_vel(self):
 

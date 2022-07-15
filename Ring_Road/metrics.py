@@ -48,24 +48,21 @@ class Metrics:
             self.velocity[veh.id].append((t, veh.v))
 
     def running_mean_vel(self, t):
-        if t == 0:
-            return
-        veh_v = []
+        mean = 0
+        num_veh = len(self.velocity)
+
         for id, vel in self.velocity.items():
-            x, y = zip(*vel)
-            veh_v.append(sum(y))
-        mean = sum(veh_v) / (len(veh_v) * t)
+            mean += vel[-1][1]
+        mean /= num_veh
         self.running_mean.append(mean)
 
-        dev = 0
+        deviation = 0
         for id, vel in self.velocity.items():
-            x, y = zip(*vel)
-            for v in y:
-                dev += (mean - v) ** 2
+            deviation += (mean - vel[-1][1]) ** 2
+        deviation /= num_veh
+        deviation = deviation ** 0.5
 
-        if (len(veh_v) * t) - 1 != 0:
-            dev /= ((len(veh_v) * t) - 1)
-            self.running_deviation.append(dev ** 0.5)
+        self.running_deviation.append(deviation)
 
     def throughput(self):
         self.throughput = self.running_mean[-1] * self.total_veh / (2 * math.pi * RADIUS_PIX)
@@ -96,7 +93,7 @@ class Metrics:
             plt.savefig("Plots/VDN/" + name + ".png")
         elif self.env.algorithm == "ppo":
             if isinstance(self.env, MultiAgentEnv):
-                if not bool(config["multiagent"]):
+                if not config["shared"]:
                     if config["model"]["use_lstm"]:
                         plt.savefig("Plots/PPO/MultiAgent/NonSharedPolicy/LSTM/" + name + ".png")
                     else:
@@ -113,6 +110,11 @@ class Metrics:
                     plt.savefig("Plots/PPO/SingleAgent/" + name + ".png")
         elif self.env.algorithm == "fs":
             plt.savefig("Plots/FollowerStopper/" + name + ".png")
+        elif self.env.algorithm == "pi":
+            plt.savefig("Plots/PISaturation/" + name + ".png")
+        elif self.env.algorithm == "idm":
+            plt.savefig("Plots/IDM/" + name + ".png")
+
 
     def plot(self, config):
         self.plot_positions(config)
@@ -142,20 +144,21 @@ class Metrics:
             plt.plot(self.convert_action_steps_to_time(x), self.smooth(y, 0.9))
         plt.xlabel("Time (s)")
         plt.ylabel("Velocity (m/s)")
-
+        plt.grid()
         self.save_fig("VelocityProfile", config)
 
     def plot_avg_vel(self, config):
         plt.figure(figsize=(15, 5))
-        plt.plot(self.convert_action_steps_to_time(self.running_mean), self.running_mean, color='#1B2ACC')
+        plt.plot(self.convert_action_steps_to_time(self.running_mean), self.smooth(self.running_mean, 0.9), color='#1B2ACC')
 
         plt.fill_between(self.convert_action_steps_to_time(self.running_mean),
-                         np.array(self.running_mean) - np.array(self.running_deviation),
-                         np.array(self.running_mean) + np.array(self.running_deviation), antialiased=True, alpha=0.2,
+                         self.smooth(np.array(self.running_mean) - np.array(self.running_deviation), 0.9),
+                         self.smooth(np.array(self.running_mean) + np.array(self.running_deviation), 0.9), antialiased=True, alpha=0.2,
                          edgecolor='#1B2ACC', facecolor='#089FFF')
 
         plt.xlabel("Time (s)")
-        plt.ylabel("Spatially-Averaged Velocity (m/s)")
+        plt.ylabel("System Average Velocity (m/s)")
+        plt.grid()
         self.save_fig("AverageVelocity", config)
 
     def smooth(self, scalars: List[float], weight: float) -> List[float]:  # Weight between 0 and 1

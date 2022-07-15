@@ -149,6 +149,8 @@ class Experiment:
             print(env.action_steps, action)
             # env.render()
             episode_reward += reward_total
+
+        self.config["shared"] = False
         met.plot(self.config)
         return episode_reward
 
@@ -181,7 +183,8 @@ class Experiment:
                                config=self.config,
                                stop={"timesteps_total": self.time_steps},
                                local_dir=save_path,
-                               checkpoint_at_end=True
+                               checkpoint_at_end=True,
+                               checkpoint_freq=20
                                )
         checkpoint_path = results.get_last_checkpoint()
         print("Checkpoint path:", checkpoint_path)
@@ -214,7 +217,9 @@ class Experiment:
             obs, reward, done, info = env.step(action)
             met.step()
             print(env.action_steps, reward)
-            env.render()
+            # env.render()
+
+        self.config["shared"] = True
         met.plot(self.config)
         return episode_reward
 

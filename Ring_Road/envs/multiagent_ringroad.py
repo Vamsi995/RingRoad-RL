@@ -93,7 +93,7 @@ class MultiAgentRingRoad(MultiAgentEnv):
             else:
                 self.done['__all__'] = False
         else:
-            if self.action_steps >= MAX_EPISODE_LENGTH + WARMUP_STEPS or self.collision:
+            if self.action_steps >= MAX_EPISODE_LENGTH or self.collision:
                 self.done = {key: True for key in self.agents.keys()}
                 self.done['__all__'] = True
             else:
@@ -155,31 +155,31 @@ class MultiAgentRingRoad(MultiAgentEnv):
             return {ag_id: 0 for ag_id in action.keys()}
 
         if self.collision:
-            return {ag_id: -5 for ag_id in action.keys()}
+            return {ag_id: 0 for ag_id in action.keys()}
 
         # reward average velocity
         eta_2 = 4.
         reward = self.state_extractor.get_average_vel() / 5
 
-        action_dict = {}
-        for ag_id, act in action.items():
-            if act == 0:
-                action_dict[ag_id] = 1
-            else:
-                action_dict[ag_id] = -1
+        # action_dict = {}
+        # for ag_id, act in action.items():
+        #     if act == 0:
+        #         action_dict[ag_id] = 1
+        #     else:
+        #         action_dict[ag_id] = -1
 
         # punish accelerations (should lead to reduced stop-and-go waves)
-        eta = 0.25  # 0.25
-        mean_actions = eta * np.mean(np.abs(list(action_dict.values())))
+        eta = 4  # 0.25
+        mean_actions = np.mean(np.abs(list(action.values())))
         accel_threshold = 0
 
         if mean_actions > accel_threshold:
             reward += eta * (accel_threshold - mean_actions)
 
         rew = {ag_id: reward for ag_id in self.agents.keys()}
-        for ag_id, agent in self.agents.items():
-            if agent.v == 0:
-                rew[ag_id] = -2
+        # for ag_id, agent in self.agents.items():
+        #     if agent.v == 0:
+        #         rew[ag_id] = -2
         return rew
 
     def _destroy(self):
@@ -195,7 +195,8 @@ class MultiAgentRingRoad(MultiAgentEnv):
         self._set_agent_type("idm")
         for i in range(WARMUP_STEPS):
             action_none = {key: None for key in self.agents.keys()}
-            self.step(action_none)
+            self._simulate(action_none)
+        self._set_agent_type(self.agent_type)
 
     def reset(self, *, seed: Optional[int] = None, return_info: bool = False, options: Optional[dict] = None):
 
@@ -212,7 +213,7 @@ class MultiAgentRingRoad(MultiAgentEnv):
             env_vehicles = np.random.randint(15, AGENTS + ENV_VEHICLES + 2)
             self._initialize_state(env_vehicles)
             self._warmup_steps()
-            self._set_agent_type(self.agent_type)
+
 
         self.state = self.state_extractor.neighbour_states()
         return self.state
@@ -221,6 +222,7 @@ class MultiAgentRingRoad(MultiAgentEnv):
 
         self.action_steps += 1
         scaled_action = self._clip_actions(action)
+        print(scaled_action)
         self._simulate(scaled_action)
         self.state = self.state_extractor.neighbour_states()
         reward = self._reward(scaled_action)
