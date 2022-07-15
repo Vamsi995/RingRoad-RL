@@ -161,16 +161,16 @@ class MultiAgentRingRoad(MultiAgentEnv):
         eta_2 = 4.
         reward = self.state_extractor.get_average_vel() / 5
 
-        # action_dict = {}
-        # for ag_id, act in action.items():
-        #     if act == 0:
-        #         action_dict[ag_id] = 1
-        #     else:
-        #         action_dict[ag_id] = -1
+        action_dict = {}
+        for ag_id, act in action.items():
+            if act == 0:
+                action_dict[ag_id] = 1
+            else:
+                action_dict[ag_id] = -1
 
         # punish accelerations (should lead to reduced stop-and-go waves)
         eta = 4  # 0.25
-        mean_actions = np.mean(np.abs(list(action.values())))
+        mean_actions = np.mean(np.abs(list(action_dict.values())))
         accel_threshold = 0
 
         if mean_actions > accel_threshold:
