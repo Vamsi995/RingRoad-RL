@@ -64,7 +64,8 @@ class Experiment:
                                config=self.config,
                                stop={"timesteps_total": self.time_steps},
                                local_dir=save_path,
-                               checkpoint_at_end=True
+                               checkpoint_at_end=True,
+                               checkpoint_freq=20
                                )
             checkpoint_path = results.get_last_checkpoint()
             print("Checkpoint path:", checkpoint_path)
@@ -256,8 +257,8 @@ class Experiment:
                           config=self.config,
                           stop={"timesteps_total": self.time_steps},
                           local_dir=save_path,
-                          checkpoint_freq=1,
-                          checkpoint_at_end=True
+                          checkpoint_freq=20,
+                          checkpoint_at_end=True,
                           )
         checkpoint_path = result.get_last_checkpoint()
         print("Checkpoint path:", checkpoint_path)
@@ -314,7 +315,7 @@ class Experiment:
                            config=config,
                            stop={"timesteps_total": self.time_steps},
                            local_dir=save_path,
-                           checkpoint_freq=10,
+                           checkpoint_freq=20,
                            checkpoint_at_end=True
                            )
         checkpoint_path = results.get_last_checkpoint()
