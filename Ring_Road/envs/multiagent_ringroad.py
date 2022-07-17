@@ -179,8 +179,7 @@ class MultiAgentRingRoad(MultiAgentEnv):
         rew = {ag_id: reward for ag_id in self.agents.keys()}
         for ag_id, agent in self.agents.items():
             if agent.v == 0:
-                rew = {ag_id: -5 for ag_id in self.agents.keys()}
-                break
+                rew[ag_id] -= 2
 
         return rew
 
